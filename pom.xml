@@ -1,0 +1,60 @@
+<build>
+    <plugins>
+
+        <!-- Checkstyle: naming, line length, method length, file length -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-checkstyle-plugin</artifactId>
+            <version>3.6.0</version>
+
+            <configuration>
+                <configLocation>config/checkstyle/checkstyle.xml</configLocation>
+                <encoding>UTF-8</encoding>
+                <consoleOutput>true</consoleOutput>
+                <failsOnError>true</failsOnError>
+                <includeTestSourceDirectory>true</includeTestSourceDirectory>
+            </configuration>
+
+            <executions>
+                <execution>
+                    <id>checkstyle-validation</id>
+                    <phase>validate</phase>
+                    <goals>
+                        <goal>check</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+
+
+        <!-- PMD: unused variables, unused private fields, unused private methods -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-pmd-plugin</artifactId>
+            <version>3.25.0</version>
+
+            <configuration>
+                <rulesets>
+                    <ruleset>config/pmd/ruleset.xml</ruleset>
+                </rulesets>
+
+                <printFailingErrors>true</printFailingErrors>
+                <failOnViolation>true</failOnViolation>
+                <linkXRef>false</linkXRef>
+                <includeTests>true</includeTests>
+                <targetJdk>26</targetJdk>
+            </configuration>
+
+            <executions>
+                <execution>
+                    <id>pmd-validation</id>
+                    <phase>verify</phase>
+                    <goals>
+                        <goal>check</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+
+    </plugins>
+</build>

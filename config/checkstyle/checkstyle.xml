@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE module PUBLIC
+        "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<module name="Checker">
+
+    <!--
+        Checkstyle rules for Java code quality and naming conventions.
+        Based on the rules in your provided document.
+    -->
+
+    <!-- UTF-8 source files -->
+    <property name="charset" value="UTF-8"/>
+
+    <!-- نمایش خطاها با درجه error -->
+    <property name="severity" value="error"/>
+
+    <!-- حداکثر طول هر خط: 120 کاراکتر -->
+    <module name="LineLength">
+        <property name="max" value="120"/>
+        <property name="ignorePattern" value="^package.*|^import.*"/>
+        <message key="maxLineLen"
+                 value="طول خط نباید بیشتر از 120 کاراکتر باشد."/>
+    </module>
+
+    <module name="FileLength">
+        <property name="max" value="500"/>
+    </module>
+
+
+    <module name="TreeWalker">
+
+        <!-- نام کلاس/اینترفیس/Enum باید با حرف بزرگ شروع شود و فقط شامل حروف و اعداد باشد -->
+        <!-- نمونه درست: StudentService, User1, BankAccount -->
+        <!-- نمونه غلط: studentService, Student_Service -->
+        <module name="TypeName">
+            <property name="format" value="^[A-Z][a-zA-Z0-9]*$"/>
+            <message key="name.invalidPattern"
+                     value="نام کلاس/اینترفیس/Enum باید با حرف بزرگ شروع شود و فقط شامل حروف و اعداد باشد. الگوی مجاز: ^[A-Z][a-zA-Z0-9]*$"/>
+        </module>
+
+        <!-- نام متد باید با حرف کوچک شروع شود و فقط شامل حروف و اعداد باشد -->
+        <!-- نمونه درست: calculateTotal, getName, print1 -->
+        <!-- نمونه غلط: CalculateTotal, calculate_total -->
+        <module name="MethodName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+            <message key="name.invalidPattern"
+                     value="نام متد باید با حرف کوچک شروع شود و فقط شامل حروف و اعداد باشد. الگوی مجاز: ^[a-z][a-zA-Z0-9]*$"/>
+        </module>
+
+        <!-- نام متغیرهای محلی باید با حرف کوچک شروع شود و فقط شامل حروف و اعداد باشد -->
+        <!-- نمونه درست: studentName, count, total1 -->
+        <!-- نمونه غلط: StudentName, student_name -->
+        <module name="LocalVariableName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+            <message key="name.invalidPattern"
+                     value="نام متغیر محلی باید با حرف کوچک شروع شود و فقط شامل حروف و اعداد باشد. الگوی مجاز: ^[a-z][a-zA-Z0-9]*$"/>
+        </module>
+
+        <!-- نام پارامترهای متد/سازنده هم بهتر است مثل متغیر محلی باشد -->
+        <!-- اگر نمی‌خواهی پارامترها بررسی شوند، این module را حذف کن -->
+        <module name="ParameterName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+            <message key="name.invalidPattern"
+                     value="نام پارامتر باید با حرف کوچک شروع شود و فقط شامل حروف و اعداد باشد. الگوی مجاز: ^[a-z][a-zA-Z0-9]*$"/>
+        </module>
+
+        <!-- نام فیلدهای عضو غیرثابت باید با حرف کوچک شروع شود -->
+        <!-- نمونه درست: studentName, accountBalance -->
+        <!-- نمونه غلط: StudentName, student_name -->
+        <module name="MemberName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+            <message key="name.invalidPattern"
+                     value="نام فیلد عضو باید با حرف کوچک شروع شود و فقط شامل حروف و اعداد باشد. الگوی مجاز: ^[a-z][a-zA-Z0-9]*$"/>
+        </module>
+
+        <!-- نام ثابت‌ها باید با حروف بزرگ نوشته شود -->
+        <!-- نمونه درست: MAX_SIZE, PI, DEFAULT_VALUE1 -->
+        <!-- نمونه غلط: maxSize, MaxSize -->
+        <module name="ConstantName">
+            <property name="format" value="^[A-Z][A-Z0-9_]*$"/>
+            <message key="name.invalidPattern"
+                     value="نام ثابت‌ها باید با حرف بزرگ شروع شود و فقط شامل حروف بزرگ، عدد و آندرلاین باشد. الگوی مجاز: ^[A-Z][A-Z0-9_]*$"/>
+        </module>
+
+        <!-- طول متدها نباید بیشتر از 50 خط باشد -->
+        <module name="MethodLength">
+            <property name="max" value="50"/>
+            <property name="countEmpty" value="false"/>
+            <message key="maxLen.method"
+                     value="طول متد نباید بیشتر از 50 خط باشد. متدهای طولانی را به متدهای کوچک‌تر تقسیم کنید."/>
+        </module>
+
+    </module>
+</module>
