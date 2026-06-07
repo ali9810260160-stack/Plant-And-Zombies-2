@@ -1,0 +1,113 @@
+package model.enums;
+
+/**
+ * الگوهای Regex برای پارس کردن تمام دستورات ورودی.
+ * هر ثابت یک دستور معتبر را تعریف می‌کند.
+ */
+public enum CommandRegex {
+
+    // ---- منوی ثبت‌نام ----
+    REGISTER("register\\s+-u\\s+(\\S+)\\s+-p\\s+(\\S+)\\s+(\\S+)\\s+-n\\s+(\\S+)\\s+-e\\s+(\\S+)\\s+-g\\s+(male|female)"),
+    PICK_QUESTION("pick question\\s+-q\\s+(\\d+)\\s+-a\\s+(\\S+)\\s+-c\\s+(\\S+)"),
+
+    // ---- منوی ورود ----
+    LOGIN("login\\s+-u\\s+(\\S+)\\s+-p\\s+(\\S+)(?:\\s+-stay-logged-in)?"),
+    FORGET_PASSWORD("forget password\\s+-u\\s+(\\S+)\\s+-e\\s+(\\S+)"),
+    ANSWER_SECURITY("answer\\s+-a\\s+(\\S+)"),
+
+    // ---- منو عمومی ----
+    MENU_ENTER("menu enter\\s+(\\S+)"),
+    MENU_ENTER_CHAPTER("menu enter chapter\\s+-c\\s+(\\S+)"),
+    MENU_SHOW_CURRENT("menu show current"),
+    MENU_EXIT("menu exit"),
+    MENU_LOGOUT("menu logout"),
+
+    // ---- منوی تنظیمات ----
+    CHANGE_DIFFICULTY("menu settings change-difficulty\\s+-l\\s+(\\d+)"),
+
+    // ---- منوی پروفایل ----
+    CHANGE_USERNAME("menu profile change-username\\s+-u\\s+(\\S+)"),
+    CHANGE_NICKNAME("menu profile change-nickname\\s+-u\\s+(\\S+)"),
+    CHANGE_EMAIL("menu profile change-email\\s+-e\\s+(\\S+)"),
+    CHANGE_PASSWORD("menu profile change-password\\s+-p\\s+(\\S+)\\s+-o\\s+(\\S+)"),
+    SHOW_PROFILE_INFO("menu profile show-info"),
+
+    // ---- منوی اخبار ----
+    NEWS_SHOW_UNREAD("menu news show-unread"),
+    NEWS_SHOW_ALL("menu news show-all"),
+
+    // ---- منوی کلکسیون ----
+    COLLECTION_SHOW_PLANTS("menu collection show-plants"),
+    COLLECTION_SHOW_ALL_PLANTS("menu collection show-all-plants"),
+    COLLECTION_SHOW_ZOMBIES("menu collection show-zombies"),
+    COLLECTION_SHOW_ALL_ZOMBIES("menu collection show-all-zombies"),
+    COLLECTION_SHOW_PLANT("menu collection show-plant\\s+-p\\s+(\\S+)"),
+    COLLECTION_SHOW_ZOMBIE("menu collection show-zombie\\s+-z\\s+(\\S+)"),
+    COLLECTION_UPGRADE_PLANT("menu collection upgrade-plant\\s+-p\\s+(\\S+)"),
+    COLLECTION_PURCHASE_PLANT("menu collection purchase-plant\\s+-p\\s+(\\S+)"),
+
+    // ---- منوی بازی ----
+    MENU_GREENHOUSE("menu greenhouse"),
+    MENU_TRAVEL_LOG("menu travel-log"),
+    MENU_LEADERBOARD("menu leaderboard"),
+    MENU_COIN_WALLET("menu coin-wallet"),
+    MENU_GEM_WALLET("menu gem-wallet"),
+    CHEAT_ADD_CURRENCY("menu cheat add\\s+(\\d+)\\s+(coin|diamond)"),
+
+    // ---- انتخاب گیاه (قبل از شروع مرحله) ----
+    SHOW_ALL_PLANTS("show all plants"),
+    SHOW_AVAILABLE_PLANTS("show available plants"),
+    ADD_PLANT_SELECT("add plant\\s+-t\\s+(\\S+)"),
+    REMOVE_PLANT_SELECT("remove plant\\s+-t\\s+(\\S+)"),
+    BOOST_PLANT_SELECT("boost plant\\s+-t\\s+(\\S+)"),
+    START_GAME("start game"),
+    START_ZOMBIE_WAVES("start zombie waves"),
+
+    // ---- درون بازی (in-game) ----
+    ADVANCE_TIME("advance time\\s+-t\\s+(\\d+)\\s+ticks"),
+    PLANT_PLANT("plant plant\\s+-t\\s+(\\S+)\\s+-l\\s+\\((\\d+),\\s*(\\d+)\\)"),
+    PLUCK_PLANT("pluck plant\\s+-l\\s+\\((\\d+),\\s*(\\d+)\\)"),
+    COLLECT_SUN("collect sun\\s+-l\\s+\\((\\d+),\\s*(\\d+)\\)"),
+    FEED_PLANT("feed plant\\s+-l\\s+\\((\\d+),\\s*(\\d+)\\)"),
+    SHOW_MAP("show map"),
+    SHOW_PLANTS_STATUS("show plants status"),
+    SHOW_TILE_STATUS("show tile status\\s+-l\\s+\\((\\d+),\\s*(\\d+)\\)"),
+    SHOW_SUN_AMOUNT("show sun amount"),
+    ZOMBIES_INFO("zombies info"),
+
+    // ---- چیت‌کدها ----
+    CHEAT_ADD_SUNS("cheat add\\s+-n\\s+(\\d+)\\s+suns"),
+    CHEAT_RELEASE_NUKE("release the nuke"),
+    CHEAT_REMOVE_COOLDOWN("cheat remove-cooldown"),
+    CHEAT_ADD_PLANT_FOOD("cheat add-plant-food"),
+    CHEAT_SPAWN_ZOMBIE("cheat spawn-zombie\\s+-t\\s+(\\S+)\\s+-l\\s+(\\d+),\\s*(\\d+)"),
+
+    // ---- گلخانه ----
+    SHOW_GREENHOUSE("show greenhouse"),
+    PLANT_POT("plant pot at\\s+\\((\\d+),\\s*(\\d+)\\)"),
+    COLLECT_POT("collect\\s+\\((\\d+),\\s*(\\d+)\\)"),
+    GROW_POT("grow\\s+\\((\\d+),\\s*(\\d+)\\)"),
+    ENTER_SHOP("enter shop"),
+
+    // ---- فروشگاه ----
+    SHOP_LIST("shop list"),
+    SHOP_DAILY("shop daily"),
+    SHOP_BUY("shop buy\\s+-i\\s+(\\S+)\\s+-n\\s+(\\d+)(?:\\s+-t\\s+(\\S+))?"),
+
+    // ---- Travel Log / کوئست ----
+    TRAVEL_LOG_PAGE("travel log page\\s+(\\S+)"),
+
+    // ---- لیدربورد ----
+    LEADERBOARD_SORT("leaderboard sort\\s+-by\\s+(\\S+)\\s+-(asc|desc)");
+
+    private final String pattern;
+
+    CommandRegex(String pattern) {
+        this.pattern = pattern;
+    }
+
+    /** الگوی regex این دستور را برمی‌گرداند */
+    public String getPattern() {
+        return pattern;
+    }
+}
