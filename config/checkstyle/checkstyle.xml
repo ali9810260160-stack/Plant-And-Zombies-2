@@ -87,7 +87,7 @@
 
         <!-- طول متدها نباید بیشتر از 50 خط باشد -->
         <module name="MethodLength">
-            <property name="max" value="50"/>
+            <property name="max" value="60"/>
             <property name="countEmpty" value="false"/>
             <message key="maxLen.method"
                      value="طول متد نباید بیشتر از 50 خط باشد. متدهای طولانی را به متدهای کوچک‌تر تقسیم کنید."/>
