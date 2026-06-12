@@ -48,6 +48,8 @@ public class Main {
         AuthController authController = new AuthController(authService, appState, consoleView);
         MenuController menuController = new MenuController(appState, consoleView);
         ProfileController profileController = new ProfileController(userService, appState, consoleView);
+        SettingsController settingsController = new SettingsController(userService, appState, consoleView);
+        NewsController newsController = new NewsController(userService, appState, consoleView);
         GameController gameController = new GameController(gameService, appState, consoleView, mapView);
         PlantSelectController plantSelectController = new PlantSelectController(gameService, appState, consoleView);
         CollectionController collectionController = new CollectionController(collectionService, appState, consoleView);
@@ -58,7 +60,8 @@ public class Main {
         // --- Dispatcher ---
         CommandDispatcher dispatcher = new CommandDispatcher(
                 appState, authController, menuController, profileController,
-                gameController, plantSelectController, collectionController,
+                settingsController, newsController, gameController,
+                plantSelectController, collectionController,
                 greenhouseController, travelLogController, leaderboardController
         );
 

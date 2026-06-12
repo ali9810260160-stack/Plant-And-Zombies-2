@@ -3,6 +3,7 @@ package service;
 import model.User;
 import model.enums.Gender;
 import model.enums.SecurityQuestion;
+import repository.UserRepository;
 
 /**
  * سرویس احراز هویت: ثبت‌نام، ورود، بازیابی رمز.
@@ -10,7 +11,7 @@ import model.enums.SecurityQuestion;
  */
 public class AuthService {
 
-    private final repository.UserRepository userRepository;
+    private final UserRepository userRepository;
 
     public AuthService(repository.UserRepository userRepository) {
         this.userRepository = userRepository;
