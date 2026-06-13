@@ -1,0 +1,366 @@
+{
+  "version": 1,
+  "quests": [
+    {
+      "id": "daily_sun_collector",
+      "name": "آفتاب‌گیر روزانه",
+      "category": "DAILY",
+      "priority": "MEDIUM",
+      "conditionType": "COLLECT_SUN",
+      "conditionDescription": "جمع‌آوری {param1} واحد خورشید در طول یک روز",
+      "params": {
+        "param1": [
+          3000,
+          4000,
+          5000
+        ]
+      },
+      "rewardType": "COINS",
+      "rewardDescription": "{param1} / ۱۰۰ سکه",
+      "rewardFormula": "param1_div_100",
+      "isParametric": true,
+      "isDaily": true
+    },
+    {
+      "id": "chapter_slayer",
+      "name": "شکارچی چپتر",
+      "category": "MAIN",
+      "priority": "HIGH",
+      "conditionType": "KILL_ZOMBIES_IN_CHAPTER",
+      "conditionDescription": "شکست دادن ۵۰ زامبی از فصل {param1}",
+      "params": {
+        "param1": [
+          "ANCIENT_EGYPT",
+          "FROSTBITE_CAVES",
+          "BIG_WAVE_BEACH",
+          "DARK_AGES"
+        ]
+      },
+      "rewardType": "SEED_PACKETS",
+      "rewardDescription": "۱۰ پک دانه",
+      "rewardAmount": 10,
+      "isParametric": true,
+      "isDaily": false
+    },
+    {
+      "id": "plant_pro_kill",
+      "name": "باز حرفه‌ای",
+      "category": "DAILY",
+      "priority": "HIGH",
+      "conditionType": "KILL_WITH_SPECIFIC_PLANT",
+      "conditionDescription": "ده تا زامبی را فقط با {param1} بکش",
+      "params": {
+        "param1": "ANY_DAMAGING_PLANT"
+      },
+      "rewardType": "RANDOM_PLANT",
+      "rewardDescription": "گیاه جدید شانسی",
+      "isParametric": true,
+      "isDaily": true
+    },
+    {
+      "id": "only_cactus",
+      "name": "only cactus",
+      "category": "DAILY",
+      "priority": "HIGH",
+      "conditionType": "KILL_WITH_SPECIFIC_PLANT",
+      "conditionDescription": "ده تا زامبی را فقط با کاکتوس بکش",
+      "params": {
+        "param1": "Cactus",
+        "killCount": 10
+      },
+      "rewardType": "GEMS",
+      "rewardAmount": 20,
+      "isParametric": false,
+      "isDaily": true
+    },
+    {
+      "id": "economic_plant_eater",
+      "name": "گیاه‌خوار اقتصادی",
+      "category": "MAIN",
+      "priority": "HIGH",
+      "conditionType": "WIN_WITH_MAX_PLANTS_LOST",
+      "conditionDescription": "پیروزی در یک مرحله بدون از دست دادن بیش از {param1} گیاه",
+      "params": {
+        "param1": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "rewardType": "SEED_PACKETS",
+      "rewardDescription": "۲۰ - {param1} پک دانه",
+      "rewardFormula": "20_minus_param1",
+      "isParametric": true,
+      "isDaily": false
+    },
+    {
+      "id": "defense_master",
+      "name": "استاد دفاع",
+      "category": "EPIC_CHALLENGE",
+      "priority": "CRITICAL",
+      "conditionType": "FINISH_LEVEL_WITH_ZERO_SUN",
+      "conditionDescription": "اتمام یک مرحله دقیقاً با صفر خورشید",
+      "params": {},
+      "rewardType": "GEMS",
+      "rewardAmount": 200,
+      "isParametric": false,
+      "isDaily": false
+    },
+    {
+      "id": "quick_action",
+      "name": "سرعت عمل",
+      "category": "MAIN",
+      "priority": "MEDIUM",
+      "conditionType": "KILL_ZOMBIES_IN_TIME",
+      "conditionDescription": "کشتن ۱۰ زامبی در کمتر از ۳۰ ثانیه از شروع موج اول",
+      "params": {
+        "killCount": 10,
+        "timeSeconds": 30
+      },
+      "rewardType": "COINS",
+      "rewardAmount": 500,
+      "isParametric": false,
+      "isDaily": false
+    },
+    {
+      "id": "explosive_destroyer",
+      "name": "تخریب‌گر حرفه‌ای",
+      "category": "DAILY",
+      "priority": "LOW",
+      "conditionType": "USE_EXPLOSIVES_IN_LEVEL",
+      "conditionDescription": "استفاده از ۳ گیاه انفجاری در یک مرحله",
+      "params": {
+        "count": 3
+      },
+      "rewardType": "COINS",
+      "rewardAmount": 100,
+      "isParametric": false,
+      "isDaily": true
+    },
+    {
+      "id": "symmetry",
+      "name": "تقارن",
+      "category": "DAILY",
+      "priority": "HIGH",
+      "conditionType": "WIN_WITH_SYMMETRIC_GARDEN",
+      "conditionDescription": "باغچه بازی در نهایت باید متقارن باشد",
+      "params": {},
+      "rewardType": "COINS",
+      "rewardAmount": 500,
+      "isParametric": false,
+      "isDaily": true
+    },
+    {
+      "id": "family_slayer",
+      "name": "کشتار خانوادگی",
+      "category": "DAILY",
+      "priority": "MEDIUM",
+      "conditionType": "KILL_ONLY_WITH_FAMILY",
+      "conditionDescription": "تنها از گیاهان {param1} برای کشتن زامبی‌ها استفاده شود",
+      "params": {
+        "param1": [
+          "Shooter",
+          "Lobber",
+          "Explosive",
+          "Melee",
+          "Wall-nut",
+          "Modifier",
+          "Strike-through",
+          "Homing"
+        ]
+      },
+      "rewardType": "COINS",
+      "rewardAmount": 1000,
+      "isParametric": true,
+      "isDaily": true
+    },
+    {
+      "id": "bloom_in_limits",
+      "name": "شکوفایی در محدودیت‌ها",
+      "category": "DAILY",
+      "priority": "HIGH",
+      "conditionType": "WIN_WITHOUT_FAMILY",
+      "conditionDescription": "برای برد در مرحله از هیچ گیاهی از خانواده {param1} استفاده نشود",
+      "params": {
+        "param1": [
+          "Shooter",
+          "Lobber",
+          "Explosive",
+          "Melee",
+          "Wall-nut",
+          "Modifier",
+          "Strike-through",
+          "Homing"
+        ]
+      },
+      "rewardType": "GEMS",
+      "rewardAmount": 100,
+      "isParametric": true,
+      "isDaily": true
+    },
+    {
+      "id": "night_or_morning",
+      "name": "شب یا صبح",
+      "category": "EPIC_CHALLENGE",
+      "priority": "HIGH",
+      "conditionType": "WIN_DAY_LEVEL_WITH_NIGHT_PLANTS",
+      "conditionDescription": "به پایان رساندن بازی روز با گیاهان شب (mushroom‌ها)",
+      "params": {},
+      "rewardType": "GEMS",
+      "rewardAmount": 20,
+      "isParametric": false,
+      "isDaily": false
+    },
+    {
+      "id": "win_streak",
+      "name": "برد پشت برد",
+      "category": "DAILY",
+      "priority": "MEDIUM",
+      "conditionType": "WIN_CONSECUTIVE_LEVELS",
+      "conditionDescription": "۵ مرحله را پشت سر هم با بیشترین سختی ببر",
+      "params": {
+        "count": 5,
+        "maxDifficulty": true
+      },
+      "rewardType": "COINS",
+      "rewardAmount": 5000,
+      "isParametric": false,
+      "isDaily": true
+    },
+    {
+      "id": "almost_winner",
+      "name": "تقریباً پیروز",
+      "category": "DAILY",
+      "priority": "MEDIUM",
+      "conditionType": "KILL_ZOMBIES_IN_FIRST_COLUMN_NO_MOWER",
+      "conditionDescription": "۱۰ زامبی را در ستون اول ردیفی بکش که چمن‌زن ندارد",
+      "params": {
+        "killCount": 10
+      },
+      "rewardType": "COINS",
+      "rewardAmount": 300,
+      "isParametric": false,
+      "isDaily": true
+    },
+    {
+      "id": "no_symmetry",
+      "name": "OCD نَمَنَ",
+      "category": "DAILY",
+      "priority": "MEDIUM",
+      "conditionType": "WIN_WITH_NO_SYMMETRY",
+      "conditionDescription": "در حالتی مرحله را ببر که هیچ تقارنی در باغچه وجود ندارد (به جز ردیف وسط)",
+      "params": {},
+      "rewardType": "COINS",
+      "rewardAmount": 800,
+      "isParametric": false,
+      "isDaily": true
+    },
+    {
+      "id": "cloudy_day",
+      "name": "روز ابری",
+      "category": "DAILY",
+      "priority": "HIGH",
+      "conditionType": "WIN_WITH_MAX_SUN_PRODUCERS",
+      "conditionDescription": "یک مرحله را تنها با ۳ تا گیاه تولیدکننده خورشید بزن",
+      "params": {
+        "maxSunProducers": 3
+      },
+      "rewardType": "GEMS",
+      "rewardAmount": 10,
+      "isParametric": false,
+      "isDaily": true
+    },
+    {
+      "id": "one_less_column",
+      "name": "یه ستون کمتر",
+      "category": "DAILY",
+      "priority": "HIGH",
+      "conditionType": "WIN_WITHOUT_PLANTING_IN_COLUMN",
+      "conditionDescription": "یک مرحله را در صورتی ببرد که در ستون {param1}ام گیاهی نکاشته باشد",
+      "params": {
+        "param1": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ]
+      },
+      "rewardType": "GEMS",
+      "rewardAmount": 10,
+      "isParametric": true,
+      "isDaily": true
+    },
+    {
+      "id": "unprotected_row",
+      "name": "سطر بی‌دفاع",
+      "category": "DAILY",
+      "priority": "HIGH",
+      "conditionType": "WIN_WITHOUT_PLANTING_IN_ROW",
+      "conditionDescription": "یک مرحله را در صورتی ببرد که سطر {param1}ام را هیچ گیاهی نکاشته باشد",
+      "params": {
+        "param1": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "rewardType": "GEMS",
+      "rewardAmount": 20,
+      "isParametric": true,
+      "isDaily": true
+    },
+    {
+      "id": "cross_unprotected",
+      "name": "صلیب بی‌دفاع",
+      "category": "DAILY",
+      "priority": "HIGH",
+      "conditionType": "WIN_WITHOUT_PLANTING_IN_ROW_AND_COLUMN",
+      "conditionDescription": "یک مرحله را در صورتی ببرد که ستون و ردیف {param1}ام خالی باشد",
+      "params": {
+        "param1": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "rewardType": "GEMS",
+      "rewardAmount": 25,
+      "isParametric": true,
+      "isDaily": true
+    },
+    {
+      "id": "mowing_time",
+      "name": "وقت چمن‌زنی",
+      "category": "EPIC_CHALLENGE",
+      "priority": "MEDIUM",
+      "conditionType": "KILL_WITH_LAWN_MOWER",
+      "conditionDescription": "حداقل {param1} زامبی را با چمن‌زن بکش",
+      "params": {
+        "param1": [
+          10,
+          20,
+          30,
+          40,
+          50
+        ]
+      },
+      "rewardType": "GEMS",
+      "rewardDescription": "{param1} الماس",
+      "rewardFormula": "param1",
+      "isParametric": true,
+      "isDaily": false
+    }
+  ]
+}

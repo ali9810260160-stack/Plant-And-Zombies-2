@@ -1,0 +1,446 @@
+{
+  "version": 1,
+  "levels": [
+    {
+      "id": "egypt_1",
+      "chapter": "ANCIENT_EGYPT",
+      "levelNumber": 1,
+      "levelType": "NORMAL",
+      "rows": 5,
+      "cols": 9,
+      "plantSlots": 8,
+      "initialWaveDifficulty": 200,
+      "waveCount": 3,
+      "allowedZombies": [
+        "ZombieMummyDefault",
+        "ZombieMummyArmor1Default",
+        "ZombieTutorialFlagDefault"
+      ],
+      "lockedPlants": [],
+      "specialProps": {},
+      "isUnlocked": true,
+      "isCompleted": false
+    },
+    {
+      "id": "egypt_2",
+      "chapter": "ANCIENT_EGYPT",
+      "levelNumber": 2,
+      "levelType": "CONVEYOR_BELT",
+      "rows": 5,
+      "cols": 9,
+      "plantSlots": 0,
+      "initialWaveDifficulty": 300,
+      "waveCount": 3,
+      "allowedZombies": [
+        "ZombieMummyDefault",
+        "ZombieMummyArmor1Default",
+        "ZombieMummyArmor2Default",
+        "ZombieTutorialFlagDefault"
+      ],
+      "lockedPlants": [],
+      "specialProps": {
+        "conveyorIntervalSeconds": 12
+      },
+      "isUnlocked": false,
+      "isCompleted": false
+    },
+    {
+      "id": "egypt_3",
+      "chapter": "ANCIENT_EGYPT",
+      "levelNumber": 3,
+      "levelType": "NIGHT_OPS",
+      "rows": 5,
+      "cols": 9,
+      "plantSlots": 8,
+      "initialWaveDifficulty": 400,
+      "waveCount": 4,
+      "allowedZombies": [
+        "ZombieMummyDefault",
+        "ZombieMummyArmor1Default",
+        "ZombieMummyArmor2Default",
+        "ZombieRaDefault",
+        "ZombieTombRaiserDefault",
+        "ZombieTutorialFlagDefault"
+      ],
+      "lockedPlants": [],
+      "specialProps": {
+        "noSkySun": true
+      },
+      "isUnlocked": false,
+      "isCompleted": false
+    },
+    {
+      "id": "egypt_4",
+      "chapter": "ANCIENT_EGYPT",
+      "levelNumber": 4,
+      "levelType": "BOSS",
+      "rows": 5,
+      "cols": 9,
+      "plantSlots": 8,
+      "initialWaveDifficulty": 600,
+      "waveCount": 5,
+      "allowedZombies": [
+        "ZombieMummyDefault",
+        "ZombieMummyArmor1Default",
+        "ZombieMummyArmor2Default",
+        "ZombieMummyArmor4Default",
+        "ZombieRaDefault",
+        "ZombieExplorerDefault",
+        "ZombieTombRaiserDefault",
+        "ZombieEgyptGargantuar",
+        "ZombieTutorialFlagDefault"
+      ],
+      "lockedPlants": [],
+      "specialProps": {
+        "bossAlias": "ZombieZombossMechEgypt"
+      },
+      "isUnlocked": false,
+      "isCompleted": false
+    },
+    {
+      "id": "frostbite_1",
+      "chapter": "FROSTBITE_CAVES",
+      "levelNumber": 1,
+      "levelType": "NORMAL",
+      "rows": 5,
+      "cols": 9,
+      "plantSlots": 8,
+      "initialWaveDifficulty": 350,
+      "waveCount": 3,
+      "allowedZombies": [
+        "ZombieIceageDefault",
+        "ZombieIceageArmor1Default",
+        "ZombieIceageArmor2Default",
+        "ZombieTutorialFlagDefault"
+      ],
+      "lockedPlants": [],
+      "specialProps": {
+        "iceWindEveryWave": true,
+        "zombiesImmuneToIce": true
+      },
+      "isUnlocked": false,
+      "isCompleted": false
+    },
+    {
+      "id": "frostbite_2",
+      "chapter": "FROSTBITE_CAVES",
+      "levelNumber": 2,
+      "levelType": "LOCKED_PLANTS",
+      "rows": 5,
+      "cols": 9,
+      "plantSlots": 8,
+      "initialWaveDifficulty": 450,
+      "waveCount": 4,
+      "allowedZombies": [
+        "ZombieIceageDefault",
+        "ZombieIceageArmor1Default",
+        "ZombieIceageArmor2Default",
+        "ZombieIceAgeHunter",
+        "ZombieTutorialFlagDefault"
+      ],
+      "lockedPlants": [
+        "Snow Pea",
+        "Winter Melon",
+        "Ice-shroom",
+        "Iceberg Lettuce"
+      ],
+      "specialProps": {
+        "iceWindEveryWave": true,
+        "zombiesImmuneToIce": true
+      },
+      "isUnlocked": false,
+      "isCompleted": false
+    },
+    {
+      "id": "frostbite_3",
+      "chapter": "FROSTBITE_CAVES",
+      "levelNumber": 3,
+      "levelType": "SAVE_OUR_SEEDS",
+      "rows": 5,
+      "cols": 9,
+      "plantSlots": 8,
+      "initialWaveDifficulty": 550,
+      "waveCount": 4,
+      "allowedZombies": [
+        "ZombieIceageDefault",
+        "ZombieIceageArmor1Default",
+        "ZombieIceageArmor2Default",
+        "ZombieIceAgeHunter",
+        "ZombieIceAgeTroglobite",
+        "ZombieTutorialFlagDefault"
+      ],
+      "lockedPlants": [],
+      "specialProps": {
+        "iceWindEveryWave": true,
+        "zombiesImmuneToIce": true,
+        "protectedPlantCount": 2
+      },
+      "isUnlocked": false,
+      "isCompleted": false
+    },
+    {
+      "id": "frostbite_4",
+      "chapter": "FROSTBITE_CAVES",
+      "levelNumber": 4,
+      "levelType": "BOSS",
+      "rows": 5,
+      "cols": 9,
+      "plantSlots": 8,
+      "initialWaveDifficulty": 700,
+      "waveCount": 5,
+      "allowedZombies": [
+        "ZombieIceageDefault",
+        "ZombieIceageArmor1Default",
+        "ZombieIceageArmor2Default",
+        "ZombieIceAgeHunter",
+        "ZombieIceAgeTroglobite",
+        "ZombieIceAgeDodo",
+        "ZombieTutorialFlagDefault"
+      ],
+      "lockedPlants": [],
+      "specialProps": {
+        "iceWindEveryWave": true,
+        "zombiesImmuneToIce": true
+      },
+      "isUnlocked": false,
+      "isCompleted": false
+    },
+    {
+      "id": "beach_1",
+      "chapter": "BIG_WAVE_BEACH",
+      "levelNumber": 1,
+      "levelType": "NORMAL",
+      "rows": 5,
+      "cols": 9,
+      "plantSlots": 8,
+      "initialWaveDifficulty": 400,
+      "waveCount": 3,
+      "allowedZombies": [
+        "ZombieBeachDefault",
+        "ZombieBeachArmor1Default",
+        "ZombieBeachArmor2Default",
+        "ZombieTutorialFlagDefault"
+      ],
+      "lockedPlants": [],
+      "specialProps": {
+        "waterColumns": [
+          7,
+          8,
+          9
+        ],
+        "waterLevelChangesOnWave": true
+      },
+      "isUnlocked": false,
+      "isCompleted": false
+    },
+    {
+      "id": "beach_2",
+      "chapter": "BIG_WAVE_BEACH",
+      "levelNumber": 2,
+      "levelType": "TIMED_WAR",
+      "rows": 5,
+      "cols": 9,
+      "plantSlots": 8,
+      "initialWaveDifficulty": 500,
+      "waveCount": 3,
+      "allowedZombies": [
+        "ZombieBeachDefault",
+        "ZombieBeachArmor1Default",
+        "ZombieBeachArmor2Default",
+        "ZombieBeachSnorkel",
+        "ZombieTutorialFlagDefault"
+      ],
+      "lockedPlants": [],
+      "specialProps": {
+        "waterColumns": [
+          7,
+          8,
+          9
+        ],
+        "timedWarZombieTarget": 12,
+        "timedWarSeconds": 60
+      },
+      "isUnlocked": false,
+      "isCompleted": false
+    },
+    {
+      "id": "beach_3",
+      "chapter": "BIG_WAVE_BEACH",
+      "levelNumber": 3,
+      "levelType": "DEAD_LINE",
+      "rows": 5,
+      "cols": 9,
+      "plantSlots": 8,
+      "initialWaveDifficulty": 600,
+      "waveCount": 4,
+      "allowedZombies": [
+        "ZombieBeachDefault",
+        "ZombieBeachArmor1Default",
+        "ZombieBeachArmor2Default",
+        "ZombieBeachSnorkel",
+        "ZombieBeachFisherman",
+        "ZombieTutorialFlagDefault"
+      ],
+      "lockedPlants": [],
+      "specialProps": {
+        "waterColumns": [
+          6,
+          7,
+          8,
+          9
+        ],
+        "deadLineColumn": 5
+      },
+      "isUnlocked": false,
+      "isCompleted": false
+    },
+    {
+      "id": "beach_4",
+      "chapter": "BIG_WAVE_BEACH",
+      "levelNumber": 4,
+      "levelType": "BOSS",
+      "rows": 5,
+      "cols": 9,
+      "plantSlots": 8,
+      "initialWaveDifficulty": 800,
+      "waveCount": 5,
+      "allowedZombies": [
+        "ZombieBeachDefault",
+        "ZombieBeachArmor1Default",
+        "ZombieBeachArmor2Default",
+        "ZombieBeachSnorkel",
+        "ZombieBeachFisherman",
+        "ZombieBeachOctopus",
+        "ZombieBeachGargantuar",
+        "ZombieTutorialFlagDefault"
+      ],
+      "lockedPlants": [],
+      "specialProps": {
+        "waterColumns": [
+          6,
+          7,
+          8,
+          9
+        ]
+      },
+      "isUnlocked": false,
+      "isCompleted": false
+    },
+    {
+      "id": "dark_1",
+      "chapter": "DARK_AGES",
+      "levelNumber": 1,
+      "levelType": "NIGHT_OPS",
+      "rows": 5,
+      "cols": 9,
+      "plantSlots": 8,
+      "initialWaveDifficulty": 450,
+      "waveCount": 3,
+      "allowedZombies": [
+        "ZombieDarkDefault",
+        "ZombieDarkArmor1Default",
+        "ZombieDarkArmor2Default",
+        "ZombieTutorialFlagDefault"
+      ],
+      "lockedPlants": [],
+      "specialProps": {
+        "noSkySun": true,
+        "tombstonesSpawnEachWave": true
+      },
+      "isUnlocked": false,
+      "isCompleted": false
+    },
+    {
+      "id": "dark_2",
+      "chapter": "DARK_AGES",
+      "levelNumber": 2,
+      "levelType": "LOVE_YOUR_PLANTS",
+      "rows": 5,
+      "cols": 9,
+      "plantSlots": 8,
+      "initialWaveDifficulty": 550,
+      "waveCount": 4,
+      "allowedZombies": [
+        "ZombieDarkDefault",
+        "ZombieDarkArmor1Default",
+        "ZombieDarkArmor2Default",
+        "ZombieDarkArmor3Default",
+        "ZombieDarkJugglerDefault",
+        "ZombieTutorialFlagDefault"
+      ],
+      "lockedPlants": [],
+      "specialProps": {
+        "noSkySun": true,
+        "tombstonesSpawnEachWave": true,
+        "maxPlantsLost": 3
+      },
+      "isUnlocked": false,
+      "isCompleted": false
+    },
+    {
+      "id": "dark_3",
+      "chapter": "DARK_AGES",
+      "levelNumber": 3,
+      "levelType": "PLANT_WHAT_YOU_GET",
+      "rows": 5,
+      "cols": 9,
+      "plantSlots": 8,
+      "initialWaveDifficulty": 650,
+      "waveCount": 4,
+      "allowedZombies": [
+        "ZombieDarkDefault",
+        "ZombieDarkArmor1Default",
+        "ZombieDarkArmor2Default",
+        "ZombieDarkArmor3Default",
+        "ZombieWizardDefault",
+        "ZombieDarkKing",
+        "ZombieTutorialFlagDefault"
+      ],
+      "lockedPlants": [
+        "Sunflower",
+        "Twin Sunflower",
+        "Sun-shroom",
+        "Primal Sunflower",
+        "Gold Bloom",
+        "Enlighten-mint"
+      ],
+      "specialProps": {
+        "noSkySun": true,
+        "tombstonesSpawnEachWave": true,
+        "initialSunAmount": 500
+      },
+      "isUnlocked": false,
+      "isCompleted": false
+    },
+    {
+      "id": "dark_4",
+      "chapter": "DARK_AGES",
+      "levelNumber": 4,
+      "levelType": "BOSS",
+      "rows": 5,
+      "cols": 9,
+      "plantSlots": 8,
+      "initialWaveDifficulty": 900,
+      "waveCount": 5,
+      "allowedZombies": [
+        "ZombieDarkDefault",
+        "ZombieDarkArmor1Default",
+        "ZombieDarkArmor2Default",
+        "ZombieDarkArmor3Default",
+        "ZombieDarkArmor4Default",
+        "ZombieWizardDefault",
+        "ZombieDarkJugglerDefault",
+        "ZombieDarkKing",
+        "ZombieDarkGargantuar",
+        "ZombieTutorialFlagDefault"
+      ],
+      "lockedPlants": [],
+      "specialProps": {
+        "noSkySun": true,
+        "tombstonesSpawnEachWave": true
+      },
+      "isUnlocked": false,
+      "isCompleted": false
+    }
+  ]
+}
