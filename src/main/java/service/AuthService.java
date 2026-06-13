@@ -5,6 +5,9 @@ import model.enums.Gender;
 import model.enums.SecurityQuestion;
 import repository.UserRepository;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * سرویس احراز هویت: ثبت‌نام، ورود، بازیابی رمز.
  * اعتبارسنجی تمام فیلدها اینجا انجام می‌شود.
@@ -17,6 +20,10 @@ public class AuthService {
         this.userRepository = userRepository;
     }
 
+    public UserRepository getUserRepository() {
+        return userRepository;
+    }
+
     /**
      * کاربر جدید ثبت می‌کند.
      * تمام اعتبارسنجی‌ها (username، password، email، nickname) اینجاست.
@@ -25,7 +32,9 @@ public class AuthService {
      */
     public User register(String username, String password, String confirmPassword,
                          String nickname, String email, Gender gender) {
-        return null;
+        User user = new User(username,password,nickname,email,gender);
+        userRepository.save(user);
+        return user;
     }
 
     /**
@@ -36,7 +45,11 @@ public class AuthService {
      * @param confirmAnswer تکرار پاسخ
      */
     public void setSecurityQuestion(String username, SecurityQuestion question,
-                                    String answer, String confirmAnswer) { }
+                                    String answer, String confirmAnswer) {
+        User user = userRepository.findByUsername(username);
+        user.setSecurityQuestion(question);
+        user.setSecurityAnswerHash(answer);
+    }
 
     /**
      * ورود کاربر را انجام می‌دهد.
@@ -80,21 +93,53 @@ public class AuthService {
      * @param username نام کاربری
      * @return true اگر معتبر باشد
      */
-    public boolean isValidUsername(String username) { return false; }
+    public boolean isValidUsername(String username) {
+        Pattern pattern = Pattern.compile("^[a-zA-Z0-9-]+$");
+        Matcher matcher = pattern.matcher(username);
+
+        if(!matcher.matches())
+            return false;
+
+        return true;
+    }
 
     /**
      * اعتبارسنجی رمز عبور (حداقل 8 حرف، بزرگ، کوچک، عدد، نماد).
      * @param password رمز
      * @return پیام خطا یا null اگر معتبر
      */
-    public String validatePassword(String password) { return null; }
+    public String validatePassword(String password) {
+        if(password.length() < 8){
+            return "Your password is too short";
+        }
+
+        Pattern pattern = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)" +
+                "(?=.*[!#$%^&*()=+{}\\[\\]|/\\\\:;'\",<>?]).*$");
+        Matcher matcher = pattern.matcher(password);
+
+        if(!matcher.matches()){
+            return "Incorrect password format";
+        }
+
+        return null;
+    }
 
     /**
      * اعتبارسنجی ایمیل با regex کامل.
      * @param email ایمیل
      * @return true اگر معتبر باشد
      */
-    public boolean isValidEmail(String email) { return false; }
+    public boolean isValidEmail(String email) {
+        Pattern pattern = Pattern.compile("^(?!.*\\.\\.)[a-zA-Z0-9](?:[a-zA-Z0-9._-]*[a-zA-Z0-9])?@[a-zA-Z0-9]" +
+                "(?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*\\.[a-zA-Z]{2,}$");
+        Matcher matcher = pattern.matcher(email);
+
+        if(!matcher.matches()){
+            return false;
+        }
+
+        return true;
+    }
 
     /**
      * رمز عبور را با SHA-256 هش می‌کند.
