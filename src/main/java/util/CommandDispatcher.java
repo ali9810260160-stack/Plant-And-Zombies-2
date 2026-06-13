@@ -12,6 +12,7 @@ import controller.ProfileController;
 import controller.SettingsController;
 import controller.TravelLogController;
 import model.AppState;
+import model.User;
 import model.enums.CommandRegex;
 import model.enums.MenuType;
 
@@ -52,6 +53,12 @@ public class CommandDispatcher {
     /** آیا منتظر انتخاب سوال امنیتی پس از ثبت‌نام هستیم */
     private boolean awaitingSecurityQuestion;
 
+    /** آیا منتظر وارد کردن مجدد رمز عبور و تکرار آن هستیم(در حالتی که رمز عبور با تکرارش یکسان نباشه هنگام ثبت نام)*/
+    private boolean awaitingForNewConfirmPassword;
+
+    /** برای نگهداری یوزر در حال ثبت نام */
+    private User temp;
+
     // ---- Constructor ----
 
     public CommandDispatcher(AppState appState,
@@ -82,6 +89,8 @@ public class CommandDispatcher {
         this.inPasswordRecovery = false;
         this.awaitingNewPassword = false;
         this.awaitingSecurityQuestion = false;
+        this.awaitingForNewConfirmPassword = false;
+        this.temp = null;
     }
 
     // ---- حلقه اصلی ----
@@ -208,19 +217,19 @@ public class CommandDispatcher {
                 authController.pickQuestion(
                         InputParser.getGroup(mPick, 1),
                         InputParser.getGroup(mPick, 2),
-                        InputParser.getGroup(mPick, 3)
+                        InputParser.getGroup(mPick, 3),
+                        temp.getUsername()
                 );
+                temp = null;
                 awaitingSecurityQuestion = false;
                 return;
             }
-            System.out.println("Please pick a security question first.");
-            System.out.println("Usage: pick question -q <number> -a <answer> -c <confirm>");
             return;
         }
 
         Matcher mRegister = InputParser.match(input, CommandRegex.REGISTER);
-        if (mRegister != null) {
-            authController.register(
+        if (mRegister != null && !awaitingForNewConfirmPassword) {
+            temp = authController.register(
                     InputParser.getGroup(mRegister, 1),
                     InputParser.getGroup(mRegister, 2),
                     InputParser.getGroup(mRegister, 3),
@@ -230,12 +239,37 @@ public class CommandDispatcher {
             );
             // بعد از register موفق، controller منو را به REGISTER نگه می‌دارد
             // تا سوال امنیتی انتخاب شود
-            awaitingSecurityQuestion = true;
+            if(temp != null && temp.getPasswordHash() != null){
+                awaitingSecurityQuestion = true;
+            }else if(temp != null && temp.getPasswordHash() == null){
+                awaitingForNewConfirmPassword = true;
+            }
+            return;
+        }
+
+        Matcher reEnterConfirmPassword = InputParser.match(input, CommandRegex.RE_ENTER_CONFIRM_PASSWORD);
+        if(awaitingForNewConfirmPassword && reEnterConfirmPassword != null){
+            temp = authController.register(
+                    temp.getUsername(),
+                    InputParser.getGroup(reEnterConfirmPassword,1),
+                    InputParser.getGroup(reEnterConfirmPassword,2),
+                    temp.getNickname(),
+                    temp.getEmail(),
+                    temp.getGender().toString()
+            );
+            if(temp != null && temp.getPasswordHash() != null){
+                awaitingSecurityQuestion = true;
+                awaitingForNewConfirmPassword = false;
+            }else if(temp != null && temp.getPasswordHash() == null){
+                awaitingForNewConfirmPassword = true;
+            }
             return;
         }
 
         Matcher mEnter = InputParser.match(input, CommandRegex.MENU_ENTER);
         if (mEnter != null) {
+            temp = null;
+            awaitingForNewConfirmPassword = false;
             menuController.enterMenu(InputParser.getGroup(mEnter, 1));
             return;
         }

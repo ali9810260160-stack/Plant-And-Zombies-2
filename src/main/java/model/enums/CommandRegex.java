@@ -9,6 +9,7 @@ public enum CommandRegex {
     // ---- منوی ثبت‌نام ----
     REGISTER("register\\s+-u\\s+(\\S+)\\s+-p\\s+(\\S+)\\s+(\\S+)\\s+-n\\s+(\\S+)\\s+-e\\s+(\\S+)\\s+-g\\s+(male|female)"),
     PICK_QUESTION("pick question\\s+-q\\s+(\\d+)\\s+-a\\s+(\\S+)\\s+-c\\s+(\\S+)"),
+    RE_ENTER_CONFIRM_PASSWORD("password\\s+:\\s+(\\S+)\\s+confirm\\s+password\\s+:\\s+(\\S+)"),
 
     // ---- منوی ورود ----
     LOGIN("login\\s+-u\\s+(\\S+)\\s+-p\\s+(\\S+)(?:\\s+-stay-logged-in)?"),
