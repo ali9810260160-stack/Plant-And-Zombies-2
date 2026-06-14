@@ -1,9 +1,11 @@
 package service;
 
+import model.AppState;
 import model.User;
 import model.enums.Gender;
 import model.enums.SecurityQuestion;
 import repository.UserRepository;
+import util.HashUtil;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,7 +34,8 @@ public class AuthService {
      */
     public User register(String username, String password, String confirmPassword,
                          String nickname, String email, Gender gender) {
-        User user = new User(username,password,nickname,email,gender);
+        String passwordHash = hashPassword(password);
+        User user = new User(username,passwordHash,nickname,email,gender);
         userRepository.save(user);
         return user;
     }
@@ -60,7 +63,18 @@ public class AuthService {
      * @throws exception.AuthException در صورت خطا
      */
     public User login(String username, String password, boolean stayLoggedIn) {
-        return null;
+        User user = userRepository.findByUsername(username);
+        user.setStayLoggedIn(stayLoggedIn);
+
+        if(stayLoggedIn){
+            userRepository.setStayLoggedIn(username);
+        }else{
+            userRepository.setStayLoggedIn(null);
+        }
+
+        userRepository.save(user);
+        AppState.getInstance().setCurrentUser(user);
+        return user;
     }
 
     /**
@@ -70,7 +84,8 @@ public class AuthService {
      * @return سوال امنیتی کاربر
      */
     public SecurityQuestion initiatePasswordRecovery(String username, String email) {
-        return null;
+        User user = userRepository.findByUsername(username);
+        return user.getSecurityQuestion();
     }
 
     /**
@@ -79,14 +94,25 @@ public class AuthService {
      * @param answer پاسخ
      * @return true اگر صحیح باشد
      */
-    public boolean verifySecurityAnswer(String username, String answer) { return false; }
+    public boolean verifySecurityAnswer(String username, String answer) {
+        User user = userRepository.findByUsername(username);
+
+        if(answer.equalsIgnoreCase(user.getSecurityAnswerHash()))
+            return true;
+
+        return false;
+    }
 
     /**
      * رمز عبور جدید را ست می‌کند (بعد از تأیید سوال امنیتی).
      * @param username نام کاربری
      * @param newPassword رمز عبور جدید
      */
-    public void resetPassword(String username, String newPassword) { }
+    public void resetPassword(String username, String newPassword) {
+        User user = userRepository.findByUsername(username);
+        String passwordHash = hashPassword(newPassword);
+        user.setPasswordHash(passwordHash);
+    }
 
     /**
      * اعتبارسنجی نام کاربری (فقط حروف، اعداد، خط‌تیره).
@@ -146,5 +172,7 @@ public class AuthService {
      * @param password رمز خام
      * @return رمز هش‌شده
      */
-    public String hashPassword(String password) { return null; }
+    public String hashPassword(String password) {
+        return HashUtil.sha256(password);
+    }
 }

@@ -262,10 +262,9 @@ public class CommandDispatcher {
                 awaitingForNewConfirmPassword = false;
             }else if(temp != null && temp.getPasswordHash() == null){
                 awaitingForNewConfirmPassword = true;
-            }
+            }else{awaitingForNewConfirmPassword = false;}
             return;
         }
-
         Matcher mEnter = InputParser.match(input, CommandRegex.MENU_ENTER);
         if (mEnter != null) {
             temp = null;
@@ -303,11 +302,13 @@ public class CommandDispatcher {
 
         Matcher mForget = InputParser.match(input, CommandRegex.FORGET_PASSWORD);
         if (mForget != null) {
-            authController.forgetPassword(
+            Boolean isSuccessful = authController.forgetPassword(
                     InputParser.getGroup(mForget, 1),
                     InputParser.getGroup(mForget, 2)
             );
-            inPasswordRecovery = true;
+            if(isSuccessful){
+                inPasswordRecovery = true;
+            }
             return;
         }
 
@@ -339,9 +340,8 @@ public class CommandDispatcher {
                 inPasswordRecovery = false;
                 return true;
             }
-            System.out.println("Please enter new password.");
-            System.out.println("Usage: menu profile change-password -p <new> -o <old>");
-            return true;
+            awaitingNewPassword = false;
+            return false;
         }
         return false;
     }
@@ -356,17 +356,20 @@ public class CommandDispatcher {
         if (inPasswordRecovery) {
             Matcher mAnswer = InputParser.match(input, CommandRegex.ANSWER_SECURITY);
             if (mAnswer != null) {
-                authController.answerSecurityQuestion(
+                Boolean isSuccessful = authController.answerSecurityQuestion(
                         InputParser.getGroup(mAnswer, 1)
                 );
                 // اگر پاسخ درست بود، controller این فلگ را true می‌کند
-                awaitingNewPassword = true;
+                if(isSuccessful){
+                    awaitingNewPassword = true;
+                    inPasswordRecovery = false;
+                    return true;
+                }
                 inPasswordRecovery = false;
                 return true;
             }
-            System.out.println("Please answer the security question.");
-            System.out.println("Usage: answer -a <your_answer>");
-            return true;
+            inPasswordRecovery = false;
+            return false;
         }
         return false;
     }
