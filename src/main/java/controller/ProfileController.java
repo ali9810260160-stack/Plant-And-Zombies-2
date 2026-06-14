@@ -1,6 +1,7 @@
 package controller;
 
 import model.AppState;
+import model.User;
 import service.UserService;
 import view.ConsoleView;
 
@@ -22,17 +23,57 @@ public class ProfileController {
     }
 
     /** دستور "menu profile change-username" را پردازش می‌کند */
-    public void changeUsername(String newUsername) { }
+    public void changeUsername(String newUsername) {
+        try {
+            userService.changeUsername(appState.getCurrentUser(), newUsername);
+            view.printSuccess("Username changed successfully.");
+        } catch (RuntimeException e) {
+            view.printError(e.getMessage());
+        }
+    }
 
     /** دستور "menu profile change-nickname" را پردازش می‌کند */
-    public void changeNickname(String newNickname) { }
+    public void changeNickname(String newNickname) {
+        try {
+            userService.changeNickname(appState.getCurrentUser(), newNickname);
+            view.printSuccess("Nickname changed successfully.");
+        } catch (RuntimeException e) {
+            view.printError(e.getMessage());
+        }
+    }
 
     /** دستور "menu profile change-email" را پردازش می‌کند */
-    public void changeEmail(String newEmail) { }
+    public void changeEmail(String newEmail) {
+        try {
+            userService.changeEmail(appState.getCurrentUser(), newEmail);
+            view.printSuccess("Email changed successfully.");
+        } catch (RuntimeException e) {
+            view.printError(e.getMessage());
+        }
+    }
 
     /** دستور "menu profile change-password" را پردازش می‌کند */
-    public void changePassword(String newPassword, String oldPassword) { }
+    public void changePassword(String newPassword, String oldPassword) {
+        try {
+            userService.changePassword(appState.getCurrentUser(), oldPassword, newPassword);
+            view.printSuccess("Password changed successfully.");
+        } catch (RuntimeException e) {
+            view.printError(e.getMessage());
+        }
+    }
 
     /** دستور "menu profile show-info" را پردازش می‌کند */
-    public void showInfo() { }
+    public void showInfo() {
+        User user = appState.getCurrentUser();
+        view.printInfo(
+                "Username: " + user.getUsername() + "\n" +
+                        "Nickname: " + user.getNickname() + "\n" +
+                        "Games Played: " + user.getGamesPlayed() + "\n" +
+                        "Coins: " + user.getCoins() + "\n" +
+                        "Gems: " + user.getGems() + "\n" +
+                        "Levels Completed: " + user.getLevelsCompleted() + "\n" +
+                        "Highest Meo Point: " + user.getHighestMeoPoint()
+        );
+    }
+
 }
