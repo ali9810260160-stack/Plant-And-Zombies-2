@@ -52,7 +52,10 @@ public class UserService {
      * @param user کاربر
      * @param level سطح (1-5)
      */
-    public void changeDifficulty(User user, int level) { }
+    public void changeDifficulty(User user, int level) {
+        user.setDifficultyLevel(level);
+        userRepository.save(user);
+    }
 
     /**
      * یک گیاه را برای کاربر آنلاک می‌کند.

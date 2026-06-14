@@ -26,5 +26,13 @@ public class SettingsController {
      * سطح باید بین 1 تا 5 باشد.
      * @param level سطح سختی
      */
-    public void changeDifficulty(int level) { }
+    public void changeDifficulty(int level) {
+        if (level < 1 || level > 5) {
+            view.printError("Invalid level.");
+            return;
+        }
+
+        userService.changeDifficulty(appState.getCurrentUser(), level);
+        view.printSuccess("Difficulty level changed successfully.");
+    }
 }
