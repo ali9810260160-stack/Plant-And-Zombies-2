@@ -522,4 +522,16 @@ public class UserRepository {
                 .replace("\n", "\\n")
                 .replace("\t", "\\t");
     }
+
+    /**
+     * کاربر را از کش و فایل حذف می‌کند.
+     * برای تغییر username استفاده می‌شود.
+     */
+    public void deleteByUsername(String username) {
+        ensureLoaded();
+        if (username == null) return;
+        usersCache.remove(username.toLowerCase());
+        persist();
+    }
+
 }
