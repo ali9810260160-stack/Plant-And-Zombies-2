@@ -16,9 +16,6 @@ public class AppState {
     /** منوی فعلی */
     private MenuType currentMenu;
 
-    /** منوی قبلی */
-    private MenuType previousMenu;
-
     /** session بازی جاری (null اگر در بازی نیست) */
     private GameSession currentSession;
 
@@ -27,7 +24,6 @@ public class AppState {
 
     private AppState() {
         this.currentMenu = MenuType.REGISTER;
-        this.previousMenu = null;
         this.currentUser = null;
         this.currentSession = null;
     }
@@ -50,8 +46,6 @@ public class AppState {
     public void setCurrentUser(User currentUser) { this.currentUser = currentUser; }
     public MenuType getCurrentMenu() { return currentMenu; }
     public void setCurrentMenu(MenuType currentMenu) { this.currentMenu = currentMenu; }
-    public MenuType getPreviousMenu() { return previousMenu; }
-    public void setPreviousMenu(MenuType previousMenu) { this.previousMenu = previousMenu; }
     public GameSession getCurrentSession() { return currentSession; }
     public void setCurrentSession(GameSession session) { this.currentSession = session; }
     public String getCurrentTravelLogPage() { return currentTravelLogPage; }

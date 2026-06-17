@@ -381,30 +381,10 @@ public class CommandDispatcher {
      * شامل: ورود به زیرمنوها.
      */
     private void handleMainMenu(String input) {
-        Matcher mEnterChapter = InputParser.match(input, CommandRegex.MENU_ENTER_CHAPTER);
-        if (mEnterChapter != null) {
-            menuController.enterMenu("chapter");
-            return;
-        }
 
         Matcher mEnter = InputParser.match(input, CommandRegex.MENU_ENTER);
         if (mEnter != null) {
             menuController.enterMenu(InputParser.getGroup(mEnter, 1));
-            return;
-        }
-
-        if (InputParser.matches(input, CommandRegex.MENU_GREENHOUSE)) {
-            menuController.enterMenu("greenhouse");
-            return;
-        }
-
-        if (InputParser.matches(input, CommandRegex.MENU_TRAVEL_LOG)) {
-            menuController.enterMenu("travel-log");
-            return;
-        }
-
-        if (InputParser.matches(input, CommandRegex.MENU_LEADERBOARD)) {
-            menuController.enterMenu("leaderboard");
             return;
         }
 

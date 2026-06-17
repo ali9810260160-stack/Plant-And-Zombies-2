@@ -36,7 +36,6 @@ public class MenuController {
             view.printError("You can't enter this menu from here");
             return;
         }
-        appState.setPreviousMenu(current);
         appState.setCurrentMenu(target);
         view.printSuccess("You are entered in " + menuName + " menu");
     }
@@ -74,7 +73,6 @@ public class MenuController {
         }
         appState.logout();
         appState.setCurrentMenu(MenuType.REGISTER);
-        appState.setPreviousMenu(null);
         view.printSuccess("Logged in successfully.");
     }
 
@@ -98,13 +96,12 @@ public class MenuController {
                 return MenuType.GREENHOUSE;
             case PLANT_SELECT:
             case COLLECTION:
-                return MenuType.GAME;
-            case IN_GAME:
-                return MenuType.PLANT_SELECT;
             case GREENHOUSE:
             case TRAVEL_LOG:
             case LEADERBOARD:
-                return appState.getPreviousMenu();
+                return MenuType.GAME;
+            case IN_GAME:
+                return MenuType.PLANT_SELECT;
             default:
                 return null;
         }
@@ -157,11 +154,7 @@ public class MenuController {
                 return target == MenuType.GAME ||
                         target == MenuType.SETTINGS ||
                         target == MenuType.NEWS ||
-                        target == MenuType.PROFILE ||
-                        target == MenuType.COLLECTION ||
-                        target == MenuType.GREENHOUSE ||
-                        target == MenuType.TRAVEL_LOG ||
-                        target == MenuType.LEADERBOARD;
+                        target == MenuType.PROFILE;
 
             case GAME:
                 // از منوی بازی هم میتونه بره به:
