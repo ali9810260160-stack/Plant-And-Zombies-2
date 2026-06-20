@@ -249,7 +249,7 @@ public class UserRepository {
 
         // news array
         sb.append("      \"news\": ");
-        sb.append(serializeNews(u.getUnreadNews()));
+        sb.append(serializeNews(u.getNews()));
         sb.append("\n    }");
         return sb.toString();
     }
@@ -307,7 +307,7 @@ public class UserRepository {
             u.setLastDailyOfferDate(parseStringField(obj, "lastDailyOfferDate"));
             u.setUnlockedPlants(parseStringArray(obj, "unlockedPlants"));
             u.setSeenZombies(parseStringArray(obj, "seenZombies"));
-            u.setUnreadNews(parseNewsArray(obj));
+            u.setNews(parseNewsArray(obj));
             return u;
         } catch (Exception e) {
             System.err.println("[UserRepository] Failed to parse user: " + e.getMessage());
