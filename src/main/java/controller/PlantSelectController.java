@@ -1,10 +1,13 @@
 package controller;
 
 import model.AppState;
+import model.GameSession;
 import model.Level;
 import model.User;
+import model.enums.MenuType;
 import model.enums.PlantType;
 import service.GameService;
+import service.UserService;
 import view.ConsoleView;
 
 import java.util.ArrayList;
@@ -17,6 +20,7 @@ import java.util.List;
 public class PlantSelectController {
 
     private final GameService gameService;
+    private final UserService userService;
     private final AppState appState;
     private final ConsoleView view;
 
@@ -29,9 +33,10 @@ public class PlantSelectController {
     /** گیاهان boost شده */
     private List<String> boostedPlants;
 
-    public PlantSelectController(GameService gameService, AppState appState,
+    public PlantSelectController(GameService gameService,UserService userService, AppState appState,
                                  ConsoleView view) {
         this.gameService = gameService;
+        this.userService = userService;
         this.appState = appState;
         this.view = view;
         this.selectedPlants = new ArrayList<String>();
@@ -104,17 +109,94 @@ public class PlantSelectController {
      * دستور "remove plant -t <type>" را پردازش می‌کند.
      * @param typeName نام گیاه
      */
-    public void removePlant(String typeName) { }
+    public void removePlant(String typeName) {
+        User currentUser = appState.getCurrentUser();
+        PlantType type = parsePlantType(typeName);
+        if (type == null){
+            view.printError("Invalid plant type.");
+            return;
+        }
+        if (!selectedPlants.contains(type.name())){
+            view.printError("Plnat " + typeName + " is not in your selection.");
+            return;
+        }
+        selectedPlants.remove(type.name());
+        boostedPlants.remove(type.name());
+        view.printSuccess("Plnat" + typeName + " removed.");
+    }
 
     /**
      * دستور "boost plant -t <type>" را پردازش می‌کند.
      * 2 الماس خرج می‌کند.
      * @param typeName نام گیاه
      */
-    public void boostPlant(String typeName) { }
+    public void boostPlant(String typeName) {
+        User currentUser = appState.getCurrentUser();
+        PlantType type = parsePlantType(typeName);
+
+        if (type == null){
+            view.printError("Invalid plant type.");
+            return;
+        }
+        if (!selectedPlants.contains(type.name())){
+            view.printError("Plant " + typeName + " is not in your selection. Add it first.");
+            return;
+        }
+        if (boostedPlants.contains(type.name())){
+            view.printError("Plant " + typeName + " is already boosted.");
+            return;
+        }
+        if (currentUser.getGems() < 2){
+            view.printError("Not enough gems.");
+            return;
+        }
+        try {
+            userService.deductGems(currentUser, 2);
+            boostedPlants.add(type.name());
+            view.printSuccess("Plant" + typeName + " boosted.");
+        }
+        catch (RuntimeException e){
+            view.printError(e.getMessage());
+        }
+    }
 
     /** دستور "start game" را پردازش می‌کند */
-    public void startGame() { }
+    public void startGame() {
+        if (selectedPlants.isEmpty()) {
+            view.printError("You must select at least one plant before starting.");
+            return;
+        }
+
+        if (currentLevel == null) {
+            view.printError("No level selected.");
+            return;
+        }
+
+        List<PlantType> plantTypes = new ArrayList<>();
+        for (String name : selectedPlants) {
+            PlantType t = parsePlantType(name);
+            if (t != null) plantTypes.add(t);
+        }
+
+        List<PlantType> boostedTypes = new ArrayList<>();
+        for (String name : boostedPlants) {
+            PlantType t = parsePlantType(name);
+            if (t != null) boostedTypes.add(t);
+        }
+        GameSession session = gameService.createSession(
+                currentLevel,
+                plantTypes,
+                appState.getCurrentUser()
+        );
+        if (session == null) {
+            view.printError("Failed to start game.");
+            return;
+        }
+        session.setBoostedPlants(boostedTypes);
+        appState.setCurrentSession(session);
+        appState.setCurrentMenu(MenuType.IN_GAME);
+        view.printSuccess("Game started! Good luck!");
+    }
 
     /** مرحله جاری را تنظیم می‌کند */
     public void setCurrentLevel(Level level) {

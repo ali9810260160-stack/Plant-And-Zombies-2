@@ -51,7 +51,7 @@ public class Main {
         SettingsController settingsController = new SettingsController(userService, appState, consoleView);
         NewsController newsController = new NewsController(userService, appState, consoleView);
         GameController gameController = new GameController(gameService, appState, consoleView, mapView);
-        PlantSelectController plantSelectController = new PlantSelectController(gameService, appState, consoleView);
+        PlantSelectController plantSelectController = new PlantSelectController(gameService, userService, appState, consoleView);
         CollectionController collectionController = new CollectionController(collectionService, appState, consoleView);
         GreenhouseController greenhouseController = new GreenhouseController(greenhouseService, shopService, appState, consoleView);
         TravelLogController travelLogController = new TravelLogController(questService, appState, consoleView);
