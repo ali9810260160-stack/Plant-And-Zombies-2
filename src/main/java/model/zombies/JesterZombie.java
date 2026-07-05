@@ -1,6 +1,11 @@
 package model.zombies;
 
+import model.GameSession;
+import model.Projectile;
 import model.enums.ZombieType;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 /**
  * ژانگولر - تیرهای مستقیم را به سمت گیاهان برمی‌گرداند.
@@ -26,23 +31,52 @@ public class JesterZombie extends Zombie {
         this.damagePerSecond = 100;
         this.waveCost = 5;
         this.spinning = false;
+        this.armors = new LinkedHashMap<>();
+        this.activeEffects = new LinkedHashMap<>();
     }
 
+    private boolean isProjectileComing(GameSession gameSession){
+        boolean isprojectilecoming = false;
+        ArrayList<Projectile> projectiles = new ArrayList<>();
+        for(Projectile projectile : gameSession.getActiveProjectiles()){
+            if(projectile.isLobbed() && projectile.getTargetX() == (int)x && projectile.getTargetY()==y){
+                projectiles.add(projectile);
+                isprojectilecoming = true;
+            }else if(!projectile.isLobbed() && projectile.getTargetX() <= x && projectile.getTargetY() == y){
+                projectiles.add(projectile);
+                isprojectilecoming = true;
+            }
+        }
+        return isprojectilecoming;
+    }
     /**
      * وقتی پرتابه به سمتش می‌آید شروع به چرخش می‌کند.
      * پرتابه برگردانده می‌شود.
      */
-    public void startSpinning() { }
+    public void startSpinning() {
+        spinning = true;
+        moveSpeed = spinSpeed;
+    }
 
     /**
      * وقتی پرتابه‌ای نیامد، چرخش متوقف می‌شود.
      */
-    public void stopSpinning() { }
+    public void stopSpinning() {
+        spinning = false;
+        moveSpeed = normalSpeed;
+    }
 
     public boolean isSpinning() { return spinning; }
 
     @Override
-    public void onTick(int tickCount) { }
+    public void onTick(int tickCount, GameSession gameSession) {
+        if(isProjectileComing(gameSession) && !spinning){
+            startSpinning();
+        }
+        if(!isProjectileComing(gameSession) && spinning){
+            stopSpinning();
+        }
+    }
 
     @Override
     public String getDescription() {

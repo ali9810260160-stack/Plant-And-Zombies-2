@@ -1,5 +1,6 @@
 package model.zombies;
 
+import model.GameSession;
 import model.enums.ArmorType;
 import model.enums.ZombieType;
 
@@ -19,11 +20,14 @@ public class ConeheadZombie extends Zombie {
         this.damagePerSecond = 100;
         this.waveCost = 2;
         this.armors = new LinkedHashMap<>();
+        this.activeEffects = new LinkedHashMap<>();
         this.armors.put(ArmorType.CONE, 370);
     }
 
     @Override
-    public void onTick(int tickCount) { }
+    public void onTick(int tickCount, GameSession gameSession) {
+        return;
+    }
 
     @Override
     public String getDescription() {
