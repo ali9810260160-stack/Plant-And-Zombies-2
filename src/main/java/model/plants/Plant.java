@@ -5,98 +5,137 @@ import model.enums.PlantFamily;
 import model.enums.PlantTag;
 import model.enums.PlantType;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * کلاس انتزاعی پایه برای تمام گیاهان.
- * هر گیاه مشخصات ذاتی (stats) و وضعیت جاری (state) دارد.
  */
 public abstract class Plant {
 
-    /** نوع گیاه */
     protected PlantType type;
-
-    /** دسته‌بندی اصلی گیاه */
     protected PlantFamily family;
-
-    /** تگ‌های گیاه */
     protected List<PlantTag> tags;
-
-    /** سطح فعلی ارتقا (از 1 شروع می‌شود) */
     protected int level;
-
-    /** سلامتی فعلی */
     protected int currentHealth;
-
-    /** حداکثر سلامتی (بر اساس سطح) */
     protected int maxHealth;
-
-    /** هزینه کاشت بر حسب خورشید */
     protected int sunCost;
-
-    /** زمان cooldown بین دو کاشت (بر حسب ثانیه بازی) */
     protected double rechargeTime;
-
-    /** تیک‌های باقیمانده تا پایان cooldown */
     protected int remainingCooldownTicks;
-
-    /** موقعیت ستون روی نقشه */
     protected int x;
-
-    /** موقعیت ردیف روی نقشه */
     protected int y;
-
-    /** آیا گیاه boost شده (اثر plant food بلافاصله فعال) */
     protected boolean boosted;
-
-    /** آیا یک بوست ذخیره‌ای از گلخانه دارد */
     protected boolean hasStoredBoost;
-
-    /** افکت‌های فعال روی این گیاه به همراه تیک باقیمانده */
     protected Map<PlantEffect, Integer> activeEffects;
-
-    /** تعداد seed packet جمع‌آوری‌شده برای این نوع گیاه */
     protected int seedPackets;
+    protected int baseDamage;
+    protected double attackSpeed;
+    protected int attackCooldown;
+    protected int currentAttackCooldown;
+    protected boolean frozen;
+    protected int freezeLevel;
 
-    // ---- Abstract Methods ----
+    protected Plant(PlantType type, PlantFamily family, int hp,
+                    int sunCost, double rechargeTime) {
+        this.type = type;
+        this.family = family;
+        this.maxHealth = hp;
+        this.currentHealth = hp;
+        this.sunCost = sunCost;
+        this.rechargeTime = rechargeTime;
+        this.remainingCooldownTicks = 0;
+        this.level = 1;
+        this.tags = new ArrayList<>();
+        this.activeEffects = new HashMap<>();
+        this.frozen = false;
+        this.freezeLevel = 0;
+        this.seedPackets = 0;
+    }
 
-    /** عمل اصلی گیاه را در هر تیک انجام می‌دهد */
     public abstract void onTick(int tickCount);
-
-    /** اثر plant food را روی این گیاه فعال می‌کند */
     public abstract void activatePlantFood();
-
-    /** رشته توضیحات این گیاه را برمی‌گرداند (برای منوی collection) */
     public abstract String getDescription();
 
-    // ---- Common Methods ----
+    public void takeDamage(int damage) {
+        currentHealth = Math.max(0, currentHealth - damage);
+    }
 
-    /** آسیب وارد می‌کند و سلامتی را کاهش می‌دهد */
-    public void takeDamage(int damage) { }
+    public boolean isAlive() {
+        return currentHealth > 0;
+    }
 
-    /** بررسی می‌کند آیا گیاه زنده است */
-    public boolean isAlive() { return currentHealth > 0; }
+    public boolean isOnCooldown() {
+        return remainingCooldownTicks > 0;
+    }
 
-    /** بررسی می‌کند آیا گیاه در حال cooldown است */
-    public boolean isOnCooldown() { return remainingCooldownTicks > 0; }
+    public void resetCooldown() {
+        remainingCooldownTicks = 0;
+    }
 
-    /** cooldown را ریست می‌کند (برای cheat) */
-    public void resetCooldown() { remainingCooldownTicks = 0; }
+    public void startCooldown() {
+        this.remainingCooldownTicks = (int) (rechargeTime * 10);
+    }
 
-    /** یک تیک از cooldown کم می‌کند */
-    public void tickCooldown() { }
+    public void tickCooldown() {
+        if (remainingCooldownTicks > 0) {
+            remainingCooldownTicks--;
+        }
+    }
 
-    /** بررسی می‌کند آیا افکت خاصی فعال است */
-    public boolean hasEffect(PlantEffect effect) { return false; }
+    public boolean hasEffect(PlantEffect effect) {
+        return activeEffects.containsKey(effect);
+    }
 
-    /** یک افکت را اضافه می‌کند */
-    public void addEffect(PlantEffect effect, int durationTicks) { }
+    public void addEffect(PlantEffect effect, int durationTicks) {
+        activeEffects.put(effect, durationTicks);
+    }
 
-    /** یک افکت را حذف می‌کند */
-    public void removeEffect(PlantEffect effect) { }
+    public void removeEffect(PlantEffect effect) {
+        activeEffects.remove(effect);
+    }
 
-    // ---- Getters & Setters ----
+    public void tickEffects() {
+        List<PlantEffect> toRemove = new ArrayList<>();
+        for (Map.Entry<PlantEffect, Integer> e : activeEffects.entrySet()) {
+            int remaining = e.getValue() - 1;
+            if (remaining <= 0) {
+                toRemove.add(e.getKey());
+            } else {
+                activeEffects.put(e.getKey(), remaining);
+            }
+        }
+        toRemove.forEach(activeEffects::remove);
+    }
+
+    public boolean isFrozen() {
+        return frozen || freezeLevel >= 3;
+    }
+
+    public void incrementFreezeLevel() {
+        freezeLevel = Math.min(3, freezeLevel + 1);
+        if (freezeLevel >= 3) {
+            frozen = true;
+        }
+    }
+
+    public void thaw() {
+        frozen = false;
+        freezeLevel = 0;
+    }
+
+    public boolean hasTag(PlantTag tag) {
+        return tags != null && tags.contains(tag);
+    }
+
+    public boolean isFirePlant() {
+        return hasTag(PlantTag.FIRE);
+    }
+
+    public String getDisplayName() {
+        return type.name().replace("_", "-").toLowerCase();
+    }
 
     public PlantType getType() { return type; }
     public PlantFamily getFamily() { return family; }
@@ -104,7 +143,7 @@ public abstract class Plant {
     public int getLevel() { return level; }
     public void setLevel(int level) { this.level = level; }
     public int getCurrentHealth() { return currentHealth; }
-    public void setCurrentHealth(int currentHealth) { this.currentHealth = currentHealth; }
+    public void setCurrentHealth(int hp) { this.currentHealth = hp; }
     public int getMaxHealth() { return maxHealth; }
     public int getSunCost() { return sunCost; }
     public double getRechargeTime() { return rechargeTime; }
@@ -117,7 +156,16 @@ public abstract class Plant {
     public boolean isBoosted() { return boosted; }
     public void setBoosted(boolean boosted) { this.boosted = boosted; }
     public boolean isHasStoredBoost() { return hasStoredBoost; }
-    public void setHasStoredBoost(boolean hasStoredBoost) { this.hasStoredBoost = hasStoredBoost; }
+    public void setHasStoredBoost(boolean b) { this.hasStoredBoost = b; }
     public int getSeedPackets() { return seedPackets; }
     public void setSeedPackets(int seedPackets) { this.seedPackets = seedPackets; }
+    public Map<PlantEffect, Integer> getActiveEffects() { return activeEffects; }
+    public int getBaseDamage() { return baseDamage; }
+    public int getFreezeLevel() { return freezeLevel; }
+    public void setFreezeLevel(int lvl) {
+        this.freezeLevel = lvl;
+        if (lvl >= 3) {
+            this.frozen = true;
+        }
+    }
 }
