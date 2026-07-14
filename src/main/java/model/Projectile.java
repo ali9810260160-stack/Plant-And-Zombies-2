@@ -3,61 +3,63 @@ package model;
 import model.enums.ProjectileType;
 
 /**
- * یک پرتابه در حال حرکت روی نقشه.
- * توسط گیاهان شلیک می‌شود و به زامبی‌ها آسیب می‌رساند.
+ * مدل پرتابه در حال حرکت روی نقشه.
  */
 public class Projectile {
 
-    /** نوع پرتابه */
     private ProjectileType type;
-
-    /** موقعیت افقی فعلی (اعشاری) */
     private double x;
-
-    /** ردیف */
     private int y;
-
-    /** مقدار آسیب */
-    private int damage;
-
-    /** سرعت حرکت (خانه بر ثانیه) */
     private double speed;
-
-    /** آیا این پرتابه هوایی است (lobber) */
-    private boolean lobbed;
-
-    /** مختصات هدف (برای پرتابه‌های lobber) */
+    private int damage;
+    private boolean movingRight;
+    private boolean passesThrough;
+    private boolean isArc;
     private int targetX;
     private int targetY;
-
-    /** آیا این پرتابه نفوذکننده است (از چند زامبی رد می‌شود) */
-    private boolean strikeThrough;
+    private boolean explodes;
+    private int aoeRadius;
+    private boolean hitsPlants;
 
     public Projectile(ProjectileType type, double x, int y, int damage) {
         this.type = type;
         this.x = x;
         this.y = y;
         this.damage = damage;
+        this.speed = 3.0;
+        this.movingRight = false;
+        this.passesThrough = false;
+        this.isArc = false;
+        this.explodes = false;
+        this.aoeRadius = 0;
+        this.hitsPlants = false;
     }
 
-    /** یک تیک پرتابه را جلو می‌برد */
-    public void advance(double deltaX) { }
-
-    /** بررسی می‌کند آیا پرتابه از نقشه خارج شده */
-    public boolean isOutOfBounds(int mapCols) { return false; }
-
     public ProjectileType getType() { return type; }
+    public void setType(ProjectileType t) { this.type = t; }
     public double getX() { return x; }
     public void setX(double x) { this.x = x; }
     public int getY() { return y; }
-    public int getDamage() { return damage; }
+    public void setY(int y) { this.y = y; }
     public double getSpeed() { return speed; }
-    public boolean isLobbed() { return lobbed; }
-    public void setLobbed(boolean lobbed) { this.lobbed = lobbed; }
+    public void setSpeed(double speed) { this.speed = speed; }
+    public int getDamage() { return damage; }
+    public void setDamage(int damage) { this.damage = damage; }
+    public boolean isMovingRight() { return movingRight; }
+    public void setMovingRight(boolean movingRight) { this.movingRight = movingRight; }
+    public boolean isPassesThrough() { return passesThrough; }
+    public void setPassesThrough(boolean passesThrough) { this.passesThrough = passesThrough; }
+    public boolean isArc() { return isArc; }
+    public void setArc(boolean arc) { isArc = arc; }
     public int getTargetX() { return targetX; }
     public void setTargetX(int targetX) { this.targetX = targetX; }
     public int getTargetY() { return targetY; }
     public void setTargetY(int targetY) { this.targetY = targetY; }
-    public boolean isStrikeThrough() { return strikeThrough; }
-    public void setStrikeThrough(boolean strikeThrough) { this.strikeThrough = strikeThrough; }
+    public boolean isExplodes() { return explodes; }
+    public void setExplodes(boolean explodes) { this.explodes = explodes; }
+    public int getAoeRadius() { return aoeRadius; }
+    public void setAoeRadius(int aoeRadius) { this.aoeRadius = aoeRadius; }
+    public boolean isHitsPlants() { return hitsPlants; }
+    public void setHitsPlants(boolean hitsPlants) { this.hitsPlants = hitsPlants; }
+
 }
