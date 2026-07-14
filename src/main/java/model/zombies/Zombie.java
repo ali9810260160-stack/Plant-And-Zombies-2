@@ -7,237 +7,179 @@ import model.enums.ZombieEffect;
 import model.enums.ZombieType;
 import model.tiles.Tile;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
-import static model.zombies.NormalZombie.MAX_ALLSTAR_SPEED;
 
 /**
  * کلاس انتزاعی پایه برای تمام زامبی‌ها.
- * شامل مشخصات ذاتی، زره، موقعیت و افکت‌های فعال.
  */
 public abstract class Zombie {
 
-    /** نوع زامبی */
     protected ZombieType type;
-
-    /** سلامتی فعلی */
     protected int currentHealth;
-
-    /** حداکثر سلامتی */
     protected int maxHealth;
-
-    /** سرعت حرکت (خانه بر ثانیه) */
     protected double moveSpeed;
-
-    /** آسیب دمیج به گیاه در هر ثانیه */
     protected int damagePerSecond;
-
-    /** هزینه موج (waveCost) برای محاسبه سختی موج */
     protected int waveCost;
-
-    /** موقعیت افقی (می‌تواند اعشاری باشد) */
     protected double x;
-
-    /** موقعیت ردیف (صحیح) */
     protected int y;
-
-    /** آیا این زامبی درخشان است (5% احتمال، plant food می‌دهد) */
     protected boolean glowing;
-
-    /** آیا این زامبی رئیس است (ماشین چمن‌زنی را فعال نمی‌کند) */
     protected boolean boss;
-
-    /** زره‌های فعال با مقدار HP هر کدام */
-    protected Map<ArmorType, Integer> armors;
-
-    /** افکت‌های وضعیتی فعال با تیک باقیمانده */
-    protected Map<ZombieEffect, Integer> activeEffects;
-
-    /** شماره موج که این زامبی در آن ظاهر شده */
-    protected int spawnWave;
-
-    /** شماره ردیف که این زامبی در آن حرکت می‌کند */
-    protected int lane;
-
-    /**
-     * آیا این زامبی خلاف جهت عادی (به سمت راست) حرکت می‌کند.
-     * مثلاً پراسپکتور بعد از انفجار دینامیتش.
-     */
     protected boolean movingBackward;
+    protected boolean hypnotized;
+    protected Map<ArmorType, Integer> armors;
+    protected Map<ZombieEffect, Integer> activeEffects;
+    protected int spawnWave;
+    protected int lane;
+    protected boolean attacking;
+    protected int damageTimer;
 
+    protected Zombie(ZombieType type, int hp, int dps,
+                     double speed, int waveCost) {
+        this.type = type;
+        this.maxHealth = hp;
+        this.currentHealth = hp;
+        this.damagePerSecond = dps;
+        this.moveSpeed = speed;
+        this.waveCost = waveCost;
+        this.armors = new HashMap<>();
+        this.activeEffects = new HashMap<>();
+        this.glowing = false;
+        this.boss = false;
+        this.movingBackward = false;
+        this.hypnotized = false;
+        this.attacking = false;
+        this.damageTimer = 0;
+    }
 
-    // ---- Abstract Methods ----
-
-    /** رفتار خاص این زامبی را در هر تیک اجرا می‌کند */
-    public abstract void onTick(int tickCount, GameSession gameSession);
-
-    /** رشته توضیحات این زامبی را برمی‌گرداند (برای collection) */
+    public abstract void onTick(int tickCount, GameSession session);
     public abstract String getDescription();
 
-    /**
-     * هنگام مرگ این زامبی فراخوانی می‌شود تا اثرات ویژه مرگ (مثل بازگرداندن خورشیدهای دزدیده‌شده
-     * یا آزاد کردن گیاهان طلسم‌شده) اعمال شود. پیاده‌سازی پیش‌فرض کاری انجام نمی‌دهد.
-     */
-    public void onDeath(GameSession gameSession) {
-    }
+    public void onDeath(GameSession session) { }
 
-    // ---- Common Methods ----
-
-    /** آسیب وارد می‌کند - ابتدا به زره، بعد به خود زامبی */
     public void takeDamage(int damage) {
-        if(!isAlive()) return;
-
-        if(!armors.isEmpty()){
-            int remainDamage = damageToArmor(damage);
-            if(remainDamage == 0) return;
-            else{
-                currentHealth = Math.max(0,currentHealth-damage);
-                return;
-            }
+        if (!isAlive()) {
+            return;
         }
-
-        currentHealth = Math.max(0,currentHealth-damage);
+        if (!armors.isEmpty()) {
+            int remain = applyDamageToArmor(damage);
+            if (remain > 0) {
+                currentHealth = Math.max(0, currentHealth - remain);
+            }
+        } else {
+            currentHealth = Math.max(0, currentHealth - damage);
+        }
     }
 
+    public void takePoisonDamage(int damage) {
+        currentHealth = Math.max(0, currentHealth - damage);
+    }
 
-
-
-    private int damageToArmor(int damage){
-
-        if(armors.size() == 2){
-            int armorHP = armors.get(ArmorType.HELMET);
-            int remainDamage = damage - armorHP;
-            armorHP = Math.max(0,armorHP-damage);
-
-            if(armorHP == 0) {
-                if(remainDamage == 0) return 0;
-
-                removeArmor(ArmorType.HELMET);
-                armorHP = armors.get(ArmorType.SHOULDER_ARMOR);
-                armorHP = Math.max(0,armorHP-remainDamage);
-
-                if(armorHP == 0){
-                    remainDamage = remainDamage - armors.get(ArmorType.SHOULDER_ARMOR);
-                    removeArmor(ArmorType.SHOULDER_ARMOR);
-                    return remainDamage;
-                }else{
-                    armors.put(ArmorType.SHOULDER_ARMOR,armorHP);
-                    return 0;
-                }
-
-            }else{
-                armors.put(ArmorType.HELMET,armorHP);
+    private int applyDamageToArmor(int damage) {
+        ArmorType[] priority = {
+                ArmorType.HELMET, ArmorType.CONE, ArmorType.BUCKET,
+                ArmorType.BLOCK, ArmorType.SHOULDER_ARMOR,
+                ArmorType.NEWSPAPER, ArmorType.BARREL
+        };
+        for (ArmorType at : priority) {
+            if (!armors.containsKey(at)) {
+                continue;
+            }
+            int armorHp = armors.get(at);
+            if (damage >= armorHp) {
+                int remaining = damage - armorHp;
+                armors.remove(at);
+                return remaining;
+            } else {
+                armors.put(at, armorHp - damage);
                 return 0;
             }
         }
-
-
-        if(hasArmor(ArmorType.BUCKET)){
-            return damageToOneArmor(ArmorType.BUCKET,damage);
-        }else if(hasArmor(ArmorType.CONE)){
-            return damageToOneArmor(ArmorType.CONE,damage);
-        }else if (hasArmor(ArmorType.BLOCK)){
-            return damageToOneArmor(ArmorType.BLOCK,damage);
-        }else if(hasArmor(ArmorType.SHOULDER_ARMOR)){
-            return damageToOneArmor(ArmorType.SHOULDER_ARMOR,damage);
-        }else{
-            return damageToOneArmor(ArmorType.NEWSPAPER,damage);
-        }
-
+        return damage;
     }
 
-    private int damageToOneArmor(ArmorType armorType, int damage){
-        int armorHP = armors.get(armorType);
-        armorHP = Math.max(0,armorHP-damage);
-        if(armorHP == 0){
-            int remainDamage = damage - armors.get(armorType);
-            removeArmor(armorType);
-            return remainDamage;
-        }else{
-            armors.put(armorType,armorHP);
-            return 0;
-        }
+    public boolean isAlive() {
+        return currentHealth > 0;
     }
 
-    /** آسیب سمی وارد می‌کند - زره را نادیده می‌گیرد */
-    public void takePoisonDamage(int damage) {
-        currentHealth = Math.max(0,currentHealth-damage);
-    }
-
-    /** بررسی می‌کند آیا زامبی زنده است */
-    public boolean isAlive() { return currentHealth > 0; }
-
-    /** بررسی می‌کند آیا افکت خاصی فعال است */
     public boolean hasEffect(ZombieEffect effect) {
         return activeEffects.containsKey(effect);
     }
 
-    /** یک افکت اضافه می‌کند */
     public void addEffect(ZombieEffect effect, int durationTicks) {
-        activeEffects.put(effect,durationTicks);
+        activeEffects.put(effect, durationTicks);
     }
 
-    /** یک افکت حذف می‌کند */
     public void removeEffect(ZombieEffect effect) {
-        if(hasEffect(effect)) activeEffects.remove(effect);
-        else return;
+        activeEffects.remove(effect);
     }
 
-    /** سرعت مؤثر را با احتساب افکت‌ها برمی‌گرداند */
+    public void tickEffects() {
+        List<ZombieEffect> toRemove = new ArrayList<>();
+        for (Map.Entry<ZombieEffect, Integer> e : activeEffects.entrySet()) {
+            int t = e.getValue() - 1;
+            if (t <= 0) {
+                toRemove.add(e.getKey());
+            } else {
+                activeEffects.put(e.getKey(), t);
+            }
+        }
+        toRemove.forEach(activeEffects::remove);
+    }
+
     public double getEffectiveMoveSpeed() {
-        if(hasEffect(ZombieEffect.CHILLED) || hasEffect(ZombieEffect.SLOWED)){
-            return moveSpeed/2;
+        if (hasEffect(ZombieEffect.FROZEN) || hasEffect(ZombieEffect.STUNNED)) {
+            return 0;
+        }
+        if (hasEffect(ZombieEffect.CHILLED) || hasEffect(ZombieEffect.SLOWED)) {
+            return moveSpeed / 2.0;
         }
         return moveSpeed;
     }
 
-    /** یک نوع زره را حذف می‌کند (وقتی HP آن صفر شد) */
-    public void removeArmor(ArmorType armorType) {
-        if(hasArmor(armorType)) armors.remove(armorType);
-        else return;
+    public void move() {
+        double delta = getEffectiveMoveSpeed() * 0.1;
+        if (movingBackward) {
+            x += delta;
+        } else {
+            x -= delta;
+        }
     }
 
-    /** بررسی می‌کند آیا زره خاصی دارد */
+    public boolean isAttackingPlant(GameSession session) {
+        GameMap map = session.getGameMap();
+        int col = (int) Math.round(x);
+        if (!map.isValidPosition(col, y)) {
+            return false;
+        }
+        Tile t = map.getTile(col, y);
+        return t != null && t.getPlant() != null && !hypnotized;
+    }
+
+    public void removeArmor(ArmorType armorType) {
+        armors.remove(armorType);
+    }
+
     public boolean hasArmor(ArmorType armorType) {
         return armors.containsKey(armorType);
     }
 
-    public void move(GameSession gameSession){
-        if(!isAlive()) return;
-
-        if (activeEffects != null
-                && (activeEffects.containsKey(ZombieEffect.FROZEN)
-                || activeEffects.containsKey(ZombieEffect.STUNNED))) {
-            return;
-        }
-
-        if(isAttacking(gameSession)) return;
-
-        double effectiveMoveSpeed = getEffectiveMoveSpeed();
-
-
-        double deltaX = effectiveMoveSpeed * 0.1f;
-        if(movingBackward) x += deltaX;
-        else x -= deltaX;
+    public void addArmor(ArmorType type, int hp) {
+        armors.put(type, hp);
     }
 
-
-    //ایا الان زامبی در حال حمله ست یا نه
-    public boolean isAttacking(GameSession gameSession){
-        GameMap map = gameSession.getGameMap();
-        Tile tile = map.getTile((int)x,y);
-        if(tile.getPlant() == null) return false;
-        else return true;
+    public String getDisplayName() {
+        return type.name().replace("_", " ").toLowerCase();
     }
-
-    // ---- Getters & Setters ----
 
     public ZombieType getType() { return type; }
     public int getCurrentHealth() { return currentHealth; }
-    public void setCurrentHealth(int currentHealth) { this.currentHealth = currentHealth; }
+    public void setCurrentHealth(int hp) { this.currentHealth = hp; }
     public int getMaxHealth() { return maxHealth; }
     public double getMoveSpeed() { return moveSpeed; }
-    public void setMoveSpeed(double moveSpeed) { this.moveSpeed = moveSpeed; }
+    public void setMoveSpeed(double s) { this.moveSpeed = s; }
     public int getDamagePerSecond() { return damagePerSecond; }
     public int getWaveCost() { return waveCost; }
     public double getX() { return x; }
@@ -247,10 +189,19 @@ public abstract class Zombie {
     public boolean isGlowing() { return glowing; }
     public void setGlowing(boolean glowing) { this.glowing = glowing; }
     public boolean isBoss() { return boss; }
+    public void setBoss(boolean boss) { this.boss = boss; }
+    public boolean isMovingBackward() { return movingBackward; }
+    public void setMovingBackward(boolean b) { this.movingBackward = b; }
+    public boolean isHypnotized() { return hypnotized; }
+    public void setHypnotized(boolean h) { this.hypnotized = h; }
     public int getSpawnWave() { return spawnWave; }
-    public void setSpawnWave(int spawnWave) { this.spawnWave = spawnWave; }
+    public void setSpawnWave(int w) { this.spawnWave = w; }
     public int getLane() { return lane; }
     public void setLane(int lane) { this.lane = lane; }
     public Map<ArmorType, Integer> getArmors() { return armors; }
     public Map<ZombieEffect, Integer> getActiveEffects() { return activeEffects; }
+    public boolean isAttacking() { return attacking; }
+    public void setAttacking(boolean a) { this.attacking = a; }
+    public int getDamageTimer() { return damageTimer; }
+    public void setDamageTimer(int t) { this.damageTimer = t; }
 }
