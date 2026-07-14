@@ -4,34 +4,55 @@ import model.enums.PlantType;
 
 /**
  * Factory برای ساخت نمونه‌های گیاه بر اساس نوع.
- * جلوگیری از تکرار کد new در سراسر پروژه.
+ * داده‌های گیاه از PlantDataRegistry خوانده می‌شود (data-driven).
  */
 public class PlantFactory {
 
-    /**
-     * یک نمونه جدید از گیاه مورد نظر می‌سازد.
-     * @param type نوع گیاه
-     * @return نمونه ساخته‌شده
-     */
     public static Plant create(PlantType type) {
-        return null; // در فاز 1 پیاده‌سازی می‌شود
+        PlantStats stats = PlantDataRegistry.getInstance().getStats(type);
+        if (stats == null) {
+            return null;
+        }
+        return new GenericPlant(stats);
     }
 
-    /**
-     * هزینه خورشید گیاه را بدون ساخت نمونه برمی‌گرداند.
-     * @param type نوع گیاه
-     * @return هزینه خورشید
-     */
     public static int getSunCost(PlantType type) {
-        return 0;
+        PlantStats stats = PlantDataRegistry.getInstance().getStats(type);
+        return stats != null ? stats.getSunCost() : 0;
     }
 
-    /**
-     * بررسی می‌کند آیا این گیاه قابل کاشت در آب است.
-     * @param type نوع گیاه
-     * @return true اگر مستقیم روی آب قابل کاشت باشد
-     */
     public static boolean isWaterPlant(PlantType type) {
+        if (type == PlantType.LILY_PAD || type == PlantType.TANGLE_KELP) {
+            return true;
+        }
         return false;
+    }
+
+    public static boolean isStackable(PlantType type) {
+        if (type == PlantType.PUMPKIN || type == PlantType.LILY_PAD) {
+            return true;
+        }
+        return false;
+    }
+
+    public static double getRechargeTime(PlantType type) {
+        PlantStats stats = PlantDataRegistry.getInstance().getStats(type);
+        return stats != null ? stats.getRechargeTime() : 7.5;
+    }
+
+    public static int getBaseHp(PlantType type) {
+        PlantStats stats = PlantDataRegistry.getInstance().getStats(type);
+        return stats != null ? stats.getBaseHp() : 300;
+    }
+
+    public static String getDescription(PlantType type) {
+        PlantStats stats = PlantDataRegistry.getInstance().getStats(type);
+        return stats != null ? stats.getDescription()
+               : type.name() + " - no description available.";
+    }
+
+    public static String getCategory(PlantType type) {
+        PlantStats stats = PlantDataRegistry.getInstance().getStats(type);
+        return stats != null ? stats.getCategory() : "Unknown";
     }
 }
