@@ -3,40 +3,28 @@ package model.zombies;
 import model.GameSession;
 import model.enums.ZombieType;
 
-import java.util.LinkedHashMap;
-
 /**
- * ایمپ - زامبی کوچک و سریع.
- * توسط Gargantuar پرتاب می‌شود یا مستقل ظاهر می‌شود.
+ * ایمپ — زامبی کوچک و سریع.
  */
 public class ImpZombie extends Zombie {
 
-    public ImpZombie(ZombieType zombieType, double speed, int waveCost) {
-        this.type = zombieType;
-        this.maxHealth = 280;
-        this.currentHealth = 280;
-        this.moveSpeed = speed;  // سریع‌تر از زامبی معمولی
-        this.damagePerSecond = 200;
-        this.waveCost = waveCost;
-        this.armors = new LinkedHashMap<>();
-        this.activeEffects = new LinkedHashMap<>();
+    public ImpZombie(ZombieType type, double speed, int dps) {
+        super(type, 100, dps, speed, 50);
     }
 
     @Override
-    public void onTick(int tickCount, GameSession gameSession) {
-        return;
-    }
-
-    /** ایمپ اژدها در برابر تیرهای آتشین مقاوم است و تاثیری از آن‌ها نمی‌گیرد */
-    public boolean isFireImmune() {
-        return type == ZombieType.DRAGON_IMP;
+    public void onTick(int tickCount, GameSession session) {
+        tickEffects();
+        if (type == ZombieType.DRAGON_IMP) {
+            removeEffect(model.enums.ZombieEffect.CHILLED);
+        }
     }
 
     @Override
     public String getDescription() {
         if (type == ZombieType.DRAGON_IMP) {
-            return "Dragon Imp: Same as a regular Imp, but immune to fire.";
+            return "Dragon Imp: Like Imp but immune to fire attacks!";
         }
-        return "Imp: Small but speedy. Thrown by Gargantuars.";
+        return "Imp: Small and fast zombie. Thrown by Gargantuar!";
     }
 }
