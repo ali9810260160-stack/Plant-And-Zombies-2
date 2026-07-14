@@ -2,84 +2,68 @@ package model.zombies;
 
 import model.GameSession;
 import model.Projectile;
+import model.enums.ProjectileType;
 import model.enums.ZombieType;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
- * ژانگولر - تیرهای مستقیم را به سمت گیاهان برمی‌گرداند.
- * حین چرخش سریع‌تر حرکت می‌کند.
- * تیرهای یخی برگشتی سبب یخ‌زدن گیاهان می‌شوند.
+ * زامبی ژانگولر — وقتی تیری بیاید می‌چرخد و تیرها را برمی‌گرداند.
  */
 public class JesterZombie extends Zombie {
 
-    /** آیا در حال چرخش است */
     private boolean spinning;
-
-    /** سرعت عادی (قبل از چرخش) */
-    private final double normalSpeed = 0.2;
-
-    /** سرعت حین چرخش */
-    private final double spinSpeed = 0.6;
+    private List<Projectile> deflectedProjectiles;
 
     public JesterZombie() {
-        this.type = ZombieType.JESTER_ZOMBIE;
-        this.maxHealth = 500;
-        this.currentHealth = 500;
-        this.moveSpeed = normalSpeed;
-        this.damagePerSecond = 100;
-        this.waveCost = 5;
+        super(ZombieType.JESTER_ZOMBIE, 490, 100, 0.12, 450);
         this.spinning = false;
-        this.armors = new LinkedHashMap<>();
-        this.activeEffects = new LinkedHashMap<>();
+        this.deflectedProjectiles = new ArrayList<>();
     }
-
-    private boolean isProjectileComing(GameSession gameSession){
-        boolean isprojectilecoming = false;
-        ArrayList<Projectile> projectiles = new ArrayList<>();
-        for(Projectile projectile : gameSession.getActiveProjectiles()){
-            if(projectile.isLobbed() && projectile.getTargetX() == (int)x && projectile.getTargetY()==y){
-                projectiles.add(projectile);
-                isprojectilecoming = true;
-            }else if(!projectile.isLobbed() && projectile.getTargetX() <= x && projectile.getTargetY() == y){
-                projectiles.add(projectile);
-                isprojectilecoming = true;
-            }
-        }
-        return isprojectilecoming;
-    }
-    /**
-     * وقتی پرتابه به سمتش می‌آید شروع به چرخش می‌کند.
-     * پرتابه برگردانده می‌شود.
-     */
-    public void startSpinning() {
-        spinning = true;
-        moveSpeed = spinSpeed;
-    }
-
-    /**
-     * وقتی پرتابه‌ای نیامد، چرخش متوقف می‌شود.
-     */
-    public void stopSpinning() {
-        spinning = false;
-        moveSpeed = normalSpeed;
-    }
-
-    public boolean isSpinning() { return spinning; }
 
     @Override
-    public void onTick(int tickCount, GameSession gameSession) {
-        if(isProjectileComing(gameSession) && !spinning){
+    public void onTick(int tickCount, GameSession session) {
+        tickEffects();
+        if (spinning && deflectedProjectiles.isEmpty()) {
+            spinning = false;
+        }
+    }
+
+    /** آغاز چرخش هنگام برخورد تیر */
+    public void startSpinning() {
+        spinning = true;
+        moveSpeed = 0.25;
+    }
+
+    /** توقف چرخش */
+    public void stopSpinning() {
+        spinning = false;
+        moveSpeed = 0.12;
+    }
+
+    /** تیر را دریافت و برمی‌گرداند */
+    public Projectile deflect(Projectile incoming) {
+        if (!spinning) {
             startSpinning();
         }
-        if(!isProjectileComing(gameSession) && spinning){
-            stopSpinning();
+        Projectile deflected = new Projectile(
+                incoming.getType(), x, y, incoming.getDamage());
+        deflected.setMovingRight(false);
+        deflected.setHitsPlants(true);
+        if (incoming.getType() == ProjectileType.ICE) {
+            deflected.setMovingRight(false);
         }
+        return deflected;
+    }
+
+    public boolean isSpinning() {
+        return spinning;
     }
 
     @Override
     public String getDescription() {
-        return "Jester Zombie: Deflects projectiles back at your plants while spinning.";
+        return "Jester Zombie: Deflects all projectiles back at plants "
+                + "while spinning! Ice projectiles freeze plants.";
     }
 }
