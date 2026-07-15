@@ -3,64 +3,56 @@ package model;
 import model.enums.SunType;
 
 /**
- * یک خورشید در حال سقوط یا روی زمین.
- * توسط بازیکن با collect sun برداشت می‌شود.
+ * مدل خورشید در حال سقوط یا موجود روی صفحه.
  */
 public class Sun {
 
-    /** نوع خورشید (معمولی، ویژه، رادیواکتیو) */
-    private SunType sunType;
-
-    /** موقعیت افقی هدف */
-    private int targetX;
-
-    /** موقعیت عمودی هدف */
-    private int targetY;
-
-    /** موقعیت عمودی فعلی (برای انیمیشن سقوط) */
-    private double currentY;
-
-    /** ارزش خورشید (25, 100, یا 150 برای رادیواکتیو) */
-    private int value;
-
-    /** آیا به زمین رسیده */
+    private SunType type;
+    private int x;
+    private int y;
+    private double fallProgress;
     private boolean landed;
+    private boolean collected;
 
-    /** تیک ظهور (برای محاسبه زمان سقوط 50 تیک = 5 ثانیه) */
+    /** تیک شروع سقوط */
     private int spawnTick;
 
-    /** آیا این خورشید از یک گیاه تولید شده (نه از آسمان) */
-    private boolean fromPlant;
+    /** ارزش خورشید */
+    private int value;
 
-    /** موقعیت گیاه مبدأ (برای خورشیدهای گیاهی) */
-    private int plantX;
-    private int plantY;
-
-    public Sun(SunType sunType, int targetX, int targetY, int spawnTick) {
-        this.sunType = sunType;
-        this.targetX = targetX;
-        this.targetY = targetY;
+    public Sun(SunType type, int x, int y, int spawnTick) {
+        this.type = type;
+        this.x = x;
+        this.y = y;
         this.spawnTick = spawnTick;
+        this.fallProgress = 0;
         this.landed = false;
-        this.value = calculateValue(sunType);
+        this.collected = false;
+        this.value = getSunValue(type);
     }
 
-    /** ارزش را بر اساس نوع محاسبه می‌کند */
-    private int calculateValue(SunType type) { return 0; }
+    private int getSunValue(SunType sunType) {
+        switch (sunType) {
+            case NORMAL:       return 25;
+            case SPECIAL:      return 100;
+            case RADIOACTIVE:  return 150;
+            default:           return 25;
+        }
+    }
 
-    public SunType getSunType() { return sunType; }
-    public int getTargetX() { return targetX; }
-    public int getTargetY() { return targetY; }
-    public double getCurrentY() { return currentY; }
-    public void setCurrentY(double currentY) { this.currentY = currentY; }
-    public int getValue() { return value; }
+    public SunType getType() { return type; }
+    public int getX() { return x; }
+    public int getY() { return y; }
+    public double getFallProgress() { return fallProgress; }
+    public void setFallProgress(double fp) { this.fallProgress = fp; }
     public boolean isLanded() { return landed; }
     public void setLanded(boolean landed) { this.landed = landed; }
+    public boolean isCollected() { return collected; }
+    public void setCollected(boolean collected) { this.collected = collected; }
     public int getSpawnTick() { return spawnTick; }
-    public boolean isFromPlant() { return fromPlant; }
-    public void setFromPlant(boolean fromPlant) { this.fromPlant = fromPlant; }
-    public int getPlantX() { return plantX; }
-    public void setPlantX(int plantX) { this.plantX = plantX; }
-    public int getPlantY() { return plantY; }
-    public void setPlantY(int plantY) { this.plantY = plantY; }
+    public int getValue() { return value; }
+
+    public void setValue(int value) {
+        this.value = value;
+    }
 }
