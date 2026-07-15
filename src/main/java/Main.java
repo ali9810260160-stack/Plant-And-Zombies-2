@@ -26,7 +26,7 @@ public class Main {
 
         // --- Services ---
         AuthService authService = new AuthService(userRepository);
-        UserService userService = new UserService(userRepository, authService);
+        UserService userService = new UserService(userRepository);
         ScoreService scoreService = new ScoreService();
         SunService sunService = new SunService();
         WaveService waveService = new WaveService();

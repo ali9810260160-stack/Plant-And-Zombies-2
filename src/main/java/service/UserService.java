@@ -1,203 +1,165 @@
 package service;
 
+import exception.ValidationException;
 import model.User;
-import model.AppState;
 import model.enums.PlantType;
-import model.enums.ZombieType;
 import repository.UserRepository;
 import util.HashUtil;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * سرویس مدیریت پروفایل کاربر.
- * تغییر اطلاعات، آنلاک گیاه/زامبی، سکه و الماس.
+ * سرویس مدیریت کاربر — پروفایل، سکه، الماس، کلکسیون.
  */
 public class UserService {
 
     private final UserRepository userRepository;
-    private final AuthService authService;
 
-    public UserService(UserRepository userRepository, AuthService authService) {
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.authService = authService;
     }
 
-    /**
-     * نام کاربری را تغییر می‌دهد.
-     * @param user کاربر
-     * @param newUsername نام کاربری جدید
-     * @throws exception.ValidationException در صورت تکراری/نامعتبر بودن
-     */
     public void changeUsername(User user, String newUsername) {
-        if (!authService.isValidUsername(newUsername)) {
-            throw new RuntimeException("Invalid username format. Only letters, numbers, and hyphens allowed.");
+        if (user.getUsername().equals(newUsername)) {
+            throw new ValidationException(
+                    "New username is the same as the current one.");
         }
         if (userRepository.existsByUsername(newUsername)) {
-            throw new RuntimeException("Username already taken.");
+            throw new ValidationException(
+                    "Username '" + newUsername + "' is already taken.");
         }
-
-        String oldUsername = user.getUsername();
         user.setUsername(newUsername);
-
-        userRepository.deleteByUsername(oldUsername);
         userRepository.save(user);
-
-        // اگر کاربر stay-logged-in بود، به‌روز کن
-        if (user.isStayLoggedIn()) {
-            userRepository.setStayLoggedIn(newUsername);
-        }
     }
 
-    /**
-     * نام مستعار را تغییر می‌دهد.
-     * @param user کاربر
-     * @param newNickname نام مستعار جدید
-     */
     public void changeNickname(User user, String newNickname) {
-        if (newNickname == null || newNickname.trim().isEmpty()) {
-            throw new RuntimeException("Nickname cannot be empty.");
+        if (user.getNickname().equals(newNickname)) {
+            throw new ValidationException(
+                    "New nickname is the same as current one.");
         }
-        if (newNickname.length() > 32) {
-            throw new RuntimeException("Nickname is too long (max 32 characters).");
+        if (newNickname.length() < 3 || newNickname.length() > 30) {
+            throw new ValidationException(
+                    "Nickname must be 3-30 characters.");
         }
-        if (newNickname.equals(user.getNickname())) {
-            throw new RuntimeException("New nickname is the same as current nickname.");
-        }
-
         user.setNickname(newNickname);
         userRepository.save(user);
     }
 
-    /**
-     * ایمیل را تغییر می‌دهد.
-     * @param user کاربر
-     * @param newEmail ایمیل جدید
-     */
     public void changeEmail(User user, String newEmail) {
-        if (!authService.isValidEmail(newEmail)) {
-            throw new RuntimeException("Invalid email format.");
+        if (user.getEmail().equals(newEmail)) {
+            throw new ValidationException(
+                    "New email is the same as current one.");
         }
-        if (newEmail.equals(user.getEmail())) {
-            throw new RuntimeException("New email is the same as current email.");
-        }
-
+        new AuthService(userRepository).validateEmail(newEmail);
         user.setEmail(newEmail);
         userRepository.save(user);
     }
 
-    /**
-     * رمز عبور را تغییر می‌دهد.
-     * @param user کاربر
-     * @param oldPassword رمز قدیمی (باید تأیید شود)
-     * @param newPassword رمز جدید
-     */
     public void changePassword(User user, String oldPassword, String newPassword) {
-        String oldHash = HashUtil.sha256(oldPassword);
-        if (!oldHash.equals(user.getPasswordHash())) {
-            throw new RuntimeException("Current password is incorrect.");
+        if (!HashUtil.verify(oldPassword, user.getPasswordHash())) {
+            throw new ValidationException("Old password is incorrect.");
         }
-
-        String validationError = authService.validatePassword(newPassword);
-        if (validationError != null) {
-            throw new RuntimeException(validationError);
+        if (HashUtil.verify(newPassword, user.getPasswordHash())) {
+            throw new ValidationException(
+                    "New password must be different from old password.");
         }
-
-        if (oldPassword.equals(newPassword)) {
-            throw new RuntimeException("New password must be different from current password.");
-        }
-
+        new AuthService(userRepository).validatePassword(newPassword);
         user.setPasswordHash(HashUtil.sha256(newPassword));
         userRepository.save(user);
     }
 
-    /**
-     * سطح سختی را تغییر می‌دهد.
-     * @param user کاربر
-     * @param level سطح (1-5)
-     */
     public void changeDifficulty(User user, int level) {
+        if (level < 1 || level > 5) {
+            throw new ValidationException(
+                    "Difficulty must be between 1 and 5.");
+        }
         user.setDifficultyLevel(level);
         userRepository.save(user);
     }
 
-    /**
-     * یک گیاه را برای کاربر آنلاک می‌کند.
-     * @param user کاربر
-     * @param type نوع گیاه
-     */
-    public void unlockPlant(User user, PlantType type) { }
+    public void addCoins(User user, long amount) {
+        user.setCoins(user.getCoins() + amount);
+        userRepository.save(user);
+    }
 
-    /**
-     * یک زامبی را برای کاربر ثبت می‌کند (دیده شده).
-     * @param user کاربر
-     * @param type نوع زامبی
-     */
-    public void registerSeenZombie(User user, ZombieType type) { }
+    public void addGems(User user, int amount) {
+        user.setGems(user.getGems() + amount);
+        userRepository.save(user);
+    }
 
-    /**
-     * سکه اضافه می‌کند.
-     * @param user کاربر
-     * @param amount مقدار
-     */
-    public void addCoins(User user, long amount) { }
+    public boolean spendCoins(User user, long amount) {
+        if (user.getCoins() < amount) {
+            return false;
+        }
+        user.setCoins(user.getCoins() - amount);
+        userRepository.save(user);
+        return true;
+    }
 
-    /**
-     * الماس اضافه می‌کند.
-     * @param user کاربر
-     * @param amount مقدار
-     */
-    public void addGems(User user, int amount) { }
+    public boolean spendGems(User user, int amount) {
+        if (user.getGems() < amount) {
+            return false;
+        }
+        user.setGems(user.getGems() - amount);
+        userRepository.save(user);
+        return true;
+    }
 
-    /**
-     * سکه کم می‌کند. اگر کافی نباشد exception می‌دهد.
-     * @param user کاربر
-     * @param amount مقدار
-     */
-    public void deductCoins(User user, long amount) { }
+    public void unlockPlant(User user, PlantType type) {
+        if (user.getUnlockedPlants() == null) {
+            user.setUnlockedPlants(new ArrayList<>());
+        }
+        String name = type.name();
+        if (!user.getUnlockedPlants().contains(name)) {
+            user.getUnlockedPlants().add(name);
+            userRepository.save(user);
+        }
+    }
 
-    /**
-     * الماس کم می‌کند. اگر کافی نباشد exception می‌دهد.
-     * @param user کاربر
-     * @param amount مقدار
-     */
-    public void deductGems(User user, int amount) { }
+    public boolean hasPlant(User user, PlantType type) {
+        if (user.getUnlockedPlants() == null) {
+            return false;
+        }
+        return user.getUnlockedPlants().contains(type.name());
+    }
 
-    /**
-     * یک گلدان اضافه می‌کند (خرید از فروشگاه).
-     * @param user کاربر
-     */
-    public void addPot(User user) { }
+    public void markZombieSeen(User user, String zombieType) {
+        if (user.getSeenZombies() == null) {
+            user.setSeenZombies(new ArrayList<>());
+        }
+        if (!user.getSeenZombies().contains(zombieType)) {
+            user.getSeenZombies().add(zombieType);
+            userRepository.save(user);
+        }
+    }
 
-    /**
-     * غذای گیاه اضافه می‌کند (حداکثر 3).
-     * @param user کاربر
-     */
-    public void addPlantFood(User user) { }
+    public void updateHighScore(User user, long score) {
+        if (score > user.getHighestMeoPoint()) {
+            user.setHighestMeoPoint(score);
+            userRepository.save(user);
+        }
+    }
 
-    /**
-     * غذای گیاه مصرف می‌کند.
-     * @param user کاربر
-     */
-    public void usePlantFood(User user) { }
+    public void incrementGamesPlayed(User user) {
+        user.setGamesPlayed(user.getGamesPlayed() + 1);
+        userRepository.save(user);
+    }
 
-    /**
-     * یک خبر به لیست اخبار کاربر اضافه می‌کند.
-     * @param user کاربر
-     * @param message متن خبر
-     */
-    public void addNews(User user, String message) { }
+    public void incrementLevelsCompleted(User user) {
+        user.setLevelsCompleted(user.getLevelsCompleted() + 1);
+        userRepository.save(user);
+    }
 
-    /**
-     * اخبار خوانده‌نشده را برمی‌گرداند و به عنوان خوانده علامت‌گذاری می‌کند.
-     * @param user کاربر
-     * @return متن اخبار
-     */
-    public String getAndMarkUnreadNews(User user) { return null; }
+    public void save(User user) {
+        userRepository.save(user);
+    }
 
-    /**
-     * seed packet یک گیاه را افزایش می‌دهد.
-     * @param user کاربر
-     * @param type نوع گیاه
-     * @param count تعداد
-     */
-    public void addSeedPackets(User user, PlantType type, int count) { }
+    public List<User> getAllUsers() {
+        return userRepository.getAllUsers();
+    }
+
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
 }
