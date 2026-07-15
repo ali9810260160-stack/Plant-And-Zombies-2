@@ -106,6 +106,8 @@ public class Level {
     public void setInitialSunAmount(int s) { this.initialSunAmount = s; }
     public int getDeadLineColumn() { return deadLineColumn; }
     public void setDeadLineColumn(int d) { this.deadLineColumn = d; }
+    public int getNightOpsSun() { return nightOpsSun; }
+    public void setNightOpsSun(int n) { this.nightOpsSun = n; }
     public int getMaxPlantsLost() { return maxPlantsLost; }
     public void setMaxPlantsLost(int m) { this.maxPlantsLost = m; }
 }
