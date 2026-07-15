@@ -4,168 +4,106 @@ import model.AppState;
 import model.enums.MenuType;
 import view.ConsoleView;
 
-import java.awt.*;
-
 /**
- * کنترلر اصلی ناوبری بین منوها.
- * دستورات menu enter، menu exit و menu show current را پردازش می‌کند.
+ * کنترلر ناوبری بین منوها.
  */
 public class MenuController {
 
-    private final AppState appState;
     private final ConsoleView view;
 
-    public MenuController(AppState appState, ConsoleView view) {
-        this.appState = appState;
+    public MenuController(ConsoleView view) {
         this.view = view;
     }
 
-    /**
-     * دستور "menu enter <menu_name>" را پردازش می‌کند.
-     * @param menuName نام منوی مقصد
-     */
-    public void enterMenu(String menuName) {
-        MenuType current = appState.getCurrentMenu();
-        MenuType target = parseMenuName(menuName);
-
-        if (target == null){
-            view.printError("Invalid menu name");
+    public void handleEnter(String menuName, AppState appState) {
+        MenuType target = resolveMenu(menuName.toLowerCase());
+        if (target == null) {
+            view.printError("Unknown menu: " + menuName);
             return;
         }
-        if (!isTransitionAllowed(current, target)){
-            view.printError("You can't enter this menu from here");
+        if (!isTransitionAllowed(appState.getCurrentMenu(), target)) {
+            view.printError("Cannot go to " + menuName
+                    + " from " + appState.getCurrentMenu().name());
             return;
         }
         appState.setCurrentMenu(target);
-        view.printSuccess("You are entered in " + menuName + " menu");
+        view.printSuccess("Entered " + target.name() + " menu.");
     }
 
-    /**
-     * دستور "menu exit" را پردازش می‌کند.
-     * بر اساس منوی فعلی، به منوی مناسب می‌رود یا برنامه را تمام می‌کند.
-     */
-    public void exitMenu() {
-        MenuType previous = getPreviousMenu(appState.getCurrentMenu());
-
-        if (previous == null) {
-            view.printSuccess("Exiting program...");
-            return;
-        }
-
-        appState.setCurrentMenu(previous);
-    }
-
-    /**
-     * دستور "menu show current" را پردازش می‌کند.
-     */
-    public void showCurrentMenu() {
+    public void handleExit(AppState appState) {
         MenuType current = appState.getCurrentMenu();
-        view.printSuccess("current menu: " + current);
-    }
-
-    /**
-     * دستور "menu logout" را پردازش می‌کند.
-     */
-    public void logout() {
-        if (!appState.isLoggedIn()){
-            view.printError("You are not logged in!");
-            return;
+        MenuType target = getExitTarget(current);
+        if (target == null) {
+            view.printInfo("Exiting program...");
+            System.exit(0);
         }
-        appState.logout();
-        appState.setCurrentMenu(MenuType.REGISTER);
-        view.printSuccess("Logged in successfully.");
+        appState.setCurrentMenu(target);
+        view.printSuccess("Returned to " + target.name() + " menu.");
     }
 
-    /**
-     * بر اساس منوی فعلی، منوی قبلی را برمی‌گرداند.
-     * @param current منوی فعلی
-     * @return منوی قبلی
-     */
-    private MenuType getPreviousMenu(MenuType current) {
-        switch (current) {
+    private MenuType resolveMenu(String name) {
+        switch (name) {
+            case "login":       return MenuType.LOGIN;
+            case "register":    return MenuType.REGISTER;
+            case "main":        return MenuType.MAIN;
+            case "game":        return MenuType.GAME;
+            case "settings":    return MenuType.SETTINGS;
+            case "news":        return MenuType.NEWS;
+            case "profile":     return MenuType.PROFILE;
+            case "collection":  return MenuType.COLLECTION;
+            case "greenhouse":  return MenuType.GREENHOUSE;
+            case "leaderboard": return MenuType.LEADERBOARD;
+            case "travel-log":  return MenuType.TRAVEL_LOG;
+            case "shop":        return MenuType.SHOP;
+            default:            return null;
+        }
+    }
+
+    private boolean isTransitionAllowed(MenuType from, MenuType to) {
+        switch (from) {
+            case REGISTER:
+                return to == MenuType.LOGIN;
             case LOGIN:
-                return MenuType.REGISTER;
+                return to == MenuType.REGISTER;
             case MAIN:
-                return MenuType.LOGIN;
+                return to == MenuType.GAME || to == MenuType.SETTINGS
+                        || to == MenuType.NEWS || to == MenuType.PROFILE
+                        || to == MenuType.GREENHOUSE || to == MenuType.LEADERBOARD
+                        || to == MenuType.TRAVEL_LOG;
+            case GAME:
+                return to == MenuType.COLLECTION || to == MenuType.MAIN;
             case SETTINGS:
             case NEWS:
             case PROFILE:
-            case GAME:
-                return MenuType.MAIN;
-            case SHOP:
-                return MenuType.GREENHOUSE;
-            case PLANT_SELECT:
-            case COLLECTION:
             case GREENHOUSE:
-            case TRAVEL_LOG:
             case LEADERBOARD:
-                return MenuType.GAME;
-            case IN_GAME:
-                return MenuType.PLANT_SELECT;
-            default:
-                return null;
-        }
-    }
-
-    /**
-     * نام رشته‌ای منو را به MenuType تبدیل می‌کند.
-     * @param name نام
-     * @return MenuType یا null اگر نامعتبر باشد
-     */
-    private MenuType parseMenuName(String name) {
-        if (name == null) return null;
-
-        switch (name.toLowerCase().trim()) {
-            case "login":           return MenuType.LOGIN;
-            case "register":        return MenuType.REGISTER;
-            case "main":            return MenuType.MAIN;
-            case "chapter":         return MenuType.GAME;
-            case "collection":      return MenuType.COLLECTION;
-            case "settings":        return MenuType.SETTINGS;
-            case "news":            return MenuType.NEWS;
-            case "profile":         return MenuType.PROFILE;
-            case "greenhouse":      return MenuType.GREENHOUSE;
-            case "shop":            return MenuType.SHOP;
-            case "travel-log":      return MenuType.TRAVEL_LOG;
-            case "leaderboard":     return MenuType.LEADERBOARD;
-            default:                return null;
-        }
-    }
-
-    /**
-     * بررسی می کند که امکان انتقال از منوی فعلی به منوی مقصد وجود دارد یا خیر.
-     * @param current منوی فعلی
-     * @param target منوی مقصد و نهایی
-     * @return
-     */
-    private boolean isTransitionAllowed(MenuType current, MenuType target) {
-        switch (current) {
-            case REGISTER:
-                // از منوی ثبت نام فقط می تواند به منوی ورود برود.
-                return target == MenuType.LOGIN;
-
-            case LOGIN:
-                // بعد از login موفق فقط می تواند به منوی اصلی برود.
-                // یا اینکه برگردد به منوی ثبت نام.
-                return target == MenuType.REGISTER;
-
-            case MAIN:
-                // منوی اصلی میتونه بره به:
-                return target == MenuType.GAME ||
-                        target == MenuType.SETTINGS ||
-                        target == MenuType.NEWS ||
-                        target == MenuType.PROFILE;
-
-            case GAME:
-                // از منوی بازی هم میتونه بره به:
-                return target == MenuType.PLANT_SELECT ||
-                        target == MenuType.COLLECTION ||
-                        target == MenuType.GREENHOUSE ||
-                        target == MenuType.TRAVEL_LOG ||
-                        target == MenuType.LEADERBOARD;
-
+            case TRAVEL_LOG:
+                return to == MenuType.MAIN;
+            case COLLECTION:
+                return to == MenuType.GAME;
+            case SHOP:
+                return to == MenuType.GREENHOUSE;
             default:
                 return false;
+        }
+    }
+
+    private MenuType getExitTarget(MenuType current) {
+        switch (current) {
+            case REGISTER:      return null;
+            case LOGIN:         return MenuType.REGISTER;
+            case SETTINGS:
+            case NEWS:
+            case PROFILE:
+            case GREENHOUSE:
+            case LEADERBOARD:
+            case TRAVEL_LOG:    return MenuType.MAIN;
+            case GAME:          return MenuType.MAIN;
+            case COLLECTION:    return MenuType.GAME;
+            case SHOP:          return MenuType.GREENHOUSE;
+            case PLANT_SELECT:  return MenuType.GAME;
+            case IN_GAME:       return MenuType.GAME;
+            default:            return MenuType.MAIN;
         }
     }
 }
