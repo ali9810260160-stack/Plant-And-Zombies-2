@@ -1,31 +1,43 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.List;
 
-/**
- * گلخانه کاربر - 20 گلدان در 4 ردیف × 5 ستون.
- * ردیف‌های 2 تا 4 ابتدا قفل هستند.
- */
 public class Greenhouse {
 
-    /** ماتریس گلدان‌ها (4 ردیف × 5 ستون، 1-based) */
     private Pot[][] pots;
 
     public Greenhouse() {
         this.pots = new Pot[4][5];
+        for (int r = 0; r < 4; r++) {
+            for (int c = 0; c < 5; c++) {
+                Pot p = new Pot(c + 1, r + 1);
+                p.setLocked(r > 0);
+                pots[r][c] = p;
+            }
+        }
     }
 
-    /** گلدان مشخص را برمی‌گرداند (x: 1-5، y: 1-4) */
-    public Pot getPot(int x, int y) { return null; }
+    public Pot getPot(int x, int y) {
+        if (x < 1 || x > 5 || y < 1 || y > 4) return null;
+        return pots[y - 1][x - 1];
+    }
 
-    /** بررسی می‌کند آیا گلدان آزاد و قابل کاشت است */
-    public boolean isPotAvailable(int x, int y) { return false; }
+    public int getUnlockedCount() {
+        int count = 0;
+        for (Pot[] row : pots)
+            for (Pot p : row)
+                if (!p.isLocked()) count++;
+        return count;
+    }
 
-    /** تعداد گلدان‌های آزاد‌شده را برمی‌گرداند */
-    public int getUnlockedPotCount() { return 0; }
-
-    /** لیست گلدان‌های آماده برداشت را برمی‌گرداند */
-    public List<Pot> getReadyPots() { return null; }
+    public List<Pot> getReadyPots() {
+        List<Pot> result = new ArrayList<>();
+        for (Pot[] row : pots)
+            for (Pot p : row)
+                if (!p.isLocked() && p.isReady()) result.add(p);
+        return result;
+    }
 
     public Pot[][] getPots() { return pots; }
 }
