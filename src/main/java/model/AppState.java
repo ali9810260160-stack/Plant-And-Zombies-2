@@ -22,10 +22,11 @@ public class AppState {
     /** صفحه فعلی Travel Log */
     private String currentTravelLogPage;
 
+    /** مینی‌گیم فعال در حال اجرا */
+    private String activeMinigame;
+
     private AppState() {
         this.currentMenu = MenuType.REGISTER;
-        this.currentUser = null;
-        this.currentSession = null;
     }
 
     /** نمونه Singleton را برمی‌گرداند */
@@ -50,4 +51,6 @@ public class AppState {
     public void setCurrentSession(GameSession session) { this.currentSession = session; }
     public String getCurrentTravelLogPage() { return currentTravelLogPage; }
     public void setCurrentTravelLogPage(String page) { this.currentTravelLogPage = page; }
+    public String getActiveMinigame() { return activeMinigame; }
+    public void setActiveMinigame(String mg) { this.activeMinigame = mg; }
 }
