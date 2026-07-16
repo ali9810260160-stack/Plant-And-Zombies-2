@@ -4,85 +4,141 @@ import model.enums.GameResult;
 import model.enums.PlantType;
 import model.zombies.Zombie;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * وضعیت جاری یک مرحله در حال اجرا.
- * تمام state زنده بازی اینجاست: تیک، خورشید، موج، پرتابه‌ها.
  */
 public class GameSession {
 
-    /** مرحله‌ای که در حال اجرا است */
     private Level level;
-
-    /** نقشه بازی */
     private GameMap gameMap;
-
-    /** تیک کنونی از شروع بازی */
     private int currentTick;
-
-    /** میزان خورشید فعلی بازیکن */
     private int sunAmount;
-
-    /** تعداد غذای گیاه موجود (حداکثر 3) */
     private int plantFoodCount;
-
-    /** شماره موج جاری */
     private int currentWaveIndex;
-
-    /** لیست تمام امواج این مرحله */
     private List<Wave> waves;
-
-    /** لیست تمام زامبی‌های زنده */
     private List<Zombie> activeZombies;
-
-    /** لیست پرتابه‌های در حال حرکت */
     private List<Projectile> activeProjectiles;
-
-    /** لیست خورشیدهای روی صفحه */
     private List<Sun> activeSuns;
-
-    /** گیاهانی که بازیکن برای این مرحله انتخاب کرده */
     private List<PlantType> selectedPlants;
-
-    /** گیاهانی که boost شده‌اند (برای این مرحله) */
     private List<PlantType> boostedPlants;
-
-    /** نتیجه بازی */
     private GameResult result;
-
-    /** آیا cooldown چیت فعال است */
     private boolean cooldownCheated;
-
-    /** تعداد گیاهان از دست رفته (برای Love Your Plants) */
     private int plantsLost;
-
-    /** تعداد زامبی‌های کشته‌شده (برای Timed War) */
     private int zombiesKilled;
-
-    /** میوپوینت جمع‌شده در این بازی */
     private long meoPoints;
-
-    /** آیا بازیکن "start zombie waves" را فراخوانی کرده (برای Plant What You Get) */
     private boolean waveStarted;
+
+    /** تیک آخرین سقوط خورشید از آسمان */
+    private int lastSkyDropTick;
+    /** تیک شروع نبرد زمان‌دار */
+    private int timedWarStartTick;
+    /** حالت انتظار بین موج‌ها */
+    private boolean betweenWaves;
+    /** آیا گردباد مصر باید اتفاق بیفتد */
+    private boolean egyptTornadoActive;
+    /** ردیف‌هایی که باد یخی زده */
+    private List<Integer> frostbiteWindAffectedRows;
+    /** گیاهانی که تبدیل به گربه شدند (برای Wizard) */
+    private Map<String, model.plants.Plant> catPlants;
+    /** مینی‌گیم state */
+    private Object minigameState;
+    /** امتیاز multi-kill برای scoreservice */
+    private int consecutiveKills;
+    private long lastKillTick;
 
     public GameSession(Level level, GameMap gameMap, List<PlantType> selectedPlants) {
         this.level = level;
         this.gameMap = gameMap;
-        this.selectedPlants = selectedPlants;
+        this.selectedPlants = new ArrayList<>(selectedPlants);
         this.currentTick = 0;
         this.result = GameResult.IN_PROGRESS;
         this.cooldownCheated = false;
+        this.sunAmount = level.getInitialSunAmount() > 0
+                ? level.getInitialSunAmount() : 50;
+        this.plantFoodCount = 0;
+        this.currentWaveIndex = 0;
+        this.activeZombies = new ArrayList<>();
+        this.activeProjectiles = new ArrayList<>();
+        this.activeSuns = new ArrayList<>();
+        this.waves = new ArrayList<>();
+        this.boostedPlants = new ArrayList<>();
+        this.plantsLost = 0;
+        this.zombiesKilled = 0;
+        this.meoPoints = 0;
+        this.waveStarted = false;
+        this.lastSkyDropTick = 0;
+        this.betweenWaves = false;
+        this.frostbiteWindAffectedRows = new ArrayList<>();
+        this.catPlants = new HashMap<>();
+        this.consecutiveKills = 0;
+        this.lastKillTick = 0;
     }
 
-    /** یک تیک بازی را پیش می‌برد */
-    public void advanceTick() { }
+    public void advanceTick() {
+        currentTick++;
+    }
 
-    /** بررسی می‌کند آیا شرط برد/باخت برقرار است */
-    public void checkWinLoseCondition() { }
+    public double getElapsedSeconds() {
+        return currentTick / 10.0;
+    }
 
-    /** تعداد ثانیه‌های گذشته را برمی‌گرداند */
-    public double getElapsedSeconds() { return currentTick / 10.0; }
+    public boolean isInProgress() {
+        return result == GameResult.IN_PROGRESS;
+    }
+
+    public void addSun(int amount) {
+        sunAmount += amount;
+    }
+
+    public boolean spendSun(int amount) {
+        if (sunAmount < amount) {
+            return false;
+        }
+        sunAmount -= amount;
+        return true;
+    }
+
+    public boolean addPlantFood() {
+        if (plantFoodCount >= 3) {
+            return false;
+        }
+        plantFoodCount++;
+        return true;
+    }
+
+    public boolean usePlantFood() {
+        if (plantFoodCount <= 0) {
+            return false;
+        }
+        plantFoodCount--;
+        return true;
+    }
+
+    public Wave getCurrentWave() {
+        if (waves == null || currentWaveIndex >= waves.size()) {
+            return null;
+        }
+        return waves.get(currentWaveIndex);
+    }
+
+    public boolean hasMoreWaves() {
+        return currentWaveIndex < waves.size() - 1;
+    }
+
+    public boolean allWavesFinished() {
+        if (waves == null || waves.isEmpty()) {
+            return false;
+        }
+        if (currentWaveIndex < waves.size() - 1) {
+            return false;
+        }
+        return activeZombies.isEmpty();
+    }
 
     public Level getLevel() { return level; }
     public GameMap getGameMap() { return gameMap; }
@@ -101,11 +157,11 @@ public class GameSession {
     public List<Sun> getActiveSuns() { return activeSuns; }
     public List<PlantType> getSelectedPlants() { return selectedPlants; }
     public List<PlantType> getBoostedPlants() { return boostedPlants; }
-    public void setBoostedPlants(List<PlantType> boostedPlants) { this.boostedPlants = boostedPlants; }
+    public void setBoostedPlants(List<PlantType> b) { this.boostedPlants = b; }
     public GameResult getResult() { return result; }
     public void setResult(GameResult result) { this.result = result; }
     public boolean isCooldownCheated() { return cooldownCheated; }
-    public void setCooldownCheated(boolean cooldownCheated) { this.cooldownCheated = cooldownCheated; }
+    public void setCooldownCheated(boolean b) { this.cooldownCheated = b; }
     public int getPlantsLost() { return plantsLost; }
     public void setPlantsLost(int plantsLost) { this.plantsLost = plantsLost; }
     public int getZombiesKilled() { return zombiesKilled; }
@@ -114,4 +170,18 @@ public class GameSession {
     public void setMeoPoints(long meoPoints) { this.meoPoints = meoPoints; }
     public boolean isWaveStarted() { return waveStarted; }
     public void setWaveStarted(boolean waveStarted) { this.waveStarted = waveStarted; }
+    public int getLastSkyDropTick() { return lastSkyDropTick; }
+    public void setLastSkyDropTick(int t) { this.lastSkyDropTick = t; }
+    public boolean isBetweenWaves() { return betweenWaves; }
+    public void setBetweenWaves(boolean b) { this.betweenWaves = b; }
+    public boolean isEgyptTornadoActive() { return egyptTornadoActive; }
+    public void setEgyptTornadoActive(boolean b) { this.egyptTornadoActive = b; }
+    public List<Integer> getFrostbiteWindAffectedRows() { return frostbiteWindAffectedRows; }
+    public Map<String, model.plants.Plant> getCatPlants() { return catPlants; }
+    public Object getMinigameState() { return minigameState; }
+    public void setMinigameState(Object s) { this.minigameState = s; }
+    public int getConsecutiveKills() { return consecutiveKills; }
+    public void setConsecutiveKills(int n) { this.consecutiveKills = n; }
+    public long getLastKillTick() { return lastKillTick; }
+    public void setLastKillTick(long t) { this.lastKillTick = t; }
 }
