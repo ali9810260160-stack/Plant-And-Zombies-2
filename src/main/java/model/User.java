@@ -200,4 +200,16 @@ public class User {
     public void setLastDailyOfferDate(String lastDailyOfferDate) {
         this.lastDailyOfferDate = lastDailyOfferDate;
     }
+
+
+    private Greenhouse greenhouse;
+    private java.util.List<NewsItem> allNews = new java.util.ArrayList<>();
+
+    public int getNightOpsSun() { return 150; }
+    public Greenhouse getGreenhouse() { return greenhouse; }
+    public void setGreenhouse(Greenhouse g) { this.greenhouse = g; }
+    public java.util.List<NewsItem> getAllNews() {
+        if (allNews == null) allNews = new java.util.ArrayList<>();
+        return allNews;
+    }
 }
