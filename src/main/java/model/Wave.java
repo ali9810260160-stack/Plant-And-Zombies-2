@@ -2,49 +2,54 @@ package model;
 
 import model.zombies.Zombie;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * یک موج حمله زامبی در یک مرحله.
- * هر مرحله چندین موج دارد و موج آخر (flag wave) دو برابر سختی دارد.
  */
 public class Wave {
 
-    /** شماره موج (از 1) */
     private int waveNumber;
-
-    /** آیا این موج آخر (flag wave) است */
     private boolean finalWave;
-
-    /** سختی این موج (waveCost مجموع زامبی‌ها) */
     private int waveDifficulty;
-
-    /** لیست زامبی‌های این موج */
     private List<Zombie> zombies;
-
-    /** آیا این موج شروع شده */
     private boolean started;
-
-    /** درصد HP از دست رفته زامبی‌های این موج (برای trigger موج بعدی - 75%) */
-    private double healthLostPercent;
-
-    /** مجموع HP اولیه همه زامبی‌های این موج */
     private int totalInitialHealth;
-
-    /** مجموع HP از دست رفته تا الان */
     private int totalHealthLost;
 
     public Wave(int waveNumber, int waveDifficulty, boolean finalWave) {
         this.waveNumber = waveNumber;
         this.waveDifficulty = waveDifficulty;
         this.finalWave = finalWave;
+        this.zombies = new ArrayList<>();
+        this.started = false;
+        this.totalInitialHealth = 0;
+        this.totalHealthLost = 0;
     }
 
-    /** بررسی می‌کند آیا شرط شروع موج بعدی (75% HP از دست رفته) برقرار است */
-    public boolean shouldTriggerNextWave() { return false; }
+    public boolean shouldTriggerNextWave() {
+        if (totalInitialHealth == 0) {
+            return false;
+        }
+        double lostPercent = (double) totalHealthLost / totalInitialHealth;
+        return lostPercent >= 0.75;
+    }
 
-    /** HP از دست رفته یک زامبی را ثبت می‌کند */
-    public void registerHealthLost(int amount) { }
+    public void registerHealthLost(int amount) {
+        totalHealthLost += amount;
+    }
+
+    public void registerZombieAdded(Zombie z) {
+        totalInitialHealth += z.getMaxHealth();
+    }
+
+    public double getHealthLostPercent() {
+        if (totalInitialHealth == 0) {
+            return 0;
+        }
+        return (double) totalHealthLost / totalInitialHealth;
+    }
 
     public int getWaveNumber() { return waveNumber; }
     public boolean isFinalWave() { return finalWave; }
@@ -53,5 +58,8 @@ public class Wave {
     public void setZombies(List<Zombie> zombies) { this.zombies = zombies; }
     public boolean isStarted() { return started; }
     public void setStarted(boolean started) { this.started = started; }
-    public double getHealthLostPercent() { return healthLostPercent; }
+    public int getTotalInitialHealth() { return totalInitialHealth; }
+    public void setTotalInitialHealth(int h) { this.totalInitialHealth = h; }
+    public int getTotalHealthLost() { return totalHealthLost; }
+    public void setTotalHealthLost(int h) { this.totalHealthLost = h; }
 }
