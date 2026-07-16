@@ -1,95 +1,480 @@
+// fixed
 package service;
 
 import model.GameSession;
 import model.Projectile;
+import model.Wave;
+import model.enums.*;
+import model.plants.GenericPlant;
 import model.plants.Plant;
+import model.plants.PlantFactory;
+import model.tiles.Tile;
+import model.zombies.Gargantuar;
+import model.zombies.JesterZombie;
 import model.zombies.Zombie;
+import util.RandomUtil;
+import view.ConsoleView;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
- * سرویس مبارزه.
- * مسئول پردازش پرتابه‌ها، برخوردها، آسیب و تعاملات خاص.
+ * سرویس مرکزی مبارزه — هر تیک پردازش می‌شود.
  */
 public class CombatService {
 
-    /**
-     * تمام پرتابه‌های فعال را یک تیک جلو می‌برد و برخوردها را پردازش می‌کند.
-     * @param session session جاری
-     */
-    public void processProjectiles(GameSession session) { }
+    private final ConsoleView view;
 
-    /**
-     * تمام زامبی‌های فعال را یک تیک جلو می‌برد.
-     * حرکت، حمله به گیاه، و رسیدن به انتها را مدیریت می‌کند.
-     * @param session session جاری
-     */
-    public void processZombies(GameSession session) { }
+    public CombatService(ConsoleView view) {
+        this.view = view;
+    }
 
-    /**
-     * تمام گیاهان فعال را یک تیک پردازش می‌کند.
-     * شلیک، تولید خورشید، cooldown و افکت‌ها.
-     * @param session session جاری
-     */
-    public void processPlants(GameSession session) { }
+    public void processTick(GameSession session) {
+        if (!session.isInProgress()) {
+            return;
+        }
+        tickAllPlants(session);
+        collectPlantProjectiles(session);
+        moveProjectiles(session);
+        checkProjectileHits(session);
+        moveZombies(session);
+        zombiesAttackPlants(session);
+        checkZombiesAtEnd(session);
+        removeDeadEntities(session);
+        applyIceMeltNearFire(session);
+    }
 
-    /**
-     * برخورد پرتابه با زامبی را پردازش می‌کند.
-     * @param session session جاری
-     * @param projectile پرتابه
-     * @param zombie زامبی هدف
-     */
-    public void applyProjectileHit(GameSession session, Projectile projectile,
-                                   Zombie zombie) { }
+    private void tickAllPlants(GameSession session) {
+        for (int r = 1; r <= session.getGameMap().getRows(); r++) {
+            for (int c = 1; c <= session.getGameMap().getCols(); c++) {
+                Tile tile = session.getGameMap().getTile(c, r);
+                if (tile == null) {
+                    continue;
+                }
+                tickPlantOnTile(tile, session);
+            }
+        }
+    }
 
-    /**
-     * آسیب مساحتی (AoE) را در یک مربع روی نقشه اعمال می‌کند.
-     * @param session session جاری
-     * @param cx مرکز x
-     * @param cy مرکز y
-     * @param radius شعاع
-     * @param damage مقدار آسیب
-     * @param hitsZombies آیا به زامبی آسیب می‌زند
-     * @param hitsPlants آیا به گیاه آسیب می‌زند
-     */
-    public void applyAoeDamage(GameSession session, int cx, int cy, int radius,
-                               int damage, boolean hitsZombies, boolean hitsPlants) { }
+    private void tickPlantOnTile(Tile tile, GameSession session) {
+        Plant plant = tile.getPlant();
+        if (plant != null && plant.isAlive()) {
+            plant.onTick(session.getCurrentTick());
+        }
+        Plant secondPlant = tile.getSecondLayerPlant();
+        if (secondPlant != null && secondPlant.isAlive()) {
+            secondPlant.onTick(session.getCurrentTick());
+        }
+    }
 
-    /**
-     * زامبی را هیپنوتیزم می‌کند (به سمت زامبی‌های دیگر حمله می‌کند).
-     * @param session session جاری
-     * @param zombie زامبی
-     */
-    public void hypnotizeZombie(GameSession session, Zombie zombie) { }
+    private void collectPlantProjectiles(GameSession session) {
+        for (int r = 1; r <= session.getGameMap().getRows(); r++) {
+            for (int c = 1; c <= session.getGameMap().getCols(); c++) {
+                Tile tile = session.getGameMap().getTile(c, r);
+                if (tile == null || tile.getPlant() == null) {
+                    continue;
+                }
+                collectFromPlant(tile.getPlant(), session);
+            }
+        }
+    }
 
-    /**
-     * وقتی زامبی می‌میرد اتفاق می‌افتد:
-     * drop سکه/الماس/گلدان، plant food از glowing zombie.
-     * @param session session جاری
-     * @param zombie زامبی کشته‌شده
-     */
-    public void onZombieDeath(GameSession session, Zombie zombie) { }
+    private void collectFromPlant(Plant plant, GameSession session) {
+        if (!(plant instanceof GenericPlant)) {
+            return;
+        }
+        GenericPlant gp = (GenericPlant) plant;
+        for (Projectile proj : gp.pollPendingProjectiles()) {
+            proj.setX(plant.getX());
+            proj.setY(plant.getY());
+            applyTorchwoodConversion(proj, session);
+            session.getActiveProjectiles().add(proj);
+        }
+    }
 
-    /**
-     * وقتی گیاه از بین می‌رود اتفاق می‌افتد.
-     * @param session session جاری
-     * @param plant گیاه نابودشده
-     */
-    public void onPlantDestroyed(GameSession session, Plant plant) { }
+    private void applyTorchwoodConversion(Projectile proj, GameSession session) {
+        if (proj.getType() != ProjectileType.NORMAL
+                && proj.getType() != ProjectileType.ICE) {
+            return;
+        }
+        for (int c = (int) proj.getX() + 1;
+             c <= session.getGameMap().getCols(); c++) {
+            Tile t = session.getGameMap().getTile(c, proj.getY());
+            if (t == null || t.getPlant() == null) {
+                continue;
+            }
+            Plant p = t.getPlant();
+            if (p.getType() == PlantType.TORCHWOOD) {
+                proj = new Projectile(ProjectileType.FIRE,
+                        proj.getX(), proj.getY(),
+                        proj.getDamage() * 2);
+                break;
+            }
+        }
+    }
 
-    /**
-     * رفتار ماشین چمن‌زنی را پردازش می‌کند.
-     * @param session session جاری
-     * @param row ردیف
-     * @param zombie زامبی رسیده به انتها
-     */
-    public void handleLawnMower(GameSession session, int row, Zombie zombie) { }
+    private void moveProjectiles(GameSession session) {
+        for (Projectile proj : session.getActiveProjectiles()) {
+            if (proj.isMovingRight()) {
+                proj.setX(proj.getX() + proj.getSpeed() * 0.1);
+            } else {
+                proj.setX(proj.getX() - proj.getSpeed() * 0.1);
+            }
+        }
+    }
 
-    /**
-     * زمین لیز را برای زامبی پردازش می‌کند.
-     * @param session session جاری
-     * @param zombie زامبی
-     * @param tileX ستون خانه لیز
-     * @param tileY ردیف خانه لیز
-     */
-    public void processSlipperyTile(GameSession session, Zombie zombie,
-                                    int tileX, int tileY) { }
+    private void checkProjectileHits(GameSession session) {
+        List<Projectile> toRemove = new ArrayList<>();
+        for (Projectile proj : session.getActiveProjectiles()) {
+            if (isOutOfBounds(proj, session)) {
+                toRemove.add(proj);
+                continue;
+            }
+            if (isTombstoneBlocking(proj, session)) {
+                toRemove.add(proj);
+                continue;
+            }
+            if (proj.isHitsPlants()) {
+                if (hitPlants(proj, session)) {
+                    toRemove.add(proj);
+                }
+                continue;
+            }
+            boolean hit = checkHitZombies(proj, session);
+            if (hit && !proj.isPassesThrough()) {
+                toRemove.add(proj);
+            }
+        }
+        session.getActiveProjectiles().removeAll(toRemove);
+    }
+
+    private boolean isOutOfBounds(Projectile proj, GameSession session) {
+        double x = proj.getX();
+        return x < 0 || x > session.getGameMap().getCols() + 1;
+    }
+
+    private boolean isTombstoneBlocking(Projectile proj, GameSession session) {
+        if (proj.isArc()) {
+            return false;
+        }
+        int col = (int) proj.getX();
+        int row = proj.getY();
+        Tile tile = session.getGameMap().getTile(col, row);
+        if (tile != null && tile.isTombstone()) {
+            tile.takeDamage(proj.getDamage());
+            return true;
+        }
+        return false;
+    }
+
+    private boolean hitPlants(Projectile proj, GameSession session) {
+        int col = (int) proj.getX();
+        Tile tile = session.getGameMap().getTile(col, proj.getY());
+        if (tile == null || tile.getPlant() == null) {
+            return false;
+        }
+        Plant plant = tile.getPlant();
+        if (proj.getType() == ProjectileType.ICE) {
+            plant.incrementFreezeLevel();
+        } else {
+            plant.takeDamage(proj.getDamage());
+        }
+        return true;
+    }
+
+    private boolean checkHitZombies(Projectile proj, GameSession session) {
+        boolean hitSomething = false;
+        for (Zombie zombie : session.getActiveZombies()) {
+            if (!zombie.isAlive()) {
+                continue;
+            }
+            if (Math.abs(zombie.getX() - proj.getX()) < 0.6
+                    && zombie.getY() == proj.getY()) {
+                if (handleJesterDeflect(zombie, proj, session)) {
+                    return true;
+                }
+                applyProjectileToZombie(proj, zombie);
+                updateWaveHealth(session, proj.getDamage());
+                hitSomething = true;
+                if (zombie.getType() == ZombieType.PARASOL_ZOMBIE
+                        && proj.isArc()) {
+                    hitSomething = true;
+                    break;
+                }
+            }
+        }
+        return hitSomething;
+    }
+
+    private boolean handleJesterDeflect(Zombie zombie, Projectile proj,
+                                        GameSession session) {
+        if (!(zombie instanceof JesterZombie)) {
+            return false;
+        }
+        JesterZombie jester = (JesterZombie) zombie;
+        Projectile deflected = jester.deflect(proj);
+        session.getActiveProjectiles().add(deflected);
+        return true;
+    }
+
+    private void applyProjectileToZombie(Projectile proj, Zombie zombie) {
+        int dmg = proj.getDamage();
+        if (proj.getType() == ProjectileType.FIRE) {
+            dmg *= 2;
+            zombie.removeEffect(ZombieEffect.CHILLED);
+        }
+        if (proj.getType() == ProjectileType.POISON) {
+            zombie.takePoisonDamage(dmg);
+        } else {
+            zombie.takeDamage(dmg);
+        }
+        if (proj.getType() == ProjectileType.ICE) {
+            zombie.addEffect(ZombieEffect.CHILLED, 50);
+        }
+    }
+
+    private void updateWaveHealth(GameSession session, int damage) {
+        Wave wave = session.getCurrentWave();
+        if (wave != null) {
+            wave.registerHealthLost(damage);
+        }
+    }
+
+    private void moveZombies(GameSession session) {
+        for (Zombie zombie : session.getActiveZombies()) {
+            if (!zombie.isAlive() || zombie.isAttacking()) {
+                continue;
+            }
+            if (isBlockedByPlant(zombie, session)) {
+                zombie.setAttacking(true);
+                continue;
+            }
+            zombie.move();
+            applySlipperyTile(zombie, session);
+        }
+    }
+
+    private boolean isBlockedByPlant(Zombie zombie, GameSession session) {
+        int col = (int) Math.ceil(zombie.getX());
+        if (!session.getGameMap().isValidPosition(col, zombie.getY())) {
+            return false;
+        }
+        Tile tile = session.getGameMap().getTile(col, zombie.getY());
+        return tile != null && tile.getPlant() != null;
+    }
+
+    private void applySlipperyTile(Zombie zombie, GameSession session) {
+        int col = (int) Math.round(zombie.getX());
+        int row = zombie.getY();
+        if (!session.getGameMap().isValidPosition(col, row)) {
+            return;
+        }
+        Tile tile = session.getGameMap().getTile(col, row);
+        if (tile == null || !tile.isSlippery()) {
+            return;
+        }
+        int newRow = tile.isSlipperyUp() ? row - 1 : row + 1;
+        if (session.getGameMap().isValidPosition(1, newRow)) {
+            zombie.setY(newRow);
+            zombie.setLane(newRow);
+        }
+    }
+
+    private void zombiesAttackPlants(GameSession session) {
+        for (Zombie zombie : session.getActiveZombies()) {
+            if (!zombie.isAlive() || !zombie.isAttacking()) {
+                continue;
+            }
+            int col = (int) Math.ceil(zombie.getX());
+            Tile tile = session.getGameMap().getTile(col, zombie.getY());
+            if (tile == null || tile.getPlant() == null) {
+                zombie.setAttacking(false);
+                continue;
+            }
+            Plant plant = tile.getPlant();
+            int dmgPerTick = zombie.getDamagePerSecond() / 10;
+            plant.takeDamage(dmgPerTick);
+            if (!plant.isAlive()) {
+                handlePlantDestroyed(tile, plant, zombie, session);
+            }
+        }
+    }
+
+    private void handlePlantDestroyed(Tile tile, Plant plant,
+                                      Zombie zombie, GameSession session) {
+        view.printPlantDestroyed(plant.getType().name(), tile.getX(), tile.getY());
+        if (tile.getSecondLayerPlant() != null) {
+            tile.setPlant(tile.getSecondLayerPlant());
+            tile.setSecondLayerPlant(null);
+        } else {
+            tile.setPlant(null);
+        }
+        zombie.setAttacking(false);
+        session.setPlantsLost(session.getPlantsLost() + 1);
+        checkSpecialLevelLoseConditions(session);
+    }
+
+    private void checkSpecialLevelLoseConditions(GameSession session) {
+        model.Level level = session.getLevel();
+        if (level.getLevelType() == LevelType.LOVE_YOUR_PLANTS) {
+            if (session.getPlantsLost() >= level.getMaxPlantsLost()) {
+                session.setResult(GameResult.LOSS);
+                view.printGameOver();
+            }
+        }
+    }
+
+    private void checkZombiesAtEnd(GameSession session) {
+        Iterator<Zombie> iter = session.getActiveZombies().iterator();
+        while (iter.hasNext()) {
+            Zombie zombie = iter.next();
+            if (!zombie.isAlive()) {
+                continue;
+            }
+            if (zombie.getX() <= 0) {
+                handleZombieReachedEnd(zombie, session);
+            }
+        }
+    }
+
+    private void handleZombieReachedEnd(Zombie zombie, GameSession session) {
+        int rowIndex = zombie.getY() - 1;
+        if (session.getGameMap().isLawnMowerAvailable(rowIndex)) {
+            triggerLawnMower(rowIndex, session);
+        } else {
+            session.setResult(GameResult.LOSS);
+            view.printGameOver();
+        }
+    }
+
+    private void triggerLawnMower(int rowIndex, GameSession session) {
+        session.getGameMap().setLawnMowerUsed(rowIndex);
+        List<String> killed = new ArrayList<>();
+        List<Zombie> toKill = new ArrayList<>();
+        for (Zombie z : session.getActiveZombies()) {
+            if (z.getY() - 1 == rowIndex && !(z instanceof Gargantuar)) {
+                killed.add(z.getType().name());
+                toKill.add(z);
+            }
+        }
+        toKill.forEach(z -> {
+            z.setCurrentHealth(0);
+            session.setZombiesKilled(session.getZombiesKilled() + 1);
+        });
+        view.printLawnMowerTriggered(rowIndex + 1, killed);
+    }
+
+    private void removeDeadEntities(GameSession session) {
+        List<Zombie> toRemove = new ArrayList<>();
+        for (Zombie z : session.getActiveZombies()) {
+            if (!z.isAlive()) {
+                handleZombieDeath(z, session);
+                toRemove.add(z);
+            }
+        }
+        session.getActiveZombies().removeAll(toRemove);
+        session.getActiveProjectiles().removeIf(
+                p -> p.getX() < 0 || p.getX() > session.getGameMap().getCols() + 2);
+    }
+
+    private void handleZombieDeath(Zombie zombie, GameSession session) {
+        view.printZombieDead(zombie.getType().name(), zombie.getX(), zombie.getY());
+        session.setZombiesKilled(session.getZombiesKilled() + 1);
+        zombie.onDeath(session);
+        updateMeoPoints(zombie, session);
+        handleDrops(zombie, session);
+        if (zombie.isGlowing()) {
+            boolean added = session.addPlantFood();
+            if (added) {
+                view.printGlowingZombieDroppedFood(session.getPlantFoodCount());
+            }
+        }
+        Wave wave = session.getCurrentWave();
+        if (wave != null) {
+            wave.registerHealthLost(zombie.getMaxHealth());
+        }
+    }
+
+    private void updateMeoPoints(Zombie zombie, GameSession session) {
+        long now = session.getCurrentTick();
+        if (now - session.getLastKillTick() <= 30) {
+            session.setConsecutiveKills(session.getConsecutiveKills() + 1);
+        } else {
+            session.setConsecutiveKills(1);
+        }
+        session.setLastKillTick(now);
+        long points = 10L * session.getConsecutiveKills();
+        session.setMeoPoints(session.getMeoPoints() + points);
+    }
+
+    private void handleDrops(Zombie zombie, GameSession session) {
+        if (!RandomUtil.chance(0.1)) {
+            return;
+        }
+        model.User user = model.AppState.getInstance().getCurrentUser();
+        if (user == null) {
+            return;
+        }
+        double roll = RandomUtil.nextDouble();
+        if (roll < 0.33) {
+            user.setCoins(user.getCoins() + 50);
+            view.printZombieDropped("coin", (int) user.getCoins());
+        } else if (roll < 0.66) {
+            user.setGems(user.getGems() + 1);
+            view.printZombieDropped("diamond", user.getGems());
+        } else {
+            user.setPots(user.getPots() + 1);
+            view.printZombieDropped("pot", user.getPots());
+        }
+    }
+
+    private void applyIceMeltNearFire(GameSession session) {
+        for (int r = 1; r <= session.getGameMap().getRows(); r++) {
+            for (int c = 1; c <= session.getGameMap().getCols(); c++) {
+                Tile tile = session.getGameMap().getTile(c, r);
+                if (tile == null || tile.getPlant() == null) {
+                    continue;
+                }
+                Plant p = tile.getPlant();
+                if (p.isFrozen() && hasAdjacentFirePlant(session, c, r)) {
+                    p.takeDamage(6);
+                    if (p.getFreezeLevel() > 0
+                            && RandomUtil.chance(0.1)) {
+                        p.setFreezeLevel(p.getFreezeLevel() - 1);
+                        if (p.getFreezeLevel() < 3) {
+                            p.thaw();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean hasAdjacentFirePlant(GameSession session, int cx, int cy) {
+        for (int dy = -1; dy <= 1; dy++) {
+            for (int dx = -1; dx <= 1; dx++) {
+                if (dx == 0 && dy == 0) {
+                    continue;
+                }
+                Tile t = session.getGameMap().getTile(cx + dx, cy + dy);
+                if (t != null && t.getPlant() != null
+                        && t.getPlant().isFirePlant()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public void checkWinCondition(GameSession session) {
+        if (!session.isInProgress()) {
+            return;
+        }
+        if (session.allWavesFinished()) {
+            session.setResult(GameResult.WIN);
+            view.printGameWon();
+        }
+    }
+
 }
