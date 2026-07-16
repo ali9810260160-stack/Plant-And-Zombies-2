@@ -1,65 +1,182 @@
 package service;
 
 import model.GameSession;
+import model.Level;
 import model.Wave;
 import model.enums.ChapterType;
 import model.enums.ZombieType;
 import model.zombies.Zombie;
+import model.zombies.ZombieDataRegistry;
+import model.zombies.ZombieFactory;
+import model.zombies.ZombieStats;
+import util.RandomUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * سرویس مدیریت امواج زامبی.
- * مسئول تولید، زمان‌بندی و spawn زامبی‌ها در هر موج.
+ * سرویس تولید امواج زامبی با فرمول سختی.
  */
 public class WaveService {
 
-    /**
-     * لیست امواج یک مرحله را بر اساس سختی اولیه می‌سازد.
-     * هر موج 25% سخت‌تر از قبلی، موج آخر 2 برابر موج قبل.
-     * @param initialDifficulty سختی اولیه
-     * @param waveCount تعداد امواج
-     * @param difficultyLevel سطح سختی کاربر (1-5)
-     * @return لیست امواج
-     */
-    public List<Wave> generateWaves(int initialDifficulty, int waveCount,
-                                    int difficultyLevel) { return null; }
+    public List<Wave> generateWaves(Level level) {
+        List<Wave> waves = new ArrayList<>();
+        int count = level.getWaveCount();
+        int base = level.getInitialWaveDifficulty();
+        for (int i = 1; i <= count; i++) {
+            boolean isFinal = (i == count);
+            int difficulty = calculateDifficulty(base, i, isFinal);
+            waves.add(new Wave(i, difficulty, isFinal));
+        }
+        return waves;
+    }
 
-    /**
-     * زامبی‌های یک موج را به صورت تصادفی انتخاب می‌کند.
-     * مجموع waveCost باید برابر سختی موج باشد.
-     * @param wave موج
-     * @param chapter فصل (برای انتخاب زامبی‌های مجاز)
-     * @return لیست زامبی‌های تولیدشده
-     */
-    public List<Zombie> spawnZombiesForWave(Wave wave, ChapterType chapter) { return null; }
+    private int calculateDifficulty(int base, int waveNumber, boolean isFinal) {
+        double multiplier = Math.pow(1.25, waveNumber - 1);
+        int difficulty = (int) (base * multiplier);
+        if (isFinal) {
+            difficulty *= 2;
+        }
+        return difficulty;
+    }
 
-    /**
-     * بررسی می‌کند آیا موج بعدی باید شروع شود (75% HP از دست رفته).
-     * @param session session جاری
-     * @return true اگر باید موج بعد شروع شود
-     */
-    public boolean shouldStartNextWave(GameSession session) { return false; }
+    public void spawnWave(Wave wave, GameSession session) {
+        ChapterType chapter = session.getGameMap().getChapter();
+        ZombieType[] allowed = ZombieFactory.getAllowedZombiesForChapter(chapter);
+        int remaining = wave.getWaveDifficulty();
+        List<Zombie> spawned = new ArrayList<>();
 
-    /**
-     * موج بعدی را شروع می‌کند.
-     * @param session session جاری
-     */
-    public void startNextWave(GameSession session) { }
+        while (remaining > 0) {
+            ZombieType picked = pickAffordableZombie(allowed, remaining);
+            if (picked == null) {
+                break;
+            }
+            Zombie zombie = ZombieFactory.create(picked);
+            int cost = ZombieFactory.getWaveCost(picked);
+            int lane = RandomUtil.between(1, session.getGameMap().getRows());
+            zombie.setX(session.getGameMap().getCols() + 1.0);
+            zombie.setY(lane);
+            zombie.setLane(lane);
+            zombie.setSpawnWave(wave.getWaveNumber());
 
-    /**
-     * یک زامبی تصادفی با توجه به سختی باقیمانده موج انتخاب می‌کند.
-     * @param remainingCost بودجه باقیمانده
-     * @param allowedTypes انواع مجاز در این فصل
-     * @return نوع زامبی انتخاب‌شده
-     */
-    public ZombieType selectRandomZombieType(int remainingCost,
-                                             ZombieType[] allowedTypes) { return null; }
+            applyEgyptTornado(zombie, session, wave);
+            applyGlowingChance(zombie);
 
-    /**
-     * ردیف تصادفی برای spawn زامبی انتخاب می‌کند.
-     * @param mapRows تعداد ردیف‌ها
-     * @return شماره ردیف (1-based)
-     */
-    public int selectRandomLane(int mapRows) { return 0; }
+            wave.registerZombieAdded(zombie);
+            session.getActiveZombies().add(zombie);
+            spawned.add(zombie);
+            remaining -= cost;
+
+            printSpawnMessage(zombie, wave, lane, cost);
+        }
+        wave.setStarted(true);
+    }
+
+    private ZombieType pickAffordableZombie(ZombieType[] allowed, int budget) {
+        List<ZombieType> affordable = new ArrayList<>();
+        for (ZombieType t : allowed) {
+            if (ZombieFactory.getWaveCost(t) <= budget) {
+                affordable.add(t);
+            }
+        }
+        if (affordable.isEmpty()) {
+            return allowed[RandomUtil.nextInt(allowed.length)];
+        }
+        return affordable.get(RandomUtil.nextInt(affordable.size()));
+    }
+
+    private void applyEgyptTornado(Zombie zombie, GameSession session, Wave wave) {
+        if (session.getGameMap().getChapter() != ChapterType.ANCIENT_EGYPT) {
+            return;
+        }
+        if (!wave.isFinalWave()) {
+            return;
+        }
+        int advance = RandomUtil.between(1, 4);
+        zombie.setX(Math.max(1.0, zombie.getX() - advance));
+    }
+
+    private void applyGlowingChance(Zombie zombie) {
+        if (RandomUtil.chance(0.05)) {
+            zombie.setGlowing(true);
+        }
+    }
+
+    private void printSpawnMessage(Zombie z, Wave wave, int lane, int cost) {
+        System.out.println("\u001B[31mZombie " + z.getType().name()
+                + " spawned at wave " + wave.getWaveNumber()
+                + " in lane " + lane
+                + " which costed " + cost + ".\u001B[0m");
+    }
+
+    public boolean shouldAdvanceWave(Wave currentWave, Wave nextWave) {
+        if (currentWave == null || !currentWave.isStarted()) {
+            return false;
+        }
+        return currentWave.shouldTriggerNextWave();
+    }
+
+    public void applyFrostbiteWind(GameSession session, int waveNumber) {
+        if (session.getGameMap().getChapter() != ChapterType.FROSTBITE_CAVES) {
+            return;
+        }
+        int rows = session.getGameMap().getRows();
+        int affectedCount = RandomUtil.between(1, Math.min(3, rows));
+        List<Integer> affected = session.getFrostbiteWindAffectedRows();
+        affected.clear();
+        for (int i = 0; i < affectedCount; i++) {
+            int row = RandomUtil.between(1, rows);
+            if (!affected.contains(row)) {
+                affected.add(row);
+            }
+        }
+        applyWindToPlants(session, affected);
+    }
+
+    private void applyWindToPlants(GameSession session, List<Integer> rows) {
+        for (int row : rows) {
+            for (int col = 1; col <= session.getGameMap().getCols(); col++) {
+                model.tiles.Tile tile = session.getGameMap().getTile(col, row);
+                if (tile == null || tile.getPlant() == null) {
+                    continue;
+                }
+                model.plants.Plant plant = tile.getPlant();
+                if (!plant.isFirePlant()) {
+                    plant.incrementFreezeLevel();
+                    System.out.println("\u001B[36mIce wind hit plant "
+                            + plant.getType().name()
+                            + " at (" + col + "," + row + "). Freeze level: "
+                            + plant.getFreezeLevel() + "\u001B[0m");
+                }
+            }
+        }
+    }
+
+    public void spawnNecromancyZombie(GameSession session) {
+        if (session.getGameMap().getChapter() != ChapterType.DARK_AGES) {
+            return;
+        }
+        for (int row = 1; row <= session.getGameMap().getRows(); row++) {
+            for (int col = 1; col <= session.getGameMap().getCols(); col++) {
+                model.tiles.Tile tile = session.getGameMap().getTile(col, row);
+                if (tile == null) {
+                    continue;
+                }
+                if (tile.getType() == model.enums.TileType.NECROMANCY
+                        && tile.isTombstone()) {
+                    spawnFromNecromancy(session, col, row);
+                }
+            }
+        }
+    }
+
+    private void spawnFromNecromancy(GameSession session, int col, int row) {
+        Zombie zombie = ZombieFactory.create(ZombieType.NORMAL);
+        zombie.setX(col);
+        zombie.setY(row);
+        zombie.setLane(row);
+        session.getActiveZombies().add(zombie);
+        System.out.println("\u001B[35mA zombie emerged from necromancy at ("
+                + col + "," + row + ")!\u001B[0m");
+    }
 }
