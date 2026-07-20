@@ -26,7 +26,7 @@ public class GenericPlant extends Plant {
 
     public GenericPlant(PlantStats stats) {
         super(stats.getType(), stats.getFamily(),
-              stats.getBaseHp(), stats.getSunCost(), stats.getRechargeTime());
+                stats.getBaseHp(), stats.getSunCost(), stats.getRechargeTime());
         this.stats = stats;
         this.tags = stats.getTags();
         this.baseDamage = stats.getBaseDamage();
@@ -34,7 +34,7 @@ public class GenericPlant extends Plant {
         this.sunProductionTimer = 0;
         this.sunPending = false;
         this.armed = (stats.getCategory().equals("Explosive")
-                      && !stats.getCategory().equals("MeleeAttacker"));
+                && !stats.getCategory().equals("MeleeAttacker"));
         this.armTimer = 0;
         this.pendingProjectiles = new ArrayList<>();
         if (type == PlantType.POTATO_MINE) {
@@ -134,8 +134,8 @@ public class GenericPlant extends Plant {
         if (cat.equals("Lobber")) {
             proj.setArc(true);
         }
-        if (cat.equals("StrikeThrough") || proj.getType() == ProjectileType.STRIKE) {
-            proj.setPassesThrough(proj.getType() == ProjectileType.STRIKE);
+        if (cat.equals("StrikeThrough")) {
+            proj.setPassesThrough(true);
         }
     }
 
@@ -209,5 +209,4 @@ public class GenericPlant extends Plant {
     public PlantStats getStats() {
         return stats;
     }
-
 }
