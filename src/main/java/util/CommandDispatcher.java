@@ -49,9 +49,9 @@ public class CommandDispatcher {
         CombatService combatService = new CombatService(view);
         SunService sunService = new SunService();
         GameService gameService = new GameService(
-            waveService, combatService, sunService, view, mapView);
+                waveService, combatService, sunService, view, mapView);
         GreenhouseService greenhouseService = new GreenhouseService(
-            userService, userRepo);
+                userService, userRepo);
 
         this.authController = new AuthController(authService, userService, view);
         this.menuController = new MenuController(view);
@@ -59,9 +59,9 @@ public class CommandDispatcher {
         this.collectionController = new CollectionController(userService, view);
         this.newsController = new NewsController(view);
         this.gameController = new GameController(
-            gameService, sunService, view, mapView);
+                gameService, sunService, view, mapView);
         this.greenhouseController = new GreenhouseController(
-            greenhouseService, view);
+                greenhouseService, view);
         this.travelLogController = new TravelLogController(view);
         this.leaderboardController = new LeaderboardController(userService, view);
         this.minigameController = new MinigameController(view, userService);
@@ -89,7 +89,7 @@ public class CommandDispatcher {
                 appState.setCurrentUser(stayUser);
                 appState.setCurrentMenu(MenuType.MAIN);
                 view.printSuccess("Welcome back, "
-                    + stayUser.getNickname() + "!");
+                        + stayUser.getNickname() + "!");
             }
         } catch (Exception ignored) { }
     }
@@ -226,11 +226,11 @@ public class CommandDispatcher {
         } else if (InputParser.matches(input,
                 model.enums.CommandRegex.MENU_COIN_WALLET)) {
             view.printInfo("Coins: "
-                + appState.getCurrentUser().getCoins());
+                    + appState.getCurrentUser().getCoins());
         } else if (InputParser.matches(input,
                 model.enums.CommandRegex.MENU_GEM_WALLET)) {
             view.printInfo("Gems: "
-                + appState.getCurrentUser().getGems());
+                    + appState.getCurrentUser().getGems());
         } else if ((m = InputParser.match(input,
                 model.enums.CommandRegex.CHEAT_ADD_CURRENCY)) != null) {
             gameController.cheatCurrency(m, appState);
@@ -354,7 +354,7 @@ public class CommandDispatcher {
         if ((m = InputParser.match(input,
                 model.enums.CommandRegex.ADVANCE_TIME)) != null) {
             gameController.advanceTime(
-                Integer.parseInt(m.group(1)), appState);
+                    Integer.parseInt(m.group(1)), appState);
         } else if ((m = InputParser.match(input,
                 model.enums.CommandRegex.PLANT_PLANT)) != null) {
             gameController.plantPlant(m, appState);
@@ -384,7 +384,7 @@ public class CommandDispatcher {
         } else if ((m = InputParser.match(input,
                 model.enums.CommandRegex.CHEAT_ADD_SUNS)) != null) {
             gameController.cheatAddSuns(
-                Integer.parseInt(m.group(1)), appState);
+                    Integer.parseInt(m.group(1)), appState);
         } else if (InputParser.matches(input,
                 model.enums.CommandRegex.CHEAT_RELEASE_NUKE)) {
             gameController.releaseNuke(appState);
@@ -464,8 +464,8 @@ public class CommandDispatcher {
 
     private void promptCurrentMenu() {
         System.out.print(
-            ConsoleView.CYAN + "["
-            + appState.getCurrentMenu().name().toLowerCase()
-            + "]> " + ConsoleView.RESET);
+                ConsoleView.CYAN + "["
+                        + appState.getCurrentMenu().name().toLowerCase()
+                        + "]> " + ConsoleView.RESET);
     }
 }
