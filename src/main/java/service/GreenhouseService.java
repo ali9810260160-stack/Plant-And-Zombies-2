@@ -8,6 +8,7 @@ import model.User;
 import model.enums.PlantType;
 import repository.UserRepository;
 import util.RandomUtil;
+import view.ConsoleView;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -21,15 +22,17 @@ public class GreenhouseService {
 
     private final UserService userService;
     private final UserRepository userRepository;
+    private final ConsoleView view;
     private static final int MAX_POTS = 20;
     private static final int MARIGOLD_GROW_HOURS = 2;
     private static final int PLANT_GROW_HOURS = 8;
     private static final long MARIGOLD_REWARD_COINS = 500;
 
     public GreenhouseService(UserService userService,
-                              UserRepository userRepository) {
+                              UserRepository userRepository, ConsoleView view) {
         this.userService = userService;
         this.userRepository = userRepository;
+        this.view = view;
     }
 
     public Greenhouse getOrCreateGreenhouse(User user) {
@@ -107,11 +110,11 @@ public class GreenhouseService {
         }
         if (pot.getPlantType().equals("MARIGOLD")) {
             userService.addCoins(user, MARIGOLD_REWARD_COINS);
-            System.out.println("\u001B[32m🌸 Harvested marigold: +"
+            view.printRaw("\u001B[32m🌸 Harvested marigold: +"
                 + MARIGOLD_REWARD_COINS + " coins!\u001B[0m");
         } else {
             giveStoredBoost(user, pot.getPlantType());
-            System.out.println("\u001B[32m🌱 Harvested "
+            view.printRaw("\u001B[32m🌱 Harvested "
                 + pot.getPlantType()
                 + " - stored boost ready for next use!\u001B[0m");
         }
@@ -121,7 +124,7 @@ public class GreenhouseService {
     }
 
     private void giveStoredBoost(User user, String plantType) {
-        System.out.println("\u001B[35mStored boost for "
+        view.printRaw("\u001B[35mStored boost for "
             + plantType + " activated!\u001B[0m");
     }
 
@@ -144,7 +147,7 @@ public class GreenhouseService {
         pot.setPlantedAt(LocalDateTime.now()
                          .minus(pot.getGrowthHours(), ChronoUnit.HOURS));
         userRepository.save(user);
-        System.out.println("\u001B[32m⚡ Growth accelerated! Plant is now ready.\u001B[0m");
+        view.printRaw("\u001B[32m⚡ Growth accelerated! Plant is now ready.\u001B[0m");
     }
 
     private double getRemainingHours(Pot pot) {
@@ -174,7 +177,7 @@ public class GreenhouseService {
         }
         pot.setLocked(false);
         userRepository.save(user);
-        System.out.println("\u001B[32m🏺 Pot unlocked at ("
+        view.printRaw("\u001B[32m🏺 Pot unlocked at ("
             + x + ", " + y + ")!\u001B[0m");
     }
 
@@ -198,7 +201,7 @@ public class GreenhouseService {
         }
         user.setPots(user.getPots() + count);
         userRepository.save(user);
-        System.out.println("\u001B[32m🏺 Purchased " + count + " pot(s)!\u001B[0m");
+        view.printRaw("\u001B[32m🏺 Purchased " + count + " pot(s)!\u001B[0m");
     }
 
     private void buyPlantFood(User user, int count) {
@@ -214,7 +217,7 @@ public class GreenhouseService {
         }
         user.setPlantFoodCount(newTotal);
         userRepository.save(user);
-        System.out.println("\u001B[32m✨ Purchased " + count
+        view.printRaw("\u001B[32m✨ Purchased " + count
             + " plant food(s)!\u001B[0m");
     }
 
@@ -223,7 +226,7 @@ public class GreenhouseService {
         if (!userService.spendCoins(user, cost)) {
             throw new GameException("Need " + cost + " coins.");
         }
-        System.out.println("\u001B[32m🎁 Purchased " + count
+        view.printRaw("\u001B[32m🎁 Purchased " + count
             + " random seed packets!\u001B[0m");
     }
 
@@ -235,7 +238,7 @@ public class GreenhouseService {
         if (!userService.spendGems(user, gemCost)) {
             throw new GameException("Need " + gemCost + " gems.");
         }
-        System.out.println("\u001B[32m🎁 Purchased " + count
+        view.printRaw("\u001B[32m🎁 Purchased " + count
             + " " + plantType + " seed packets!\u001B[0m");
     }
 
@@ -245,7 +248,7 @@ public class GreenhouseService {
             throw new GameException("Need " + gemCost + " gems.");
         }
         userService.addCoins(user, 500L * count);
-        System.out.println("\u001B[32m💱 Converted " + gemCost
+        view.printRaw("\u001B[32m💱 Converted " + gemCost
             + " gems to " + (500 * count) + " coins!\u001B[0m");
     }
 
@@ -259,6 +262,6 @@ public class GreenhouseService {
         }
         user.setLastDailyOfferDate(today);
         userRepository.save(user);
-        System.out.println("\u001B[32m🎁 Daily offer purchased! 10 seed packets added.\u001B[0m");
+        view.printRaw("\u001B[32m🎁 Daily offer purchased! 10 seed packets added.\u001B[0m");
     }
 }

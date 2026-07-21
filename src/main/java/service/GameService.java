@@ -202,7 +202,7 @@ public class GameService {
                     && !tile.isTombstone()) {
                 TileType tombType = getTombstoneType();
                 session.getGameMap().setTileType(col, row, tombType);
-                System.out.println("\u001B[35m⛰ A tombstone appeared at ("
+                view.printRaw("\u001B[35m⛰ A tombstone appeared at ("
                     + col + "," + row + ")!\u001B[0m");
             }
         }

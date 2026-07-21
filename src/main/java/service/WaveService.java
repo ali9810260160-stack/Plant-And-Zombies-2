@@ -10,6 +10,7 @@ import model.zombies.ZombieDataRegistry;
 import model.zombies.ZombieFactory;
 import model.zombies.ZombieStats;
 import util.RandomUtil;
+import view.ConsoleView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,13 @@ import java.util.List;
  * سرویس تولید امواج زامبی با فرمول سختی.
  */
 public class WaveService {
+
+    private final ConsoleView view;
+
+    public WaveService(ConsoleView view) {
+        this.view = view;
+    }
+
 
     public List<Wave> generateWaves(Level level) {
         List<Wave> waves = new ArrayList<>();
@@ -103,7 +111,7 @@ public class WaveService {
     }
 
     private void printSpawnMessage(Zombie z, Wave wave, int lane, int cost) {
-        System.out.println("\u001B[31mZombie " + z.getType().name()
+        view.printRaw("\u001B[31mZombie " + z.getType().name()
             + " spawned at wave " + wave.getWaveNumber()
             + " in lane " + lane
             + " which costed " + cost + ".\u001B[0m");
@@ -143,7 +151,7 @@ public class WaveService {
                 model.plants.Plant plant = tile.getPlant();
                 if (!plant.isFirePlant()) {
                     plant.incrementFreezeLevel();
-                    System.out.println("\u001B[36mIce wind hit plant "
+                    view.printRaw("\u001B[36mIce wind hit plant "
                         + plant.getType().name()
                         + " at (" + col + "," + row + "). Freeze level: "
                         + plant.getFreezeLevel() + "\u001B[0m");
@@ -176,7 +184,7 @@ public class WaveService {
         zombie.setY(row);
         zombie.setLane(row);
         session.getActiveZombies().add(zombie);
-        System.out.println("\u001B[35mA zombie emerged from necromancy at ("
+        view.printRaw("\u001B[35mA zombie emerged from necromancy at ("
             + col + "," + row + ")!\u001B[0m");
     }
 }

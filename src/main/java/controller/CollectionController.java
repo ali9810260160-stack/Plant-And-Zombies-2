@@ -36,7 +36,7 @@ public class CollectionController {
         for (String plantName : user.getUnlockedPlants()) {
             PlantStats stats = getPlantStatsForName(plantName);
             String desc = stats != null ? stats.getDescription() : "";
-            System.out.println(ConsoleView.GREEN + "  " + i++ + ". "
+            view.printRaw(ConsoleView.GREEN + "  " + i++ + ". "
                 + ConsoleView.BOLD + plantName + ConsoleView.RESET
                 + "  — " + desc);
         }
@@ -69,7 +69,7 @@ public class CollectionController {
         for (String zombieName : user.getSeenZombies()) {
             ZombieStats stats = getZombieStatsForName(zombieName);
             String desc = stats != null ? stats.getDescription() : "";
-            System.out.println(ConsoleView.RED + "  " + i++ + ". "
+            view.printRaw(ConsoleView.RED + "  " + i++ + ". "
                 + ConsoleView.BOLD + zombieName + ConsoleView.RESET
                 + "  — " + desc);
         }
@@ -98,27 +98,27 @@ public class CollectionController {
             return;
         }
         view.printHeader("🌱 " + stats.getType().name());
-        System.out.println(ConsoleView.CYAN + "  Type:        " + ConsoleView.RESET
+        view.printRaw(ConsoleView.CYAN + "  Type:        " + ConsoleView.RESET
             + stats.getType().name());
-        System.out.println(ConsoleView.CYAN + "  Family:      " + ConsoleView.RESET
+        view.printRaw(ConsoleView.CYAN + "  Family:      " + ConsoleView.RESET
             + stats.getFamily());
-        System.out.println(ConsoleView.CYAN + "  Category:    " + ConsoleView.RESET
+        view.printRaw(ConsoleView.CYAN + "  Category:    " + ConsoleView.RESET
             + stats.getCategory());
-        System.out.println(ConsoleView.YELLOW + "  Sun Cost:    " + ConsoleView.RESET
+        view.printRaw(ConsoleView.YELLOW + "  Sun Cost:    " + ConsoleView.RESET
             + stats.getSunCost());
-        System.out.println(ConsoleView.GREEN + "  HP:          " + ConsoleView.RESET
+        view.printRaw(ConsoleView.GREEN + "  HP:          " + ConsoleView.RESET
             + stats.getBaseHp());
-        System.out.println(ConsoleView.RED + "  Damage:      " + ConsoleView.RESET
+        view.printRaw(ConsoleView.RED + "  Damage:      " + ConsoleView.RESET
             + stats.getBaseDamage());
-        System.out.println(ConsoleView.WHITE + "  Atk Speed:   " + ConsoleView.RESET
+        view.printRaw(ConsoleView.WHITE + "  Atk Speed:   " + ConsoleView.RESET
             + stats.getAttackSpeed());
-        System.out.println(ConsoleView.WHITE + "  Range:       " + ConsoleView.RESET
+        view.printRaw(ConsoleView.WHITE + "  Range:       " + ConsoleView.RESET
             + stats.getRange());
-        System.out.println(ConsoleView.WHITE + "  Recharge:    " + ConsoleView.RESET
+        view.printRaw(ConsoleView.WHITE + "  Recharge:    " + ConsoleView.RESET
             + stats.getRechargeTime() + "s");
-        System.out.println(ConsoleView.MAGENTA + "  Tags:        " + ConsoleView.RESET
+        view.printRaw(ConsoleView.MAGENTA + "  Tags:        " + ConsoleView.RESET
             + stats.getTags());
-        System.out.println(ConsoleView.WHITE + "  Description: " + ConsoleView.RESET
+        view.printRaw(ConsoleView.WHITE + "  Description: " + ConsoleView.RESET
             + stats.getDescription());
     }
 
@@ -129,21 +129,21 @@ public class CollectionController {
             return;
         }
         view.printHeader("🧟 " + stats.getType().name());
-        System.out.println(ConsoleView.CYAN + "  Type:        " + ConsoleView.RESET
+        view.printRaw(ConsoleView.CYAN + "  Type:        " + ConsoleView.RESET
             + stats.getType().name());
-        System.out.println(ConsoleView.GREEN + "  HP:          " + ConsoleView.RESET
+        view.printRaw(ConsoleView.GREEN + "  HP:          " + ConsoleView.RESET
             + stats.getHp());
-        System.out.println(ConsoleView.RED + "  DPS:         " + ConsoleView.RESET
+        view.printRaw(ConsoleView.RED + "  DPS:         " + ConsoleView.RESET
             + stats.getDps());
-        System.out.println(ConsoleView.WHITE + "  Move Speed:  " + ConsoleView.RESET
+        view.printRaw(ConsoleView.WHITE + "  Move Speed:  " + ConsoleView.RESET
             + stats.getMoveSpeed());
-        System.out.println(ConsoleView.YELLOW + "  Wave Cost:   " + ConsoleView.RESET
+        view.printRaw(ConsoleView.YELLOW + "  Wave Cost:   " + ConsoleView.RESET
             + stats.getWaveCost());
         if (!stats.getArmors().isEmpty()) {
-            System.out.println(ConsoleView.CYAN + "  Armor:       " + ConsoleView.RESET
+            view.printRaw(ConsoleView.CYAN + "  Armor:       " + ConsoleView.RESET
                 + stats.getArmors());
         }
-        System.out.println(ConsoleView.WHITE + "  Description: " + ConsoleView.RESET
+        view.printRaw(ConsoleView.WHITE + "  Description: " + ConsoleView.RESET
             + stats.getDescription());
     }
 

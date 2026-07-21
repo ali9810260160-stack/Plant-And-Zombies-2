@@ -54,20 +54,17 @@ public class VasebreakerMinigame {
     private final ConsoleView view;
     private List<Vase> vases;
     private List<PlantType> availablePlants;
-    private int sunAmount;
     private boolean gameOver;
     private boolean won;
-    private int seedExpireTimer;
+
 
     public VasebreakerMinigame(int level, ConsoleView view) {
         this.level = level;
         this.view = view;
         this.vases = new ArrayList<>();
         this.availablePlants = new ArrayList<>();
-        this.sunAmount = 0;
         this.gameOver = false;
         this.won = false;
-        this.seedExpireTimer = 0;
         generateVases();
     }
 
@@ -149,18 +146,18 @@ public class VasebreakerMinigame {
     private void handleVaseOpen(Vase vase) {
         switch (vase.getContent()) {
             case EMPTY:
-                System.out.println(ConsoleView.WHITE
+                view.printRaw(ConsoleView.WHITE
                     + "  💨 Vase was empty!" + ConsoleView.RESET);
                 break;
             case ZOMBIE:
             case GARGANTUAR:
-                System.out.println(ConsoleView.RED
+                view.printRaw(ConsoleView.RED
                     + "  🧟 A " + vase.getZombieType().name()
                     + " emerged!" + ConsoleView.RESET);
                 break;
             case PLANT_SEED:
             case PLANT_SEED_GUARANTEED:
-                System.out.println(ConsoleView.GREEN
+                view.printRaw(ConsoleView.GREEN
                     + "  🌱 Seed packet found: "
                     + vase.getSeedDrop().name()
                     + "! Pick it up with: pickup seed -l ("
@@ -213,7 +210,7 @@ public class VasebreakerMinigame {
     public void printBoard() {
         view.printHeader("🏺 Vasebreaker — Level " + level);
         int maxCols = getColsForLevel();
-        System.out.println(ConsoleView.CYAN
+        view.printRaw(ConsoleView.CYAN
             + "  " + "─".repeat(maxCols * 6) + ConsoleView.RESET);
         for (int r = 1; r <= 5; r++) {
             System.out.print("  ");
@@ -221,11 +218,11 @@ public class VasebreakerMinigame {
                 Vase v = findVase(c, r);
                 System.out.print(formatVase(v) + " ");
             }
-            System.out.println();
+            view.printRaw("");
         }
-        System.out.println(ConsoleView.CYAN
+        view.printRaw(ConsoleView.CYAN
             + "  " + "─".repeat(maxCols * 6) + ConsoleView.RESET);
-        System.out.println(ConsoleView.YELLOW
+        view.printRaw(ConsoleView.YELLOW
             + "  Available plants: " + availablePlants + ConsoleView.RESET);
         view.printInfo("break vase -l (x,y) | pickup seed -l (x,y)");
     }

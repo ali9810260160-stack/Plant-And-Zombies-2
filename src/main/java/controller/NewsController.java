@@ -27,7 +27,7 @@ public class NewsController {
         }
         view.printHeader("📰 Unread News");
         for (NewsItem item : unread) {
-            System.out.println(ConsoleView.YELLOW + "  [" + item.getDate()
+            view.printRaw(ConsoleView.YELLOW + "  [" + item.getDate()
                 + "] " + ConsoleView.RESET + item.getMessage());
         }
         unread.clear();
@@ -46,7 +46,7 @@ public class NewsController {
             String readMark = item.isRead()
                 ? ConsoleView.GREEN + "[read]   " + ConsoleView.RESET
                 : ConsoleView.RED + "[unread] " + ConsoleView.RESET;
-            System.out.println("  " + readMark
+            view.printRaw("  " + readMark
                 + ConsoleView.YELLOW + "[" + item.getDate() + "] "
                 + ConsoleView.RESET + item.getMessage());
         }

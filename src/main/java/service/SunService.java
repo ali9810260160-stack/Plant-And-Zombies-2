@@ -6,6 +6,7 @@ import model.enums.ChapterType;
 import model.enums.SunType;
 import model.tiles.Tile;
 import util.RandomUtil;
+import view.ConsoleView;
 
 import java.util.Iterator;
 import java.util.List;
@@ -15,7 +16,14 @@ import java.util.List;
  */
 public class SunService {
 
+    private final ConsoleView view;
+
+
     private static final int SKY_DROP_DURATION_TICKS = 50;
+
+    public SunService(ConsoleView view) {
+        this.view = view;
+    }
 
     /** محاسبه فاصله سقوط بعدی: max(6 + 0.05t, 12) ثانیه */
     public int calculateDropIntervalTicks(double elapsedSeconds) {
@@ -43,7 +51,7 @@ public class SunService {
         int y = RandomUtil.between(1, session.getGameMap().getRows());
         Sun sun = new Sun(type, x, y, tick);
         session.getActiveSuns().add(sun);
-        System.out.println("\u001B[33m☀ New " + typeName(type)
+        view.printRaw("\u001B[33m☀ New " + typeName(type)
             + " sun is dropping at position (" + x + ", " + y + ")\u001B[0m");
     }
 
@@ -87,7 +95,7 @@ public class SunService {
         if (sun.getType() == SunType.RADIOACTIVE) {
             sun.setValue(sun.getValue() == 150 ? 25 : sun.getValue());
         }
-        System.out.println("\u001B[33m☀ Sun reached the ground at position ("
+        view.printRaw("\u001B[33m☀ Sun reached the ground at position ("
             + sun.getX() + ", " + sun.getY() + ")\u001B[0m");
     }
 
@@ -117,7 +125,7 @@ public class SunService {
     }
 
     private void handleRadioactiveExplosion(Sun sun, GameSession session) {
-        System.out.println("\u001B[31m☢ Radioactive sun exploded mid-air!\u001B[0m");
+        view.printRaw("\u001B[31m☢ Radioactive sun exploded mid-air!\u001B[0m");
         int cx = sun.getX();
         int cy = sun.getY();
         for (model.zombies.Zombie z : session.getActiveZombies()) {
@@ -163,7 +171,7 @@ public class SunService {
         int amount = gp.getSunProductionAmount();
         gp.collectSun();
         session.addSun(amount);
-        System.out.println("\u001B[33m☀ plant " + plant.getType().name()
+        view.printRaw("\u001B[33m☀ plant " + plant.getType().name()
             + " produced a sun at (" + x + ", " + y + ")\u001B[0m");
     }
 

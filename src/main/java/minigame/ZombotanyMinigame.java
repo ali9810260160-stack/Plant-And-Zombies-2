@@ -161,10 +161,10 @@ public class ZombotanyMinigame {
     }
 
     private void printSpawnMessage() {
-        System.out.println(ConsoleView.RED
+        view.printRaw(ConsoleView.RED
             + "  🧟 Zombotany zombies incoming!" + ConsoleView.RESET);
         for (ZombotanyType t : ZombotanyType.values()) {
-            System.out.println(ConsoleView.RED + "  ⚡ " + t.displayName
+            view.printRaw(ConsoleView.RED + "  ⚡ " + t.displayName
                 + ": " + t.description + ConsoleView.RESET);
         }
     }
@@ -178,7 +178,6 @@ public class ZombotanyMinigame {
     }
 
     private void handleZombotanySpecials() {
-        List<int[]> rowsToFire = new ArrayList<>();
 
         for (ZombotanyZombie z : zombies) {
             if (!z.isAlive()) {
@@ -215,7 +214,7 @@ public class ZombotanyMinigame {
             target.getType().name(), target.getX(), target.getY(),
             target.getHp());
         if (!target.isAlive()) {
-            System.out.println(ConsoleView.YELLOW + "  🌿 Plant "
+            view.printRaw(ConsoleView.YELLOW + "  🌿 Plant "
                 + target.getType().name() + " destroyed by ZomboPea!"
                 + ConsoleView.RESET);
         }
@@ -240,13 +239,13 @@ public class ZombotanyMinigame {
     }
 
     private void burnEntireRow(int row) {
-        System.out.println(ConsoleView.RED
+        view.printRaw(ConsoleView.RED
             + "  🌶 ZomboJalapeno burns entire row " + row + "!"
             + ConsoleView.RESET);
         for (ZombotanyPlant p : plants) {
             if (p.getY() == row && p.isAlive()) {
                 p.takeDamage(9999);
-                System.out.println(ConsoleView.YELLOW + "  🌿 "
+                view.printRaw(ConsoleView.YELLOW + "  🌿 "
                     + p.getType().name() + " burned!" + ConsoleView.RESET);
             }
         }
@@ -255,7 +254,7 @@ public class ZombotanyMinigame {
     private void handleSquash(ZombotanyZombie zombie) {
         ZombotanyPlant target = findNearestPlantLeft(zombie);
         if (target != null && Math.abs(target.getX() - zombie.getX()) < 1) {
-            System.out.println(ConsoleView.RED + "  💥 ZomboSquash crushes "
+            view.printRaw(ConsoleView.RED + "  💥 ZomboSquash crushes "
                 + target.getType().name() + " — both destroyed!"
                 + ConsoleView.RESET);
             target.takeDamage(9999);
@@ -272,7 +271,7 @@ public class ZombotanyMinigame {
             if (blocked != null) {
                 blocked.takeDamage(z.getZombotanyType().dps / 10);
                 if (!blocked.isAlive()) {
-                    System.out.println(ConsoleView.YELLOW + "  🌿 Plant "
+                    view.printRaw(ConsoleView.YELLOW + "  🌿 Plant "
                         + blocked.getType().name()
                         + " eaten by " + z.getZombotanyType().displayName
                         + "!" + ConsoleView.RESET);
@@ -306,7 +305,7 @@ public class ZombotanyMinigame {
             if (lawnMowers[rowIdx]) {
                 lawnMowers[rowIdx] = false;
                 killAllInRow(z.getY());
-                System.out.println(ConsoleView.CYAN
+                view.printRaw(ConsoleView.CYAN
                     + "  🚜 Lawn mower triggered in row "
                     + z.getY() + "!" + ConsoleView.RESET);
             } else {
@@ -339,7 +338,7 @@ public class ZombotanyMinigame {
             return;
         }
         plants.add(new ZombotanyPlant(type, getPlantHp(type), x, y));
-        System.out.println(ConsoleView.GREEN + "  🌱 "
+        view.printRaw(ConsoleView.GREEN + "  🌱 "
             + type.name() + " planted at (" + x + "," + y + ")"
             + ConsoleView.RESET);
     }
@@ -354,14 +353,14 @@ public class ZombotanyMinigame {
 
     public void printBoard() {
         view.printHeader("⚡ Zombotany — Level " + level);
-        System.out.println(ConsoleView.RED
+        view.printRaw(ConsoleView.RED
             + "  Zombies with plant powers!" + ConsoleView.RESET);
         System.out.print("     ");
         for (int c = 1; c <= COLS; c++) {
             System.out.printf("%-3d", c);
         }
-        System.out.println();
-        System.out.println("    " + "───".repeat(COLS));
+        view.printRaw("");
+        view.printRaw("    " + "───".repeat(COLS));
         for (int r = 1; r <= ROWS; r++) {
             System.out.printf(" %d │ ", r);
             for (int c = 1; c <= COLS; c++) {
@@ -370,10 +369,10 @@ public class ZombotanyMinigame {
             String mower = lawnMowers[r - 1]
                 ? ConsoleView.GREEN + "🚜" + ConsoleView.RESET
                 : ConsoleView.RED + "✗" + ConsoleView.RESET;
-            System.out.println(mower);
+            view.printRaw(mower);
         }
-        System.out.println("    " + "───".repeat(COLS));
-        System.out.println(ConsoleView.YELLOW
+        view.printRaw("    " + "───".repeat(COLS));
+        view.printRaw(ConsoleView.YELLOW
             + "  Legend: 🟢=ZomboPea ⬜=ZomboNut 🌶=ZomboJala 💥=ZomboSquash"
             + ConsoleView.RESET);
     }

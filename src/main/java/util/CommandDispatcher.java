@@ -45,13 +45,13 @@ public class CommandDispatcher {
         UserService userService = new UserService(userRepo);
         AuthService authService = new AuthService(userRepo);
 
-        WaveService waveService = new WaveService();
+        WaveService waveService = new WaveService(view);
         CombatService combatService = new CombatService(view);
-        SunService sunService = new SunService();
+        SunService sunService = new SunService(view);
         GameService gameService = new GameService(
             waveService, combatService, sunService, view, mapView);
         GreenhouseService greenhouseService = new GreenhouseService(
-            userService, userRepo);
+            userService, userRepo, view);
 
         this.authController = new AuthController(authService, userService, view);
         this.menuController = new MenuController(view);
@@ -373,7 +373,6 @@ public class CommandDispatcher {
             view.printError("Unknown plant select command.");
         }
     }
-
     private void handleInGameMenu(String input) {
         Matcher m;
         // اگر مینی‌گیمی فعال است، دستور ابتدا به آن داده می‌شود
@@ -434,7 +433,6 @@ public class CommandDispatcher {
             view.printError("Unknown in-game command.");
         }
     }
-
     private void handleGreenhouseMenu(String input) {
         Matcher m;
         if (InputParser.matches(input, model.enums.CommandRegex.SHOW_GREENHOUSE)) {
@@ -455,7 +453,6 @@ public class CommandDispatcher {
             view.printError("Unknown greenhouse command.");
         }
     }
-
     private void handleShopMenu(String input) {
         Matcher m;
         if (InputParser.matches(input, model.enums.CommandRegex.SHOP_LIST)) {
@@ -469,7 +466,6 @@ public class CommandDispatcher {
             view.printError("Unknown shop command.");
         }
     }
-
     private void handleTravelLogMenu(String input) {
         Matcher m;
         if ((m = InputParser.match(input,
@@ -486,7 +482,6 @@ public class CommandDispatcher {
                 + "or 'menu enter chapter <MINIGAME_N>'.");
         }
     }
-
     private void handleLeaderboardMenu(String input) {
         Matcher m;
         if ((m = InputParser.match(input,
@@ -496,7 +491,6 @@ public class CommandDispatcher {
             leaderboardController.show(appState);
         }
     }
-
     private void promptCurrentMenu() {
         System.out.print(
             ConsoleView.CYAN + "["

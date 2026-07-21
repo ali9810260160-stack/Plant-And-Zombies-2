@@ -101,19 +101,19 @@ public class MinigameController {
         scoredGameService.reset();
         List<PlantType> plants = scoredGameService.getDefaultScoredPlants();
         view.printHeader("🏆 Scored Game — Daily Challenge");
-        System.out.println(ConsoleView.YELLOW
+        view.printRaw(ConsoleView.YELLOW
             + "  Daily Seed: " + scoredGameService.getDailySeed() + ConsoleView.RESET);
-        System.out.println(ConsoleView.CYAN
+        view.printRaw(ConsoleView.CYAN
             + "  All players use the same zombie patterns today!" + ConsoleView.RESET);
-        System.out.println("  Your plants: " + plants);
-        System.out.println();
-        System.out.println("  MeoPoint Scoring Patterns:");
-        System.out.println("  1. Multi-Kill:       Hit 2+ zombies with one projectile → 500pt×count");
-        System.out.println("  2. Speed-Kill Combo: Kill zombies in <3s each → 300pt×combo");
-        System.out.println("  3. AoE Simultaneous: Kill 3+ at once → 750pt×count");
-        System.out.println("  4. Clean Wave:       No plants lost → 1000pt×waveNum");
-        System.out.println("  5. Item Collector:   Collect 5+ sun in 10 ticks → 200pt×count");
-        System.out.println();
+        view.printRaw("  Your plants: " + plants);
+        view.printRaw("");
+        view.printRaw("  MeoPoint Scoring Patterns:");
+        view.printRaw("  1. Multi-Kill:       Hit 2+ zombies with one projectile → 500pt×count");
+        view.printRaw("  2. Speed-Kill Combo: Kill zombies in <3s each → 300pt×combo");
+        view.printRaw("  3. AoE Simultaneous: Kill 3+ at once → 750pt×count");
+        view.printRaw("  4. Clean Wave:       No plants lost → 1000pt×waveNum");
+        view.printRaw("  5. Item Collector:   Collect 5+ sun in 10 ticks → 200pt×count");
+        view.printRaw("");
         view.printInfo("Use 'advance time -t <n> ticks' to play.");
         view.printInfo("Type 'show scored-game score' to see your current score.");
         activeMinigame = "SCORED";

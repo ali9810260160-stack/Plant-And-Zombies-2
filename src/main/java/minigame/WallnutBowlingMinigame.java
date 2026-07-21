@@ -102,7 +102,6 @@ public class WallnutBowlingMinigame {
     private boolean won;
     private int totalKilled;
     private int targetKills;
-    private int sunAmount;
 
     public WallnutBowlingMinigame(int level, ConsoleView view) {
         this.level = level;
@@ -118,7 +117,6 @@ public class WallnutBowlingMinigame {
         this.won = false;
         this.totalKilled = 0;
         this.targetKills = getTargetKills(level);
-        this.sunAmount = 0;
         initZombies();
         fillConveyorQueue();
     }
@@ -167,7 +165,7 @@ public class WallnutBowlingMinigame {
         conveyorTimer++;
         if (conveyorTimer >= 120 && !conveyorQueue.isEmpty()) {
             PlantType next = conveyorQueue.remove(0);
-            System.out.println(ConsoleView.CYAN + "  🎳 Conveyor: "
+            view.printRaw(ConsoleView.CYAN + "  🎳 Conveyor: "
                 + next.name() + " is ready to place!" + ConsoleView.RESET);
             conveyorTimer = 0;
         }
@@ -235,7 +233,7 @@ public class WallnutBowlingMinigame {
                 break;
         }
         if (!zombie.isAlive()) {
-            System.out.println(ConsoleView.GREEN + "  💀 "
+            view.printRaw(ConsoleView.GREEN + "  💀 "
                 + zombie.getType().name() + " crushed!" + ConsoleView.RESET);
             totalKilled++;
         }
@@ -251,12 +249,12 @@ public class WallnutBowlingMinigame {
             ball.setDirX(oldDy);
             ball.setDirY(0);
         }
-        System.out.println(ConsoleView.YELLOW
+        view.printRaw(ConsoleView.YELLOW
             + "  🎳 Ball deflects 45° after hit!" + ConsoleView.RESET);
     }
 
     private void explodeArea(BowlingBall ball) {
-        System.out.println(ConsoleView.RED
+        view.printRaw(ConsoleView.RED
             + "  💥 EXPLODE-O-NUT explodes in 3x3 area!" + ConsoleView.RESET);
         int cx = (int) ball.getX();
         int cy = ball.getY();
@@ -265,7 +263,7 @@ public class WallnutBowlingMinigame {
                 z.takeDamage(180);
                 if (!z.isAlive()) {
                     totalKilled++;
-                    System.out.println(ConsoleView.GREEN
+                    view.printRaw(ConsoleView.GREEN
                         + "  💀 " + z.getType().name()
                         + " destroyed by explosion!" + ConsoleView.RESET);
                 }
@@ -307,7 +305,7 @@ public class WallnutBowlingMinigame {
         }
         BowlingBall ball = new BowlingBall(type, x, y);
         balls.add(ball);
-        System.out.println(ConsoleView.GREEN + "  🎳 " + type.name()
+        view.printRaw(ConsoleView.GREEN + "  🎳 " + type.name()
             + " placed at (" + x + "," + y + ") — rolling!" + ConsoleView.RESET);
         for (int t = 0; t < 20; t++) {
             tick();
@@ -327,7 +325,7 @@ public class WallnutBowlingMinigame {
             won = true;
             gameOver = true;
             view.printGameWon();
-            System.out.println(ConsoleView.GREEN
+            view.printRaw(ConsoleView.GREEN
                 + "  Crushed " + totalKilled + " zombies!" + ConsoleView.RESET);
         }
     }
@@ -335,13 +333,13 @@ public class WallnutBowlingMinigame {
     public void printBoard() {
         view.printHeader("🎳 Wallnut Bowling — Level " + level
             + "  Killed: " + totalKilled + "/" + targetKills);
-        System.out.println("    Red line at column " + deadlineCol);
+        view.printRaw("    Red line at column " + deadlineCol);
         System.out.print("     ");
         for (int c = 1; c <= cols; c++) {
             System.out.printf("%-4d", c);
         }
-        System.out.println();
-        System.out.println("    " + "────".repeat(cols));
+        view.printRaw("");
+        view.printRaw("    " + "────".repeat(cols));
         for (int r = 1; r <= rows; r++) {
             System.out.printf(" %d │ ", r);
             for (int c = 1; c <= cols; c++) {
@@ -351,13 +349,13 @@ public class WallnutBowlingMinigame {
                 String cell = getCellDisplay(c, r);
                 System.out.print(cell);
             }
-            System.out.println();
+            view.printRaw("");
         }
-        System.out.println("    " + "────".repeat(cols));
-        System.out.println(ConsoleView.CYAN + "  Conveyor queue: "
+        view.printRaw("    " + "────".repeat(cols));
+        view.printRaw(ConsoleView.CYAN + "  Conveyor queue: "
             + conveyorQueue.size() + " balls remaining" + ConsoleView.RESET);
-        System.out.println("  Use: place bowling -t <TYPE> -l (<col>, <row>)");
-        System.out.println("  Types: WALLNUT_BOWLING | EXPLODE_O_NUT_BOWLING | BIG_WALLNUT");
+        view.printRaw("  Use: place bowling -t <TYPE> -l (<col>, <row>)");
+        view.printRaw("  Types: WALLNUT_BOWLING | EXPLODE_O_NUT_BOWLING | BIG_WALLNUT");
     }
 
     private String getCellDisplay(int c, int r) {

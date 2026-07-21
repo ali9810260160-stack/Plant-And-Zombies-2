@@ -74,7 +74,7 @@ public class LeaderboardController {
             + ConsoleView.RESET,
             "Rank", "Username", "Level", "Minigames",
             "DailyQ", "RegularQ", "MeoPoint");
-        System.out.println(ConsoleView.CYAN
+        view.printRaw(ConsoleView.CYAN
             + "  " + "─".repeat(75) + ConsoleView.RESET);
     }
 

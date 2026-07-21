@@ -246,7 +246,4 @@ public class MapView {
             + RESET);
     }
 
-    private Plant getStats(Plant p) {
-        return p;
-    }
 }

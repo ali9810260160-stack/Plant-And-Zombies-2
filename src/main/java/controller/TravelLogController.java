@@ -86,32 +86,31 @@ public class TravelLogController {
     }
 
     private void showMinigameMenu(AppState appState) {
-        User u = appState.getCurrentUser();
         view.printHeader("🎮 Minigames");
-        System.out.println(ConsoleView.CYAN
+        view.printRaw(ConsoleView.CYAN
             + "  1. Vasebreaker" + ConsoleView.RESET);
-        System.out.println("     Smash vases to find plants and zombies!");
-        System.out.println("     Levels: 1-3 | Reward: 200/300/500 coins");
-        System.out.println();
-        System.out.println(ConsoleView.CYAN
+        view.printRaw("     Smash vases to find plants and zombies!");
+        view.printRaw("     Levels: 1-3 | Reward: 200/300/500 coins");
+        view.printRaw("");
+        view.printRaw(ConsoleView.CYAN
             + "  2. Wallnut Bowling" + ConsoleView.RESET);
-        System.out.println("     Roll walnuts to crush zombies!");
-        System.out.println("     Levels: 1-3 | Reward: 200/300/500 coins");
-        System.out.println();
-        System.out.println(ConsoleView.CYAN
+        view.printRaw("     Roll walnuts to crush zombies!");
+        view.printRaw("     Levels: 1-3 | Reward: 200/300/500 coins");
+        view.printRaw("");
+        view.printRaw(ConsoleView.CYAN
             + "  3. I, Zombie" + ConsoleView.RESET);
-        System.out.println("     Play as zombies to eat plant brains!");
-        System.out.println("     Levels: 1-3 | Reward: 300/400/600 coins");
-        System.out.println();
-        System.out.println(ConsoleView.CYAN
+        view.printRaw("     Play as zombies to eat plant brains!");
+        view.printRaw("     Levels: 1-3 | Reward: 300/400/600 coins");
+        view.printRaw("");
+        view.printRaw(ConsoleView.CYAN
             + "  4. Beghouled (BONUS)" + ConsoleView.RESET);
-        System.out.println("     Match-3 puzzle with plant upgrades!");
-        System.out.println("     Levels: 1-3 | Reward: 500/700/1000 coins");
-        System.out.println();
-        System.out.println(ConsoleView.CYAN
+        view.printRaw("     Match-3 puzzle with plant upgrades!");
+        view.printRaw("     Levels: 1-3 | Reward: 500/700/1000 coins");
+        view.printRaw("");
+        view.printRaw(ConsoleView.CYAN
             + "  5. Zombotany (BONUS)" + ConsoleView.RESET);
-        System.out.println("     Face zombies with plant powers!");
-        System.out.println("     Levels: 1-3 | Reward: 400/600/900 coins");
+        view.printRaw("     Face zombies with plant powers!");
+        view.printRaw("     Levels: 1-3 | Reward: 400/600/900 coins");
         view.printInfo("To play: menu enter chapter VASEBREAKER_1 (or _2, _3)");
     }
 
@@ -120,8 +119,8 @@ public class TravelLogController {
         String status = completed
             ? ConsoleView.GREEN + "[DONE] " + ConsoleView.RESET
             : ConsoleView.RED   + "[TODO] " + ConsoleView.RESET;
-        System.out.println("  " + status + name);
-        System.out.println("          Reward: "
+        view.printRaw("  " + status + name);
+        view.printRaw("          Reward: "
             + ConsoleView.YELLOW + reward + ConsoleView.RESET);
     }
 }

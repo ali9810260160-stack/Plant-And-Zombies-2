@@ -39,9 +39,11 @@ public class ConsoleView {
         System.out.println(YELLOW + "⚠ " + message + RESET);
     }
 
-    public void printRaw(String message) {
-        System.out.println(message);
-    }
+    public void printRaw(String message) { System.out.println(message); }
+
+    public void print(String message) { System.out.print(message); }
+
+    public void printF(String message) { System.out.printf(message); }
 
     public void printSeparator() {
         System.out.println(SEPARATOR);

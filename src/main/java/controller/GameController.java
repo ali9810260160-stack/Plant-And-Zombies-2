@@ -115,9 +115,9 @@ public class GameController {
             }
             String mark = selected
                 ? ConsoleView.GREEN + " ✔ SELECTED" + ConsoleView.RESET : "";
-            System.out.println("  " + i++ + ". " + plantName + mark);
+            view.printRaw("  " + i++ + ". " + plantName + mark);
         }
-        System.out.println(ConsoleView.CYAN + "  Selected: "
+        view.printRaw(ConsoleView.CYAN + "  Selected: "
             + selectedPlants.size() + "/"
             + pendingLevel.getPlantSlots() + ConsoleView.RESET);
     }
@@ -362,7 +362,7 @@ public class GameController {
             return;
         }
         view.printHeader("Tile (" + x + ", " + y + ")");
-        System.out.println(ConsoleView.CYAN + "  Type: "
+        view.printRaw(ConsoleView.CYAN + "  Type: "
             + ConsoleView.RESET + tile.getType().name());
         if (tile.getPlant() != null) {
             printPlantStatus(tile.getPlant(), x, y);
@@ -409,18 +409,18 @@ public class GameController {
     }
 
     private void printDetailedZombieInfo(Zombie zombie) {
-        System.out.println(ConsoleView.RED + zombie.getType().name()
+        view.printRaw(ConsoleView.RED + zombie.getType().name()
             + ":" + ConsoleView.RESET);
         System.out.printf("  position: %.1f, %d%n",
             zombie.getX(), zombie.getY());
-        System.out.println("  health: " + zombie.getCurrentHealth());
+        view.printRaw("  health: " + zombie.getCurrentHealth());
         if (!zombie.getArmors().isEmpty()) {
-            System.out.println("  armor:");
+            view.printRaw("  armor:");
             zombie.getArmors().forEach((at, hp) ->
-                System.out.println("    " + at.name() + ": " + hp));
+                view.printRaw("    " + at.name() + ": " + hp));
         }
         if (!zombie.getActiveEffects().isEmpty()) {
-            System.out.println("  effects:");
+            view.printRaw("  effects:");
             zombie.getActiveEffects().forEach((ef, ticks) ->
                 System.out.printf("    %s: %.1fs%n",
                     ef.name(), ticks / 10.0));

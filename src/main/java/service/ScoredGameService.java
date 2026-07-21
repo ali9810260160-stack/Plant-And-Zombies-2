@@ -174,7 +174,7 @@ public class ScoredGameService {
     }
 
     private void printMeoEvent(String event, long bonus, int tick) {
-        System.out.println(ConsoleView.BOLD + ConsoleView.YELLOW
+        view.printRaw(ConsoleView.BOLD + ConsoleView.YELLOW
             + "  🏆 MEO-POINT! " + event
             + " +" + bonus + " pts  [Total: " + meoPoints + "]"
             + ConsoleView.RESET);
@@ -183,11 +183,11 @@ public class ScoredGameService {
     public void saveHighScore(User user, long finalScore) {
         if (finalScore > user.getHighestMeoPoint()) {
             user.setHighestMeoPoint(finalScore);
-            System.out.println(ConsoleView.GREEN
+            view.printRaw(ConsoleView.GREEN
                 + "  🏆 NEW HIGH SCORE: " + finalScore
                 + " MeoPoints!" + ConsoleView.RESET);
         } else {
-            System.out.println(ConsoleView.CYAN
+            view.printRaw(ConsoleView.CYAN
                 + "  Score: " + finalScore
                 + " MeoPoints (Best: " + user.getHighestMeoPoint() + ")"
                 + ConsoleView.RESET);
@@ -197,28 +197,28 @@ public class ScoredGameService {
     public void printFinalScore(User user) {
         view.printSeparator();
         view.printHeader("🏆 Scored Game — Final Results");
-        System.out.println(ConsoleView.YELLOW
+        view.printRaw(ConsoleView.YELLOW
             + "  Total MeoPoints:    " + meoPoints + ConsoleView.RESET);
-        System.out.println(ConsoleView.GREEN
+        view.printRaw(ConsoleView.GREEN
             + "  Your Best Score:   "
             + user.getHighestMeoPoint() + ConsoleView.RESET);
-        System.out.println(ConsoleView.CYAN
+        view.printRaw(ConsoleView.CYAN
             + "  Daily Seed:        " + getDailySeed() + ConsoleView.RESET);
         view.printSeparator();
-        System.out.println(ConsoleView.WHITE + "  MeoPoint Breakdown:" + ConsoleView.RESET);
-        System.out.println("    Pattern 1 — Multi-Kill:      "
+        view.printRaw(ConsoleView.WHITE + "  MeoPoint Breakdown:" + ConsoleView.RESET);
+        view.printRaw("    Pattern 1 — Multi-Kill:      "
             + ConsoleView.YELLOW + "(earned via StrikeThrough projectiles)"
             + ConsoleView.RESET);
-        System.out.println("    Pattern 2 — Speed-Kill Combo: "
+        view.printRaw("    Pattern 2 — Speed-Kill Combo: "
             + ConsoleView.YELLOW + "(fast consecutive kills)"
             + ConsoleView.RESET);
-        System.out.println("    Pattern 3 — AoE Simultaneous: "
+        view.printRaw("    Pattern 3 — AoE Simultaneous: "
             + ConsoleView.YELLOW + "(Cherry Bomb, Melon, explosions)"
             + ConsoleView.RESET);
-        System.out.println("    Pattern 4 — Clean Wave:       "
+        view.printRaw("    Pattern 4 — Clean Wave:       "
             + ConsoleView.YELLOW + "(no plants lost per wave)"
             + ConsoleView.RESET);
-        System.out.println("    Pattern 5 — Item Collector:   "
+        view.printRaw("    Pattern 5 — Item Collector:   "
             + ConsoleView.YELLOW + "(5+ suns in 10 ticks)"
             + ConsoleView.RESET);
         view.printSeparator();

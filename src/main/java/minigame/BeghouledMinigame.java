@@ -134,10 +134,10 @@ public class BeghouledMinigame {
         int sunReward = 50 * (size - 2);
         sunAmount += sunReward;
         matchCount++;
-        System.out.println(ConsoleView.GREEN + "  ✔ Match of "
+        view.printRaw(ConsoleView.GREEN + "  ✔ Match of "
             + size + "! +" + sunReward + " sun ☀" + ConsoleView.RESET);
         if (size >= 4) {
-            System.out.println(ConsoleView.YELLOW
+            view.printRaw(ConsoleView.YELLOW
                 + "  🌟 Bonus match! Extra sun!" + ConsoleView.RESET);
         }
         for (int[] pos : matches) {
@@ -151,7 +151,7 @@ public class BeghouledMinigame {
             int baseSun = 50 * (chainMatches.size() - 2);
             sunAmount += baseSun + 50;
             matchCount++;
-            System.out.println(ConsoleView.MAGENTA + "  ⚡ Chain match! +"
+            view.printRaw(ConsoleView.MAGENTA + "  ⚡ Chain match! +"
                 + (baseSun + 50) + " sun (bonus!)" + ConsoleView.RESET);
             for (int[] pos : chainMatches) {
                 grid[pos[0]][pos[1]] = null;
@@ -244,7 +244,7 @@ public class BeghouledMinigame {
             won = true;
             gameOver = true;
             view.printGameWon();
-            System.out.println(ConsoleView.GREEN
+            view.printRaw(ConsoleView.GREEN
                 + "  🏆 Created " + matchCount
                 + "/" + targetMatches + " matches!" + ConsoleView.RESET);
         }
@@ -291,7 +291,7 @@ public class BeghouledMinigame {
 
     public void checkAndResetIfNoMoves() {
         if (!hasValidMoves()) {
-            System.out.println(ConsoleView.YELLOW
+            view.printRaw(ConsoleView.YELLOW
                 + "  🔄 No valid moves! Resetting board..." + ConsoleView.RESET);
             for (int r = 0; r < ROWS; r++) {
                 for (int c = 0; c < COLS; c++) {
@@ -311,8 +311,8 @@ public class BeghouledMinigame {
         for (int c = 1; c <= COLS; c++) {
             System.out.printf(" %-4d", c);
         }
-        System.out.println();
-        System.out.println("    " + "─────".repeat(COLS));
+        view.printRaw("");
+        view.printRaw("    " + "─────".repeat(COLS));
         for (int r = 0; r < ROWS; r++) {
             System.out.printf(" %d │ ", r + 1);
             for (int c = 0; c < COLS; c++) {
@@ -324,9 +324,9 @@ public class BeghouledMinigame {
                     System.out.print(getPlantEmoji(grid[r][c]) + "   ");
                 }
             }
-            System.out.println();
+            view.printRaw("");
         }
-        System.out.println("    " + "─────".repeat(COLS));
+        view.printRaw("    " + "─────".repeat(COLS));
         printUpgradeTable();
     }
 
@@ -347,10 +347,10 @@ public class BeghouledMinigame {
     }
 
     private void printUpgradeTable() {
-        System.out.println(ConsoleView.CYAN
+        view.printRaw(ConsoleView.CYAN
             + "  Upgrades: P(500)→R(1500)→G  W(500)→T  M(1000)→MELON(750)→I"
             + ConsoleView.RESET);
-        System.out.println("  Use: upgrade plant -t <TYPE>");
+        view.printRaw("  Use: upgrade plant -t <TYPE>");
     }
 
     public int getSunAmount() { return sunAmount; }

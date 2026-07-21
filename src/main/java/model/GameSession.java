@@ -36,7 +36,7 @@ public class GameSession {
     /** تیک آخرین سقوط خورشید از آسمان */
     private int lastSkyDropTick;
     /** تیک شروع نبرد زمان‌دار */
-    private int timedWarStartTick;
+//    private int timedWarStartTick;
     /** حالت انتظار بین موج‌ها */
     private boolean betweenWaves;
     /** آیا گردباد مصر باید اتفاق بیفتد */

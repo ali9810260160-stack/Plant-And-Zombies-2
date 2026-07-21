@@ -28,13 +28,13 @@ public class GreenhouseController {
         Greenhouse gh = greenhouseService.getOrCreateGreenhouse(user);
         view.printHeader("🏡 Greenhouse (4×5)");
         printGreenhouseGrid(gh);
-        System.out.println(ConsoleView.YELLOW
+        view.printRaw(ConsoleView.YELLOW
             + "  Coins: " + user.getCoins()
             + "  Gems: " + user.getGems() + ConsoleView.RESET);
     }
 
     private void printGreenhouseGrid(Greenhouse gh) {
-        System.out.println(ConsoleView.CYAN
+        view.printRaw(ConsoleView.CYAN
             + "     1          2          3          4          5"
             + ConsoleView.RESET);
         for (int row = 1; row <= 4; row++) {
@@ -43,7 +43,7 @@ public class GreenhouseController {
                 Pot pot = gh.getPot(col, row);
                 System.out.print(formatPot(pot) + " ");
             }
-            System.out.println();
+            view.printRaw("");
         }
     }
 
@@ -91,17 +91,17 @@ public class GreenhouseController {
 
     public void showShopList() {
         view.printHeader("🛒 Shop — Permanent Items");
-        System.out.println(ConsoleView.CYAN + "  ID            Item"
+        view.printRaw(ConsoleView.CYAN + "  ID            Item"
             + "                         Price" + ConsoleView.RESET);
-        System.out.println("  POT           Unlock a greenhouse pot       "
+        view.printRaw("  POT           Unlock a greenhouse pot       "
             + ConsoleView.YELLOW + "2000 coins" + ConsoleView.RESET);
-        System.out.println("  PLANT_FOOD    Plant food (start of level)   "
+        view.printRaw("  PLANT_FOOD    Plant food (start of level)   "
             + ConsoleView.MAGENTA + "3 gems" + ConsoleView.RESET);
-        System.out.println("  SEED_RANDOM   5 random seed packets         "
+        view.printRaw("  SEED_RANDOM   5 random seed packets         "
             + ConsoleView.YELLOW + "1000 coins" + ConsoleView.RESET);
-        System.out.println("  SEED_CHOICE   10 seed packets (pick plant)  "
+        view.printRaw("  SEED_CHOICE   10 seed packets (pick plant)  "
             + ConsoleView.MAGENTA + "5 gems" + ConsoleView.RESET);
-        System.out.println("  CURRENCY      500 coins                     "
+        view.printRaw("  CURRENCY      500 coins                     "
             + ConsoleView.MAGENTA + "5 gems" + ConsoleView.RESET);
         view.printInfo("Usage: shop buy -i <ID> -n <count> [-t <plant>]");
     }
@@ -111,15 +111,15 @@ public class GreenhouseController {
         String today = java.time.LocalDate.now().toString();
         boolean purchased = today.equals(user.getLastDailyOfferDate());
         view.printHeader("🎁 Daily Offer");
-        System.out.println(ConsoleView.YELLOW
+        view.printRaw(ConsoleView.YELLOW
             + "  10 Random Seed Packets" + ConsoleView.RESET);
-        System.out.println(ConsoleView.GREEN
+        view.printRaw(ConsoleView.GREEN
             + "  Price: 1600 coins (20% off!)" + ConsoleView.RESET);
         if (purchased) {
-            System.out.println(ConsoleView.RED
+            view.printRaw(ConsoleView.RED
                 + "  ✘ Already purchased today." + ConsoleView.RESET);
         } else {
-            System.out.println(ConsoleView.GREEN
+            view.printRaw(ConsoleView.GREEN
                 + "  ✔ Available! Use: shop buy -i DAILY -n 1"
                 + ConsoleView.RESET);
         }

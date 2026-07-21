@@ -235,7 +235,7 @@ public class IZombieMinigame {
                 int sunGain = getSunProducerAmount();
                 sunAmount += sunGain;
                 sunProducerProductionTimer[r] = 0;
-                System.out.println(ConsoleView.YELLOW + "  ☀ SunProducer in row "
+                view.printRaw(ConsoleView.YELLOW + "  ☀ SunProducer in row "
                     + (r + 1) + " produced " + sunGain + " sun! Total: "
                     + sunAmount + ConsoleView.RESET);
             }
@@ -287,7 +287,7 @@ public class IZombieMinigame {
         if (nearest != null) {
             nearest.takeDamage(plant.getDamage());
             if (!nearest.isAlive()) {
-                System.out.println(ConsoleView.RED + "  💀 "
+                view.printRaw(ConsoleView.RED + "  💀 "
                     + nearest.getType().name()
                     + " killed by plant!" + ConsoleView.RESET);
             }
@@ -305,7 +305,7 @@ public class IZombieMinigame {
                     blocking.takeDamage(100);
                     z.resetAttackTimer();
                     if (!blocking.isAlive()) {
-                        System.out.println(ConsoleView.GREEN
+                        view.printRaw(ConsoleView.GREEN
                             + "  🧟 " + z.getType().name()
                             + " destroyed " + blocking.getName()
                             + "!" + ConsoleView.RESET);
@@ -315,7 +315,7 @@ public class IZombieMinigame {
                 z.setX(z.getX() - 0.2);
                 if (z.getX() <= 0 && brains[z.getY() - 1] > 0) {
                     brains[z.getY() - 1]--;
-                    System.out.println(ConsoleView.GREEN
+                    view.printRaw(ConsoleView.GREEN
                         + "  🧠 Brain eaten in row " + z.getY()
                         + "!" + ConsoleView.RESET);
                     z.setX(z.getX() - 1);
@@ -347,7 +347,7 @@ public class IZombieMinigame {
             won = true;
             gameOver = true;
             view.printGameWon();
-            System.out.println(ConsoleView.GREEN
+            view.printRaw(ConsoleView.GREEN
                 + "  🏆 All brains eaten! You win!" + ConsoleView.RESET);
         }
     }
@@ -392,7 +392,7 @@ public class IZombieMinigame {
         int hp = stats != null ? stats.getHp() : 190;
         PlacedZombie z = new PlacedZombie(type, x, y, hp);
         zombies.add(z);
-        System.out.println(ConsoleView.GREEN + "  🧟 "
+        view.printRaw(ConsoleView.GREEN + "  🧟 "
             + type.name() + " placed at (" + x + "," + y
             + ") for " + cost + " sun!" + ConsoleView.RESET);
     }
@@ -442,7 +442,7 @@ public class IZombieMinigame {
         for (int b : brains) {
             totalBrains += b;
         }
-        System.out.println("  Brains remaining: " + totalBrains
+        view.printRaw("  Brains remaining: " + totalBrains
             + "   Zombies on field: "
             + zombies.stream().filter(PlacedZombie::isAlive).count());
         System.out.print("     ");
@@ -452,8 +452,8 @@ public class IZombieMinigame {
             }
             System.out.printf("%-3d", c);
         }
-        System.out.println();
-        System.out.println("    " + "───".repeat(COLS + 1));
+        view.printRaw("");
+        view.printRaw("    " + "───".repeat(COLS + 1));
         for (int r = 1; r <= ROWS; r++) {
             System.out.printf(" %d │ ", r);
             for (int c = 1; c <= COLS; c++) {
@@ -466,9 +466,9 @@ public class IZombieMinigame {
                 ? ConsoleView.RED + "🧠" + ConsoleView.RESET : "  ";
             String sunProdStr = sunProducerHp[r - 1] > 0
                 ? ConsoleView.YELLOW + "S" + ConsoleView.RESET : " ";
-            System.out.println(brainStr + sunProdStr);
+            view.printRaw(brainStr + sunProdStr);
         }
-        System.out.println("    " + "───".repeat(COLS + 1));
+        view.printRaw("    " + "───".repeat(COLS + 1));
         printAvailableZombies();
     }
 
@@ -485,17 +485,15 @@ public class IZombieMinigame {
         }
         return ".";
     }
-
     private void printAvailableZombies() {
-        System.out.println(ConsoleView.CYAN
+        view.printRaw(ConsoleView.CYAN
             + "  Available Zombies:" + ConsoleView.RESET);
         for (ZombieType t : getAvailableZombies()) {
             System.out.printf("    %-25s cost: %d sun%n",
                 t.name(), getZombieSunCost(t));
         }
-        System.out.println("  Use: place zombie -t <TYPE> -l (<col>, <row>)");
+        view.printRaw("  Use: place zombie -t <TYPE> -l (<col>, <row>)");
     }
-
     public boolean isGameOver() { return gameOver; }
     public boolean isWon() { return won; }
     public int getSunAmount() { return sunAmount; }
