@@ -2,80 +2,100 @@ package model.enums;
 
 /**
  * انواع گیاهان موجود در بازی.
- * نام‌ها با داک و فایل plants.csv هماهنگ هستند.
+ * نام‌ها با فیلد type در فایل plants.json هماهنگ هستند.
  */
 public enum PlantType {
+
     // Sun Producers
     SUNFLOWER,
     TWIN_SUNFLOWER,
     SUN_SHROOM,
-    SUN_BEAN,
+    PRIMAL_SUNFLOWER,
+    GOLD_BLOOM,
 
-    // Shooters (Pea family)
+    // Pea / Shooter Plants
     PEASHOOTER,
     REPEATER,
-    GATLING_PEA,
-    MEGA_GATLING_PEA,
+    THREEPEATER,
     SNOW_PEA,
-    TORCHWOOD,
+    PEA_POD,
+    SPLIT_PEA,
+    FIRE_PEASHOOTER,
+    GOO_PEASHOOTER,
+    MEGA_GATLING_PEA,
 
-    // Shooters (other)
-    SPIKEWEED,
-    CABBAGE_PULT,
-    MELON_PULT,
-    WINTER_MELON,
-    KERNEL_PULT,
-    COB_CANNON,
+    // Other Shooters
+    ROTOBAGA,
+    CITRON,
+    BOWLING_BULB,
+    STARFRUIT,
+
+    // Homing Plants
+    CAULIPOWER,
+    ELECTRIC_BLUEBERRY,
+    CAT_TAIL,
+
+    // Strike-through Plants
+    CACTUS,
+    FUME_SHROOM,
 
     // Lobbers
-    PEANUT,
-    CITRON,
+    CABBAGE_PULT,
+    KERNEL_PULT,
+    MELON_PULT,
+    WINTER_MELON,
+    PEPPER_PULT,
 
-    // Explosives
-    CHERRY_BOMB,
+    // Explosives and Traps
     POTATO_MINE,
+    PRIMAL_POTATO_MINE,
+    CHERRY_BOMB,
+    SQUASH,
+    GRAPESHOT,
     JALAPENO,
-    EXPLODE_O_NUT,
+    DOOM_SHROOM,
+    TANGLE_KELP,
+    ICEBERG_LETTUCE,
+    ICE_SHROOM,
+    HOT_POTATO,
+    GRAVE_BUSTER,
 
     // Melee Attackers
-    CHOMPER,
     BONK_CHOY,
-    SQUASH,
+    PHAT_BEET,
+    CHOMPER,
+    WASABI_WHIP,
+    KIWIBEAST,
 
-    // Wall-nuts (Defenders)
+    // Wall-nuts / Defenders
     WALL_NUT,
     TALL_NUT,
-    PUMPKIN,
-
-    // Modifiers / Support
+    ENDURIAN,
     GARLIC,
     SWEET_POTATO,
-    SPORE_SHROOM,
+    EXPLODE_O_NUT,
+    PUMPKIN,
+    SUN_BEAN,
+
+    // Mushrooms
+    SEA_SHROOM,
+    PUFF_SHROOM,
     MAGNET_SHROOM,
     HYPNO_SHROOM,
 
-    // Strike-through
-    LASER_BEAN,
-    FUME_SHROOM,
-    HOMING_THISTLE,
-
-    // Homing
-    SNAPDRAGON,
-
-    // Mints (insta-activate)
-    SPEARMINT,
-    FROSTBITE_CAVES_MINT,
-    TORCHWOOD_MINT,
-
-    // Water plants
+    // Modifiers / Support
+    TORCHWOOD,
+    IMITATER,
     LILY_PAD,
-    TANGLE_KELP,
 
-    // Minigame exclusives
-    WALLNUT_BOWLING,
-    EXPLODE_O_NUT_BOWLING,
-    BIG_WALLNUT,
-
-    // Puff-shroom (cheap temporary)
-    PUFF_SHROOM
+    // Mints
+    ENLIGHTEN_MINT,
+    APPEASE_MINT,
+    ARMA_MINT,
+    BOMBARD_MINT,
+    ENFORCE_MINT,
+    REINFORCE_MINT,
+    ENCHANT_MINT,
+    PIERCE_MINT,
+    CATTAIL_MINT
 }
