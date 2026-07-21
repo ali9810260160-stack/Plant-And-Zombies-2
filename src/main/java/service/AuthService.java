@@ -38,13 +38,13 @@ public class AuthService {
         validatePassword(password);
         if (!password.equals(confirmPassword)) {
             throw new ValidationException(
-                    "Password and confirmation do not match.");
+                "Password and confirmation do not match.");
         }
         validateNickname(nickname);
         validateEmail(email);
         if (userRepository.existsByUsername(username)) {
             throw new ValidationException(
-                    "Username '" + username + "' is already taken.");
+                "Username '" + username + "' is already taken.");
         }
         String hash = HashUtil.sha256(password);
         User user = new User(username, hash, nickname, email, gender);
@@ -61,7 +61,7 @@ public class AuthService {
         }
         if (!USERNAME_PATTERN.matcher(username).matches()) {
             throw new ValidationException(
-                    "Username may only contain letters, digits, and hyphens.");
+                "Username may only contain letters, digits, and hyphens.");
         }
     }
 
@@ -72,7 +72,7 @@ public class AuthService {
         if (nickname.length() < MIN_NICKNAME_LEN
                 || nickname.length() > MAX_NICKNAME_LEN) {
             throw new ValidationException(
-                    "Nickname must be 3-30 characters long.");
+                "Nickname must be 3-30 characters long.");
         }
     }
 
@@ -92,43 +92,43 @@ public class AuthService {
         if (local.isEmpty() || !local.matches("[a-zA-Z0-9].*[a-zA-Z0-9]")
                 && local.length() > 1) {
             throw new ValidationException(
-                    "Email local part must start and end with letter/digit.");
+                "Email local part must start and end with letter/digit.");
         }
         if (local.contains("..")) {
             throw new ValidationException(
-                    "Email local part cannot have consecutive dots.");
+                "Email local part cannot have consecutive dots.");
         }
         if (!EMAIL_LOCAL_PATTERN.matcher(local).matches()) {
             throw new ValidationException(
-                    "Email local part contains invalid characters.");
+                "Email local part contains invalid characters.");
         }
     }
 
     private void validateEmailDomain(String domain) {
         if (!domain.contains(".")) {
             throw new ValidationException(
-                    "Email domain must contain at least one dot.");
+                "Email domain must contain at least one dot.");
         }
         String[] domainParts = domain.split("\\.");
         String tld = domainParts[domainParts.length - 1];
         if (tld.length() < 2) {
             throw new ValidationException(
-                    "Email domain TLD must be at least 2 characters.");
+                "Email domain TLD must be at least 2 characters.");
         }
         if (domain.contains("..")) {
             throw new ValidationException(
-                    "Email domain cannot have consecutive dots.");
+                "Email domain cannot have consecutive dots.");
         }
         if (!EMAIL_DOMAIN_PATTERN.matcher(domain).matches()) {
             throw new ValidationException(
-                    "Email domain contains invalid characters.");
+                "Email domain contains invalid characters.");
         }
     }
 
     public void validatePassword(String password) {
         if (password == null || password.length() < 8) {
             throw new ValidationException(
-                    "Password must be at least 8 characters long.");
+                "Password must be at least 8 characters long.");
         }
         boolean hasUpper = false;
         boolean hasLower = false;
@@ -150,19 +150,19 @@ public class AuthService {
         }
         if (!hasUpper) {
             throw new ValidationException(
-                    "Password must contain at least one uppercase letter.");
+                "Password must contain at least one uppercase letter.");
         }
         if (!hasLower) {
             throw new ValidationException(
-                    "Password must contain at least one lowercase letter.");
+                "Password must contain at least one lowercase letter.");
         }
         if (!hasDigit) {
             throw new ValidationException(
-                    "Password must contain at least one digit.");
+                "Password must contain at least one digit.");
         }
         if (!hasSpecial) {
             throw new ValidationException(
-                    "Password must contain at least one special character.");
+                "Password must contain at least one special character.");
         }
     }
 
@@ -170,7 +170,7 @@ public class AuthService {
                                     String answer, String confirmAnswer) {
         if (!answer.equals(confirmAnswer)) {
             throw new ValidationException(
-                    "Answer and confirmation do not match.");
+                "Answer and confirmation do not match.");
         }
         User user = userRepository.findByUsername(username);
         if (user == null) {
@@ -226,7 +226,7 @@ public class AuthService {
 
     public boolean isValidUsername(String username) {
         return username != null
-                && USERNAME_PATTERN.matcher(username).matches();
+               && USERNAME_PATTERN.matcher(username).matches();
     }
 
     public boolean isValidEmail(String email) {

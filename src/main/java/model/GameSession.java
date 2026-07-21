@@ -59,7 +59,7 @@ public class GameSession {
         this.result = GameResult.IN_PROGRESS;
         this.cooldownCheated = false;
         this.sunAmount = level.getInitialSunAmount() > 0
-                ? level.getInitialSunAmount() : 50;
+                         ? level.getInitialSunAmount() : 50;
         this.plantFoodCount = 0;
         this.currentWaveIndex = 0;
         this.activeZombies = new ArrayList<>();

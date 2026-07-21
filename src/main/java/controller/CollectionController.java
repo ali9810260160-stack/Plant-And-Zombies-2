@@ -37,8 +37,8 @@ public class CollectionController {
             PlantStats stats = getPlantStatsForName(plantName);
             String desc = stats != null ? stats.getDescription() : "";
             System.out.println(ConsoleView.GREEN + "  " + i++ + ". "
-                    + ConsoleView.BOLD + plantName + ConsoleView.RESET
-                    + "  — " + desc);
+                + ConsoleView.BOLD + plantName + ConsoleView.RESET
+                + "  — " + desc);
         }
     }
 
@@ -51,10 +51,10 @@ public class CollectionController {
                 continue;
             }
             System.out.printf(ConsoleView.GREEN + "  %2d. %-30s"
-                            + ConsoleView.RESET
-                            + " Cost: %-4d HP: %-5d  %s%n",
-                    i++, type.name(), stats.getSunCost(),
-                    stats.getBaseHp(), stats.getDescription());
+                + ConsoleView.RESET
+                + " Cost: %-4d HP: %-5d  %s%n",
+                i++, type.name(), stats.getSunCost(),
+                stats.getBaseHp(), stats.getDescription());
         }
     }
 
@@ -70,8 +70,8 @@ public class CollectionController {
             ZombieStats stats = getZombieStatsForName(zombieName);
             String desc = stats != null ? stats.getDescription() : "";
             System.out.println(ConsoleView.RED + "  " + i++ + ". "
-                    + ConsoleView.BOLD + zombieName + ConsoleView.RESET
-                    + "  — " + desc);
+                + ConsoleView.BOLD + zombieName + ConsoleView.RESET
+                + "  — " + desc);
         }
     }
 
@@ -84,10 +84,10 @@ public class CollectionController {
                 continue;
             }
             System.out.printf(ConsoleView.RED + "  %2d. %-30s"
-                            + ConsoleView.RESET
-                            + " HP: %-5d Cost: %-4d  %s%n",
-                    i++, type.name(), stats.getHp(),
-                    stats.getWaveCost(), stats.getDescription());
+                + ConsoleView.RESET
+                + " HP: %-5d Cost: %-4d  %s%n",
+                i++, type.name(), stats.getHp(),
+                stats.getWaveCost(), stats.getDescription());
         }
     }
 
@@ -99,27 +99,27 @@ public class CollectionController {
         }
         view.printHeader("🌱 " + stats.getType().name());
         System.out.println(ConsoleView.CYAN + "  Type:        " + ConsoleView.RESET
-                + stats.getType().name());
+            + stats.getType().name());
         System.out.println(ConsoleView.CYAN + "  Family:      " + ConsoleView.RESET
-                + stats.getFamily());
+            + stats.getFamily());
         System.out.println(ConsoleView.CYAN + "  Category:    " + ConsoleView.RESET
-                + stats.getCategory());
+            + stats.getCategory());
         System.out.println(ConsoleView.YELLOW + "  Sun Cost:    " + ConsoleView.RESET
-                + stats.getSunCost());
+            + stats.getSunCost());
         System.out.println(ConsoleView.GREEN + "  HP:          " + ConsoleView.RESET
-                + stats.getBaseHp());
+            + stats.getBaseHp());
         System.out.println(ConsoleView.RED + "  Damage:      " + ConsoleView.RESET
-                + stats.getBaseDamage());
+            + stats.getBaseDamage());
         System.out.println(ConsoleView.WHITE + "  Atk Speed:   " + ConsoleView.RESET
-                + stats.getAttackSpeed());
+            + stats.getAttackSpeed());
         System.out.println(ConsoleView.WHITE + "  Range:       " + ConsoleView.RESET
-                + stats.getRange());
+            + stats.getRange());
         System.out.println(ConsoleView.WHITE + "  Recharge:    " + ConsoleView.RESET
-                + stats.getRechargeTime() + "s");
+            + stats.getRechargeTime() + "s");
         System.out.println(ConsoleView.MAGENTA + "  Tags:        " + ConsoleView.RESET
-                + stats.getTags());
+            + stats.getTags());
         System.out.println(ConsoleView.WHITE + "  Description: " + ConsoleView.RESET
-                + stats.getDescription());
+            + stats.getDescription());
     }
 
     public void showZombie(String zombieName) {
@@ -130,21 +130,21 @@ public class CollectionController {
         }
         view.printHeader("🧟 " + stats.getType().name());
         System.out.println(ConsoleView.CYAN + "  Type:        " + ConsoleView.RESET
-                + stats.getType().name());
+            + stats.getType().name());
         System.out.println(ConsoleView.GREEN + "  HP:          " + ConsoleView.RESET
-                + stats.getHp());
+            + stats.getHp());
         System.out.println(ConsoleView.RED + "  DPS:         " + ConsoleView.RESET
-                + stats.getDps());
+            + stats.getDps());
         System.out.println(ConsoleView.WHITE + "  Move Speed:  " + ConsoleView.RESET
-                + stats.getMoveSpeed());
+            + stats.getMoveSpeed());
         System.out.println(ConsoleView.YELLOW + "  Wave Cost:   " + ConsoleView.RESET
-                + stats.getWaveCost());
+            + stats.getWaveCost());
         if (!stats.getArmors().isEmpty()) {
             System.out.println(ConsoleView.CYAN + "  Armor:       " + ConsoleView.RESET
-                    + stats.getArmors());
+                + stats.getArmors());
         }
         System.out.println(ConsoleView.WHITE + "  Description: " + ConsoleView.RESET
-                + stats.getDescription());
+            + stats.getDescription());
     }
 
     public void upgradePlant(String plantName, AppState appState) {
@@ -161,12 +161,12 @@ public class CollectionController {
         long coinCost = 500L;
         if (user.getCoins() < coinCost) {
             view.printError("Need " + coinCost + " coins to upgrade. "
-                    + "You have: " + user.getCoins());
+                + "You have: " + user.getCoins());
             return;
         }
         user.setCoins(user.getCoins() - coinCost);
         view.printSuccess(plantName + " upgraded! Costs "
-                + coinCost + " coins.");
+            + coinCost + " coins.");
     }
 
     public void purchasePlant(String plantName, AppState appState) {

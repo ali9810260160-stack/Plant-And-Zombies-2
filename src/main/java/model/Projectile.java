@@ -61,5 +61,4 @@ public class Projectile {
     public void setAoeRadius(int aoeRadius) { this.aoeRadius = aoeRadius; }
     public boolean isHitsPlants() { return hitsPlants; }
     public void setHitsPlants(boolean hitsPlants) { this.hitsPlants = hitsPlants; }
-
 }

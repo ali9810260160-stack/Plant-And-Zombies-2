@@ -48,7 +48,7 @@ public class JesterZombie extends Zombie {
             startSpinning();
         }
         Projectile deflected = new Projectile(
-                incoming.getType(), x, y, incoming.getDamage());
+            incoming.getType(), x, y, incoming.getDamage());
         deflected.setMovingRight(false);
         deflected.setHitsPlants(true);
         if (incoming.getType() == ProjectileType.ICE) {
@@ -64,6 +64,6 @@ public class JesterZombie extends Zombie {
     @Override
     public String getDescription() {
         return "Jester Zombie: Deflects all projectiles back at plants "
-                + "while spinning! Ice projectiles freeze plants.";
+               + "while spinning! Ice projectiles freeze plants.";
     }
 }

@@ -39,7 +39,7 @@ public class GameService {
 
     public GameSession createSession(Level level, List<PlantType> selectedPlants) {
         GameMap map = new GameMap(level.getMapRows(), level.getMapCols(),
-                level.getChapter());
+                                  level.getChapter());
         setupMapForChapter(map, level);
         GameSession session = new GameSession(level, map, selectedPlants);
         List<Wave> waves = waveService.generateWaves(level);
@@ -72,7 +72,7 @@ public class GameService {
         }
         if (level.getLevelType() == LevelType.PLANT_WHAT_YOU_GET) {
             int sun = level.getInitialSunAmount() > 0
-                    ? level.getInitialSunAmount() : 500;
+                      ? level.getInitialSunAmount() : 500;
             session.setSunAmount(sun);
             session.setWaveStarted(false);
         }
@@ -112,8 +112,8 @@ public class GameService {
             int col = RandomUtil.between(2, map.getCols() - 1);
             int row = RandomUtil.between(1, map.getRows());
             TileType type = RandomUtil.chance(0.5)
-                    ? TileType.SLIPPERY_UP
-                    : TileType.SLIPPERY_DOWN;
+                            ? TileType.SLIPPERY_UP
+                            : TileType.SLIPPERY_DOWN;
             map.setTileType(col, row, type);
         }
     }
@@ -121,7 +121,7 @@ public class GameService {
     private void setupBeachWater(GameMap map) {
         int waterCols = RandomUtil.between(2, 4);
         for (int col = map.getCols() - waterCols + 1;
-             col <= map.getCols(); col++) {
+                col <= map.getCols(); col++) {
             for (int row = 1; row <= map.getRows(); row++) {
                 map.setTileType(col, row, TileType.WATER);
             }
@@ -203,7 +203,7 @@ public class GameService {
                 TileType tombType = getTombstoneType();
                 session.getGameMap().setTileType(col, row, tombType);
                 System.out.println("\u001B[35m⛰ A tombstone appeared at ("
-                        + col + "," + row + ")!\u001B[0m");
+                    + col + "," + row + ")!\u001B[0m");
             }
         }
     }
@@ -220,35 +220,35 @@ public class GameService {
         Tile tile = session.getGameMap().getTile(x, y);
         if (tile == null) {
             throw new exception.GameException(
-                    "Invalid position (" + x + ", " + y + ").");
+                "Invalid position (" + x + ", " + y + ").");
         }
         if (PlantFactory.isWaterPlant(type)) {
             if (!tile.isWater()) {
                 throw new exception.GameException(
-                        type.name() + " can only be planted on water.");
+                    type.name() + " can only be planted on water.");
             }
         } else if (type == PlantType.PUMPKIN) {
             if (tile.getPlant() == null) {
                 throw new exception.GameException(
-                        "Pumpkin needs a plant to protect underneath.");
+                    "Pumpkin needs a plant to protect underneath.");
             }
         } else {
             if (!tile.isPlantable()) {
                 throw new exception.GameException(
-                        "Cannot plant at (" + x + ", " + y + ").");
+                    "Cannot plant at (" + x + ", " + y + ").");
             }
         }
         int cost = PlantFactory.getSunCost(type);
         if (session.getSunAmount() < cost) {
             throw new exception.GameException(
-                    "Not enough sun. Need " + cost
-                            + ", have " + session.getSunAmount() + ".");
+                "Not enough sun. Need " + cost
+                + ", have " + session.getSunAmount() + ".");
         }
         session.spendSun(cost);
         Plant plant = PlantFactory.create(type);
         if (plant == null) {
             throw new exception.GameException(
-                    "Unknown plant type: " + type.name());
+                "Unknown plant type: " + type.name());
         }
         plant.setX(x);
         plant.setY(y);
@@ -278,7 +278,7 @@ public class GameService {
         Tile tile = session.getGameMap().getTile(x, y);
         if (tile == null || tile.getPlant() == null) {
             throw new exception.GameException(
-                    "No plant at (" + x + ", " + y + ").");
+                "No plant at (" + x + ", " + y + ").");
         }
         if (tile.getSecondLayerPlant() != null) {
             tile.setPlant(tile.getSecondLayerPlant());
@@ -291,17 +291,17 @@ public class GameService {
     public void feedPlant(GameSession session, int x, int y) {
         if (session.getPlantFoodCount() <= 0) {
             throw new exception.GameException(
-                    "No plant food available.");
+                "No plant food available.");
         }
         Tile tile = session.getGameMap().getTile(x, y);
         if (tile == null || tile.getPlant() == null) {
             throw new exception.GameException(
-                    "No plant at (" + x + ", " + y + ").");
+                "No plant at (" + x + ", " + y + ").");
         }
         session.usePlantFood();
         tile.getPlant().activatePlantFood();
         view.printSuccess("Plant food used on "
-                + tile.getPlant().getType().name() + "!");
+            + tile.getPlant().getType().name() + "!");
     }
 
     public void releaseNuke(GameSession session) {
@@ -329,17 +329,17 @@ public class GameService {
         boolean added = session.addPlantFood();
         if (added) {
             view.printSuccess("Plant food added. You have "
-                    + session.getPlantFoodCount() + " now.");
+                + session.getPlantFoodCount() + " now.");
         } else {
             view.printError("Plant food is at maximum (3).");
         }
     }
 
     public void spawnZombieCheat(GameSession session, String zombieType,
-                                 int x, int y) {
+                                  int x, int y) {
         try {
             model.enums.ZombieType type =
-                    model.enums.ZombieType.valueOf(zombieType.toUpperCase());
+                model.enums.ZombieType.valueOf(zombieType.toUpperCase());
             Zombie z = model.zombies.ZombieFactory.create(type);
             z.setX(x);
             z.setY(y);

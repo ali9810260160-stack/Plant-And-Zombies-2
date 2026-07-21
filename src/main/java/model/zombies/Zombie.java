@@ -79,9 +79,9 @@ public abstract class Zombie {
 
     private int applyDamageToArmor(int damage) {
         ArmorType[] priority = {
-                ArmorType.HELMET, ArmorType.CONE, ArmorType.BUCKET,
-                ArmorType.BLOCK, ArmorType.SHOULDER_ARMOR,
-                ArmorType.NEWSPAPER, ArmorType.BARREL
+            ArmorType.HELMET, ArmorType.CONE, ArmorType.BUCKET,
+            ArmorType.BLOCK, ArmorType.SHOULDER_ARMOR,
+            ArmorType.NEWSPAPER, ArmorType.BARREL
         };
         for (ArmorType at : priority) {
             if (!armors.containsKey(at)) {

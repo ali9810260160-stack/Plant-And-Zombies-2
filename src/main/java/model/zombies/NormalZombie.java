@@ -158,7 +158,7 @@ public class NormalZombie extends Zombie {
     @Override
     public String getDescription() {
         return type.name() + " - a zombie with "
-                + maxHealth + " HP and "
-                + damagePerSecond + " DPS.";
+               + maxHealth + " HP and "
+               + damagePerSecond + " DPS.";
     }
 }

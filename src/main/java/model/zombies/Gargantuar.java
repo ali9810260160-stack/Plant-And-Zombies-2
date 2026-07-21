@@ -41,6 +41,6 @@ public class Gargantuar extends Zombie {
     @Override
     public String getDescription() {
         return "Gargantuar: 3000 HP, destroys plants in one hit. "
-                + "Throws an Imp when at half health!";
+               + "Throws an Imp when at half health!";
     }
 }

@@ -72,14 +72,14 @@ public class ScoredGameService {
      */
     public List<PlantType> getDefaultScoredPlants() {
         return Arrays.asList(
-                PlantType.SUNFLOWER,
-                PlantType.PEASHOOTER,
-                PlantType.REPEATER,
-                PlantType.SNOW_PEA,
-                PlantType.CHERRY_BOMB,
-                PlantType.WALL_NUT,
-                PlantType.CABBAGE_PULT,
-                PlantType.POTATO_MINE
+            PlantType.SUNFLOWER,
+            PlantType.PEASHOOTER,
+            PlantType.REPEATER,
+            PlantType.SNOW_PEA,
+            PlantType.CHERRY_BOMB,
+            PlantType.WALL_NUT,
+            PlantType.CABBAGE_PULT,
+            PlantType.POTATO_MINE
         );
     }
 
@@ -91,7 +91,7 @@ public class ScoredGameService {
             long bonus = MULTI_KILL_BONUS * killCountInOneShot;
             meoPoints += bonus;
             printMeoEvent("⚡ MULTI-KILL x" + killCountInOneShot + "!",
-                    bonus, currentTick);
+                bonus, currentTick);
         }
         onZombieKilled(currentTick);
     }
@@ -106,7 +106,7 @@ public class ScoredGameService {
                 long bonus = SPEED_KILL_BONUS * consecutiveKills;
                 meoPoints += bonus;
                 printMeoEvent("⚡ SPEED-KILL COMBO x" + consecutiveKills + "!",
-                        bonus, currentTick);
+                    bonus, currentTick);
             }
         } else {
             consecutiveKills = 1;
@@ -126,7 +126,7 @@ public class ScoredGameService {
             long bonus = AOE_KILL_BONUS * simultaneousKills;
             meoPoints += bonus;
             printMeoEvent("💥 AOE x" + simultaneousKills + " simultaneous kills!",
-                    bonus, currentTick);
+                bonus, currentTick);
         }
     }
 
@@ -138,7 +138,7 @@ public class ScoredGameService {
             long bonus = CLEAN_WAVE_BONUS * waveNumber;
             meoPoints += bonus;
             printMeoEvent("🛡 CLEAN WAVE " + waveNumber
-                    + "! No plants lost!", bonus, 0);
+                + "! No plants lost!", bonus, 0);
         }
         plantsLostThisWave = 0;
     }
@@ -161,8 +161,8 @@ public class ScoredGameService {
                 long bonus = ITEM_COLLECT_BONUS * itemsCollectedInWindow;
                 meoPoints += bonus;
                 printMeoEvent("✨ ITEM COLLECTOR x"
-                                + itemsCollectedInWindow + " in 10 ticks!",
-                        bonus, currentTick);
+                    + itemsCollectedInWindow + " in 10 ticks!",
+                    bonus, currentTick);
                 inItemWindow = false;
                 itemsCollectedInWindow = 0;
             }
@@ -175,22 +175,22 @@ public class ScoredGameService {
 
     private void printMeoEvent(String event, long bonus, int tick) {
         System.out.println(ConsoleView.BOLD + ConsoleView.YELLOW
-                + "  🏆 MEO-POINT! " + event
-                + " +" + bonus + " pts  [Total: " + meoPoints + "]"
-                + ConsoleView.RESET);
+            + "  🏆 MEO-POINT! " + event
+            + " +" + bonus + " pts  [Total: " + meoPoints + "]"
+            + ConsoleView.RESET);
     }
 
     public void saveHighScore(User user, long finalScore) {
         if (finalScore > user.getHighestMeoPoint()) {
             user.setHighestMeoPoint(finalScore);
             System.out.println(ConsoleView.GREEN
-                    + "  🏆 NEW HIGH SCORE: " + finalScore
-                    + " MeoPoints!" + ConsoleView.RESET);
+                + "  🏆 NEW HIGH SCORE: " + finalScore
+                + " MeoPoints!" + ConsoleView.RESET);
         } else {
             System.out.println(ConsoleView.CYAN
-                    + "  Score: " + finalScore
-                    + " MeoPoints (Best: " + user.getHighestMeoPoint() + ")"
-                    + ConsoleView.RESET);
+                + "  Score: " + finalScore
+                + " MeoPoints (Best: " + user.getHighestMeoPoint() + ")"
+                + ConsoleView.RESET);
         }
     }
 
@@ -198,29 +198,29 @@ public class ScoredGameService {
         view.printSeparator();
         view.printHeader("🏆 Scored Game — Final Results");
         System.out.println(ConsoleView.YELLOW
-                + "  Total MeoPoints:    " + meoPoints + ConsoleView.RESET);
+            + "  Total MeoPoints:    " + meoPoints + ConsoleView.RESET);
         System.out.println(ConsoleView.GREEN
-                + "  Your Best Score:   "
-                + user.getHighestMeoPoint() + ConsoleView.RESET);
+            + "  Your Best Score:   "
+            + user.getHighestMeoPoint() + ConsoleView.RESET);
         System.out.println(ConsoleView.CYAN
-                + "  Daily Seed:        " + getDailySeed() + ConsoleView.RESET);
+            + "  Daily Seed:        " + getDailySeed() + ConsoleView.RESET);
         view.printSeparator();
         System.out.println(ConsoleView.WHITE + "  MeoPoint Breakdown:" + ConsoleView.RESET);
         System.out.println("    Pattern 1 — Multi-Kill:      "
-                + ConsoleView.YELLOW + "(earned via StrikeThrough projectiles)"
-                + ConsoleView.RESET);
+            + ConsoleView.YELLOW + "(earned via StrikeThrough projectiles)"
+            + ConsoleView.RESET);
         System.out.println("    Pattern 2 — Speed-Kill Combo: "
-                + ConsoleView.YELLOW + "(fast consecutive kills)"
-                + ConsoleView.RESET);
+            + ConsoleView.YELLOW + "(fast consecutive kills)"
+            + ConsoleView.RESET);
         System.out.println("    Pattern 3 — AoE Simultaneous: "
-                + ConsoleView.YELLOW + "(Cherry Bomb, Melon, explosions)"
-                + ConsoleView.RESET);
+            + ConsoleView.YELLOW + "(Cherry Bomb, Melon, explosions)"
+            + ConsoleView.RESET);
         System.out.println("    Pattern 4 — Clean Wave:       "
-                + ConsoleView.YELLOW + "(no plants lost per wave)"
-                + ConsoleView.RESET);
+            + ConsoleView.YELLOW + "(no plants lost per wave)"
+            + ConsoleView.RESET);
         System.out.println("    Pattern 5 — Item Collector:   "
-                + ConsoleView.YELLOW + "(5+ suns in 10 ticks)"
-                + ConsoleView.RESET);
+            + ConsoleView.YELLOW + "(5+ suns in 10 ticks)"
+            + ConsoleView.RESET);
         view.printSeparator();
     }
 

@@ -57,7 +57,7 @@ public class GameController {
         appState.setCurrentMenu(MenuType.PLANT_SELECT);
         view.printHeader("🌿 Plant Selection — " + chapterName);
         view.printInfo("Select up to " + pendingLevel.getPlantSlots()
-                + " plants. Type 'show all plants' to see available plants.");
+            + " plants. Type 'show all plants' to see available plants.");
     }
 
     private Level createLevelFromChapter(String name) {
@@ -85,12 +85,12 @@ public class GameController {
                 continue;
             }
             boolean owned = user.getUnlockedPlants() != null
-                    && user.getUnlockedPlants().contains(type.name());
+                && user.getUnlockedPlants().contains(type.name());
             String status = owned
-                    ? ConsoleView.GREEN + "[owned]" + ConsoleView.RESET
-                    : ConsoleView.RED + "[locked]" + ConsoleView.RESET;
+                ? ConsoleView.GREEN + "[owned]" + ConsoleView.RESET
+                : ConsoleView.RED + "[locked]" + ConsoleView.RESET;
             System.out.printf("  %-30s  Cost:%-5d  %s%n",
-                    type.name(), stats.getSunCost(), status);
+                type.name(), stats.getSunCost(), status);
         }
     }
 
@@ -100,7 +100,7 @@ public class GameController {
         List<String> unlocked = user.getUnlockedPlants();
         if (unlocked == null || unlocked.isEmpty()) {
             view.printInfo("You need to unlock plants first "
-                    + "(menu collection purchase-plant -p <name>).");
+                + "(menu collection purchase-plant -p <name>).");
             view.printInfo("Starter plants: SUNFLOWER, PEASHOOTER, WALL_NUT");
             return;
         }
@@ -114,12 +114,12 @@ public class GameController {
                 }
             }
             String mark = selected
-                    ? ConsoleView.GREEN + " ✔ SELECTED" + ConsoleView.RESET : "";
+                ? ConsoleView.GREEN + " ✔ SELECTED" + ConsoleView.RESET : "";
             System.out.println("  " + i++ + ". " + plantName + mark);
         }
         System.out.println(ConsoleView.CYAN + "  Selected: "
-                + selectedPlants.size() + "/"
-                + pendingLevel.getPlantSlots() + ConsoleView.RESET);
+            + selectedPlants.size() + "/"
+            + pendingLevel.getPlantSlots() + ConsoleView.RESET);
     }
 
     public void addPlantToSelect(String typeName, AppState appState) {
@@ -133,7 +133,7 @@ public class GameController {
         }
         if (!userHasPlant(user, type)) {
             view.printError("You don't own " + typeName
-                    + ". Purchase it first from the collection menu.");
+                + ". Purchase it first from the collection menu.");
             return;
         }
         if (selectedPlants.contains(type)) {
@@ -142,13 +142,13 @@ public class GameController {
         }
         if (selectedPlants.size() >= pendingLevel.getPlantSlots()) {
             view.printError("Plant slots full ("
-                    + pendingLevel.getPlantSlots() + " max).");
+                + pendingLevel.getPlantSlots() + " max).");
             return;
         }
         selectedPlants.add(type);
         view.printSuccess(typeName + " added. ("
-                + selectedPlants.size() + "/"
-                + pendingLevel.getPlantSlots() + ")");
+            + selectedPlants.size() + "/"
+            + pendingLevel.getPlantSlots() + ")");
     }
 
     private boolean userHasPlant(User user, PlantType type) {
@@ -188,7 +188,7 @@ public class GameController {
         }
         if (user.getGems() < 2) {
             view.printError("Need 2 gems to boost. You have: "
-                    + user.getGems());
+                + user.getGems());
             return;
         }
         user.setGems(user.getGems() - 2);
@@ -206,7 +206,7 @@ public class GameController {
             return;
         }
         GameSession session = gameService.createSession(
-                pendingLevel, selectedPlants);
+            pendingLevel, selectedPlants);
         session.setBoostedPlants(new ArrayList<>(boostedPlants));
         appState.setCurrentSession(session);
         appState.setCurrentMenu(MenuType.IN_GAME);
@@ -290,7 +290,7 @@ public class GameController {
                 view.printError("No sun at (" + x + ", " + y + ").");
             } else {
                 view.printSuccess("Collected " + gained + " sun! Total: "
-                        + session.getSunAmount());
+                    + session.getSunAmount());
             }
         }
     }
@@ -335,17 +335,17 @@ public class GameController {
 
     private void printPlantStatus(Plant plant, int x, int y) {
         PlantStats stats = PlantDataRegistry.getInstance()
-                .getStats(plant.getType());
+                                            .getStats(plant.getType());
         int cost = stats != null ? stats.getSunCost() : 0;
         String cooldown = plant.getRemainingCooldownTicks() > 0
-                ? String.format("%.1fs", plant.getRemainingCooldownTicks() / 10.0)
-                : "Ready";
+            ? String.format("%.1fs", plant.getRemainingCooldownTicks() / 10.0)
+            : "Ready";
         System.out.printf("  (%d,%d) %-20s  HP:%d/%d  Cost:%-4d  CD:%s%s%n",
-                x, y, plant.getType().name(),
-                plant.getCurrentHealth(), plant.getMaxHealth(),
-                cost, cooldown,
-                plant.isFrozen()
-                        ? ConsoleView.CYAN + "  [FROZEN]" + ConsoleView.RESET : "");
+            x, y, plant.getType().name(),
+            plant.getCurrentHealth(), plant.getMaxHealth(),
+            cost, cooldown,
+            plant.isFrozen()
+                ? ConsoleView.CYAN + "  [FROZEN]" + ConsoleView.RESET : "");
     }
 
     public void showTileStatus(Matcher m, AppState appState) {
@@ -363,7 +363,7 @@ public class GameController {
         }
         view.printHeader("Tile (" + x + ", " + y + ")");
         System.out.println(ConsoleView.CYAN + "  Type: "
-                + ConsoleView.RESET + tile.getType().name());
+            + ConsoleView.RESET + tile.getType().name());
         if (tile.getPlant() != null) {
             printPlantStatus(tile.getPlant(), x, y);
         }
@@ -376,10 +376,10 @@ public class GameController {
 
     private void printZombieStatus(Zombie zombie) {
         System.out.printf(ConsoleView.RED
-                        + "  Zombie: %-20s  HP:%d  X:%.2f  Y:%d  Armor:%s%n"
-                        + ConsoleView.RESET,
-                zombie.getType().name(), zombie.getCurrentHealth(),
-                zombie.getX(), zombie.getY(), zombie.getArmors());
+            + "  Zombie: %-20s  HP:%d  X:%.2f  Y:%d  Armor:%s%n"
+            + ConsoleView.RESET,
+            zombie.getType().name(), zombie.getCurrentHealth(),
+            zombie.getX(), zombie.getY(), zombie.getArmors());
     }
 
     public void showSunAmount(AppState appState) {
@@ -389,7 +389,7 @@ public class GameController {
             return;
         }
         view.printInfo("☀ Current sun: "
-                + ConsoleView.YELLOW + session.getSunAmount());
+            + ConsoleView.YELLOW + session.getSunAmount());
     }
 
     public void showZombiesInfo(AppState appState) {
@@ -410,20 +410,20 @@ public class GameController {
 
     private void printDetailedZombieInfo(Zombie zombie) {
         System.out.println(ConsoleView.RED + zombie.getType().name()
-                + ":" + ConsoleView.RESET);
+            + ":" + ConsoleView.RESET);
         System.out.printf("  position: %.1f, %d%n",
-                zombie.getX(), zombie.getY());
+            zombie.getX(), zombie.getY());
         System.out.println("  health: " + zombie.getCurrentHealth());
         if (!zombie.getArmors().isEmpty()) {
             System.out.println("  armor:");
             zombie.getArmors().forEach((at, hp) ->
-                    System.out.println("    " + at.name() + ": " + hp));
+                System.out.println("    " + at.name() + ": " + hp));
         }
         if (!zombie.getActiveEffects().isEmpty()) {
             System.out.println("  effects:");
             zombie.getActiveEffects().forEach((ef, ticks) ->
-                    System.out.printf("    %s: %.1fs%n",
-                            ef.name(), ticks / 10.0));
+                System.out.printf("    %s: %.1fs%n",
+                    ef.name(), ticks / 10.0));
         }
     }
 
@@ -435,7 +435,7 @@ public class GameController {
         }
         session.addSun(count);
         view.printSuccess("Added " + count + " sun! Total: "
-                + session.getSunAmount());
+            + session.getSunAmount());
     }
 
     public void releaseNuke(AppState appState) {
@@ -487,11 +487,11 @@ public class GameController {
         if (type.equalsIgnoreCase("coin")) {
             user.setCoins(user.getCoins() + amount);
             view.printSuccess("Added " + amount + " coins! Total: "
-                    + user.getCoins());
+                + user.getCoins());
         } else {
             user.setGems(user.getGems() + amount);
             view.printSuccess("Added " + amount + " gems! Total: "
-                    + user.getGems());
+                + user.getGems());
         }
     }
 }

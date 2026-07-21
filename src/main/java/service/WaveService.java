@@ -104,9 +104,9 @@ public class WaveService {
 
     private void printSpawnMessage(Zombie z, Wave wave, int lane, int cost) {
         System.out.println("\u001B[31mZombie " + z.getType().name()
-                + " spawned at wave " + wave.getWaveNumber()
-                + " in lane " + lane
-                + " which costed " + cost + ".\u001B[0m");
+            + " spawned at wave " + wave.getWaveNumber()
+            + " in lane " + lane
+            + " which costed " + cost + ".\u001B[0m");
     }
 
     public boolean shouldAdvanceWave(Wave currentWave, Wave nextWave) {
@@ -144,9 +144,9 @@ public class WaveService {
                 if (!plant.isFirePlant()) {
                     plant.incrementFreezeLevel();
                     System.out.println("\u001B[36mIce wind hit plant "
-                            + plant.getType().name()
-                            + " at (" + col + "," + row + "). Freeze level: "
-                            + plant.getFreezeLevel() + "\u001B[0m");
+                        + plant.getType().name()
+                        + " at (" + col + "," + row + "). Freeze level: "
+                        + plant.getFreezeLevel() + "\u001B[0m");
                 }
             }
         }
@@ -177,6 +177,6 @@ public class WaveService {
         zombie.setLane(row);
         session.getActiveZombies().add(zombie);
         System.out.println("\u001B[35mA zombie emerged from necromancy at ("
-                + col + "," + row + ")!\u001B[0m");
+            + col + "," + row + ")!\u001B[0m");
     }
 }

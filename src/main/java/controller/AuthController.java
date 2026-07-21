@@ -42,9 +42,9 @@ public class AuthController {
         String email = m.group(5);
         String genderStr = m.group(6);
         Gender gender = genderStr.equalsIgnoreCase("male")
-                ? Gender.MALE : Gender.FEMALE;
+                        ? Gender.MALE : Gender.FEMALE;
         User user = authService.register(username, password, confirm,
-                nickname, email, gender);
+                                         nickname, email, gender);
         view.printSuccess("User registered! Please set a security question.");
         view.printSecurityQuestions();
         appState.setCurrentUser(user);
@@ -57,12 +57,12 @@ public class AuthController {
         SecurityQuestion[] questions = SecurityQuestion.values();
         if (qNum < 1 || qNum > questions.length) {
             view.printError("Invalid question number. Choose 1-"
-                    + questions.length);
+                + questions.length);
             return;
         }
         SecurityQuestion question = questions[qNum - 1];
         String username = appState.getCurrentUser() != null
-                ? appState.getCurrentUser().getUsername() : "";
+                          ? appState.getCurrentUser().getUsername() : "";
         authService.setSecurityQuestion(username, question, answer, confirm);
         view.printSuccess("Security question set! Redirecting to login...");
         appState.setCurrentUser(null);
@@ -83,7 +83,7 @@ public class AuthController {
         String username = m.group(1);
         String email = m.group(2);
         SecurityQuestion question =
-                authService.initiatePasswordRecovery(username, email);
+            authService.initiatePasswordRecovery(username, email);
         pendingRecoveryUsername = username;
         awaitingAnswer = true;
         view.printInfo("Security question: " + question.getDisplayText());
@@ -97,7 +97,7 @@ public class AuthController {
         }
         String answer = m.group(1);
         boolean correct = authService.verifySecurityAnswer(
-                pendingRecoveryUsername, answer);
+            pendingRecoveryUsername, answer);
         if (!correct) {
             view.printError("Incorrect answer. Password recovery cancelled.");
             pendingRecoveryUsername = null;

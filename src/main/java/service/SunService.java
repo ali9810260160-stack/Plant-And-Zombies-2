@@ -44,7 +44,7 @@ public class SunService {
         Sun sun = new Sun(type, x, y, tick);
         session.getActiveSuns().add(sun);
         System.out.println("\u001B[33m☀ New " + typeName(type)
-                + " sun is dropping at position (" + x + ", " + y + ")\u001B[0m");
+            + " sun is dropping at position (" + x + ", " + y + ")\u001B[0m");
     }
 
     private String typeName(SunType type) {
@@ -88,7 +88,7 @@ public class SunService {
             sun.setValue(sun.getValue() == 150 ? 25 : sun.getValue());
         }
         System.out.println("\u001B[33m☀ Sun reached the ground at position ("
-                + sun.getX() + ", " + sun.getY() + ")\u001B[0m");
+            + sun.getX() + ", " + sun.getY() + ")\u001B[0m");
     }
 
     public int collectSun(GameSession session, int x, int y) {
@@ -149,7 +149,7 @@ public class SunService {
         Tile tile = session.getGameMap().getTile(x, y);
         if (tile == null || tile.getPlant() == null) {
             throw new exception.GameException(
-                    "No plant at (" + x + ", " + y + ")");
+                "No plant at (" + x + ", " + y + ")");
         }
         model.plants.Plant plant = tile.getPlant();
         if (!(plant instanceof model.plants.GenericPlant)) {
@@ -158,13 +158,13 @@ public class SunService {
         model.plants.GenericPlant gp = (model.plants.GenericPlant) plant;
         if (!gp.isSunPending()) {
             throw new exception.GameException(
-                    "No sun ready on plant at (" + x + ", " + y + ")");
+                "No sun ready on plant at (" + x + ", " + y + ")");
         }
         int amount = gp.getSunProductionAmount();
         gp.collectSun();
         session.addSun(amount);
         System.out.println("\u001B[33m☀ plant " + plant.getType().name()
-                + " produced a sun at (" + x + ", " + y + ")\u001B[0m");
+            + " produced a sun at (" + x + ", " + y + ")\u001B[0m");
     }
 
     public void cleanupCollectedSuns(GameSession session) {

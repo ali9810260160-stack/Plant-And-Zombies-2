@@ -49,9 +49,9 @@ public class CommandDispatcher {
         CombatService combatService = new CombatService(view);
         SunService sunService = new SunService();
         GameService gameService = new GameService(
-                waveService, combatService, sunService, view, mapView);
+            waveService, combatService, sunService, view, mapView);
         GreenhouseService greenhouseService = new GreenhouseService(
-                userService, userRepo);
+            userService, userRepo);
 
         this.authController = new AuthController(authService, userService, view);
         this.menuController = new MenuController(view);
@@ -59,9 +59,9 @@ public class CommandDispatcher {
         this.collectionController = new CollectionController(userService, view);
         this.newsController = new NewsController(view);
         this.gameController = new GameController(
-                gameService, sunService, view, mapView);
+            gameService, sunService, view, mapView);
         this.greenhouseController = new GreenhouseController(
-                greenhouseService, view);
+            greenhouseService, view);
         this.travelLogController = new TravelLogController(view);
         this.leaderboardController = new LeaderboardController(userService, view);
         this.minigameController = new MinigameController(view, userService);
@@ -89,7 +89,7 @@ public class CommandDispatcher {
                 appState.setCurrentUser(stayUser);
                 appState.setCurrentMenu(MenuType.MAIN);
                 view.printSuccess("Welcome back, "
-                        + stayUser.getNickname() + "!");
+                    + stayUser.getNickname() + "!");
             }
         } catch (Exception ignored) { }
     }
@@ -192,27 +192,7 @@ public class CommandDispatcher {
             menuController.handleEnter(m.group(1), appState);
         } else if ((m = InputParser.match(input,
                 model.enums.CommandRegex.MENU_ENTER_CHAPTER)) != null) {
-            String chapterArg = m.group(1).toUpperCase();
-            if (chapterArg.startsWith("VASEBREAKER_")) {
-                int lvl = Integer.parseInt(chapterArg.replace("VASEBREAKER_",""));
-                minigameController.startVasebreaker(lvl, appState);
-            } else if (chapterArg.startsWith("BOWLING_")) {
-                int lvl = Integer.parseInt(chapterArg.replace("BOWLING_",""));
-                minigameController.startBowling(lvl, appState);
-            } else if (chapterArg.startsWith("IZOMBIE_")) {
-                int lvl = Integer.parseInt(chapterArg.replace("IZOMBIE_",""));
-                minigameController.startIZombie(lvl, appState);
-            } else if (chapterArg.startsWith("BEGHOULED_")) {
-                int lvl = Integer.parseInt(chapterArg.replace("BEGHOULED_",""));
-                minigameController.startBeghouled(lvl, appState);
-            } else if (chapterArg.startsWith("ZOMBOTANY_")) {
-                int lvl = Integer.parseInt(chapterArg.replace("ZOMBOTANY_",""));
-                minigameController.startZombotany(lvl, appState);
-            } else if (chapterArg.equals("SCORED_GAME")) {
-                minigameController.startScoredGame(appState);
-            } else {
-                gameController.enterChapter(m.group(1), appState);
-            }
+            handleChapterEntry(m.group(1), appState);
         } else if (InputParser.matches(input,
                 model.enums.CommandRegex.MENU_GREENHOUSE)) {
             appState.setCurrentMenu(MenuType.GREENHOUSE);
@@ -226,16 +206,61 @@ public class CommandDispatcher {
         } else if (InputParser.matches(input,
                 model.enums.CommandRegex.MENU_COIN_WALLET)) {
             view.printInfo("Coins: "
-                    + appState.getCurrentUser().getCoins());
+                + appState.getCurrentUser().getCoins());
         } else if (InputParser.matches(input,
                 model.enums.CommandRegex.MENU_GEM_WALLET)) {
             view.printInfo("Gems: "
-                    + appState.getCurrentUser().getGems());
+                + appState.getCurrentUser().getGems());
         } else if ((m = InputParser.match(input,
                 model.enums.CommandRegex.CHEAT_ADD_CURRENCY)) != null) {
             gameController.cheatCurrency(m, appState);
         } else {
             view.printError("Unknown command in Main menu.");
+        }
+    }
+
+
+    /**
+     * روتینگ دستور "menu enter chapter" از هر منو.
+     * @return true اگر هندل شد
+     */
+    private boolean handleChapterEntry(String chapterArg, AppState appState) {
+        String arg = chapterArg.toUpperCase();
+        try {
+            if (arg.startsWith("VASEBREAKER_")) {
+                int lvl = Integer.parseInt(arg.replace("VASEBREAKER_", ""));
+                minigameController.startVasebreaker(lvl, appState);
+                return true;
+            }
+            if (arg.startsWith("BOWLING_")) {
+                int lvl = Integer.parseInt(arg.replace("BOWLING_", ""));
+                minigameController.startBowling(lvl, appState);
+                return true;
+            }
+            if (arg.startsWith("IZOMBIE_")) {
+                int lvl = Integer.parseInt(arg.replace("IZOMBIE_", ""));
+                minigameController.startIZombie(lvl, appState);
+                return true;
+            }
+            if (arg.startsWith("BEGHOULED_")) {
+                int lvl = Integer.parseInt(arg.replace("BEGHOULED_", ""));
+                minigameController.startBeghouled(lvl, appState);
+                return true;
+            }
+            if (arg.startsWith("ZOMBOTANY_")) {
+                int lvl = Integer.parseInt(arg.replace("ZOMBOTANY_", ""));
+                minigameController.startZombotany(lvl, appState);
+                return true;
+            }
+            if (arg.equals("SCORED_GAME")) {
+                minigameController.startScoredGame(appState);
+                return true;
+            }
+            gameController.enterChapter(chapterArg, appState);
+            return true;
+        } catch (NumberFormatException e) {
+            view.printError("Invalid minigame level in: " + chapterArg);
+            return false;
         }
     }
 
@@ -286,7 +311,7 @@ public class CommandDispatcher {
         Matcher m;
         if ((m = InputParser.match(input,
                 model.enums.CommandRegex.MENU_ENTER_CHAPTER)) != null) {
-            gameController.enterChapter(m.group(1), appState);
+            handleChapterEntry(m.group(1), appState);
         } else if ((m = InputParser.match(input,
                 model.enums.CommandRegex.MENU_ENTER)) != null) {
             menuController.handleEnter(m.group(1), appState);
@@ -351,10 +376,15 @@ public class CommandDispatcher {
 
     private void handleInGameMenu(String input) {
         Matcher m;
+        // اگر مینی‌گیمی فعال است، دستور ابتدا به آن داده می‌شود
+        if (appState.getActiveMinigame() != null
+                && minigameController.handleMinigameCommand(input, appState)) {
+            return;
+        }
         if ((m = InputParser.match(input,
                 model.enums.CommandRegex.ADVANCE_TIME)) != null) {
             gameController.advanceTime(
-                    Integer.parseInt(m.group(1)), appState);
+                Integer.parseInt(m.group(1)), appState);
         } else if ((m = InputParser.match(input,
                 model.enums.CommandRegex.PLANT_PLANT)) != null) {
             gameController.plantPlant(m, appState);
@@ -384,7 +414,7 @@ public class CommandDispatcher {
         } else if ((m = InputParser.match(input,
                 model.enums.CommandRegex.CHEAT_ADD_SUNS)) != null) {
             gameController.cheatAddSuns(
-                    Integer.parseInt(m.group(1)), appState);
+                Integer.parseInt(m.group(1)), appState);
         } else if (InputParser.matches(input,
                 model.enums.CommandRegex.CHEAT_RELEASE_NUKE)) {
             gameController.releaseNuke(appState);
@@ -400,8 +430,6 @@ public class CommandDispatcher {
         } else if (InputParser.matches(input,
                 model.enums.CommandRegex.START_ZOMBIE_WAVES)) {
             gameController.startZombieWaves(appState);
-        } else if (minigameController.handleMinigameCommand(input, appState)) {
-            // handled by minigame controller
         } else {
             view.printError("Unknown in-game command.");
         }
@@ -447,8 +475,15 @@ public class CommandDispatcher {
         if ((m = InputParser.match(input,
                 model.enums.CommandRegex.TRAVEL_LOG_PAGE)) != null) {
             travelLogController.showPage(m.group(1), appState);
+        } else if ((m = InputParser.match(input,
+                model.enums.CommandRegex.MENU_ENTER_CHAPTER)) != null) {
+            handleChapterEntry(m.group(1), appState);
+        } else if ((m = InputParser.match(input,
+                model.enums.CommandRegex.MENU_ENTER)) != null) {
+            menuController.handleEnter(m.group(1), appState);
         } else {
-            travelLogController.showCurrentPage(appState);
+            view.printError("Unknown travel-log command. Use 'travel log page <name>' "
+                + "or 'menu enter chapter <MINIGAME_N>'.");
         }
     }
 
@@ -464,8 +499,8 @@ public class CommandDispatcher {
 
     private void promptCurrentMenu() {
         System.out.print(
-                ConsoleView.CYAN + "["
-                        + appState.getCurrentMenu().name().toLowerCase()
-                        + "]> " + ConsoleView.RESET);
+            ConsoleView.CYAN + "["
+            + appState.getCurrentMenu().name().toLowerCase()
+            + "]> " + ConsoleView.RESET);
     }
 }

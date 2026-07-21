@@ -25,7 +25,7 @@ public class NewsItem {
 
     public String getDate() {
         LocalDateTime dt = LocalDateTime.ofInstant(
-                Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
+            Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
         return dt.format(DateTimeFormatter.ofPattern("MM-dd HH:mm"));
     }
 }

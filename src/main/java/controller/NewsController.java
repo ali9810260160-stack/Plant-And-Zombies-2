@@ -28,7 +28,7 @@ public class NewsController {
         view.printHeader("📰 Unread News");
         for (NewsItem item : unread) {
             System.out.println(ConsoleView.YELLOW + "  [" + item.getDate()
-                    + "] " + ConsoleView.RESET + item.getMessage());
+                + "] " + ConsoleView.RESET + item.getMessage());
         }
         unread.clear();
         view.printInfo("All news marked as read.");
@@ -44,11 +44,11 @@ public class NewsController {
         view.printHeader("📰 All News");
         for (NewsItem item : all) {
             String readMark = item.isRead()
-                    ? ConsoleView.GREEN + "[read]   " + ConsoleView.RESET
-                    : ConsoleView.RED + "[unread] " + ConsoleView.RESET;
+                ? ConsoleView.GREEN + "[read]   " + ConsoleView.RESET
+                : ConsoleView.RED + "[unread] " + ConsoleView.RESET;
             System.out.println("  " + readMark
-                    + ConsoleView.YELLOW + "[" + item.getDate() + "] "
-                    + ConsoleView.RESET + item.getMessage());
+                + ConsoleView.YELLOW + "[" + item.getDate() + "] "
+                + ConsoleView.RESET + item.getMessage());
         }
     }
 }
