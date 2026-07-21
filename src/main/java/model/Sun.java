@@ -51,8 +51,6 @@ public class Sun {
     public void setCollected(boolean collected) { this.collected = collected; }
     public int getSpawnTick() { return spawnTick; }
     public int getValue() { return value; }
+    public void setValue(int value) { this.value = value; }
 
-    public void setValue(int value) {
-        this.value = value;
-    }
 }

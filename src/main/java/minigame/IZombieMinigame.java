@@ -60,6 +60,7 @@ public class IZombieMinigame {
         public int getY() { return y; }
         public int getDamage() { return damage; }
         public boolean isAlive() { return alive; }
+        public int getAttackPeriod() { return attackPeriod; }
     }
 
     public static class PlacedZombie {
@@ -99,7 +100,6 @@ public class IZombieMinigame {
         public int getY() { return y; }
         public int getHp() { return hp; }
         public boolean isAlive() { return alive; }
-        public int getAttackPeriodInternal() { return attackPeriod; }
     }
 
     private final int level;
@@ -259,7 +259,7 @@ public class IZombieMinigame {
 
     private void plantAttack() {
         for (IZombiePlant plant : plants) {
-            if (!plant.isAlive() || plant.getAttackPeriodInternal() == 0) {
+            if (!plant.isAlive() || plant.getAttackPeriod() == 0) {
                 continue;
             }
             if (plant.canAttack()) {

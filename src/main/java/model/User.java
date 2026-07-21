@@ -78,7 +78,7 @@ public class User {
     private int plantFoodCount;
 
     /** لیست اخبار خوانده‌نشده */
-    private List<NewsItem> news;
+    private List<NewsItem> unreadNews;
 
     /** تاریخ آخرین خرید پیشنهاد روزانه فروشگاه */
     private String lastDailyOfferDate;
@@ -191,9 +191,9 @@ public class User {
         this.plantFoodCount = plantFoodCount;
     }
 
-    public List<NewsItem> getNews() { return news; }
-    public void setNews(List<NewsItem> unreadNews) {
-        this.news = unreadNews;
+    public List<NewsItem> getUnreadNews() { return unreadNews; }
+    public void setUnreadNews(List<NewsItem> unreadNews) {
+        this.unreadNews = unreadNews;
     }
 
     public String getLastDailyOfferDate() { return lastDailyOfferDate; }

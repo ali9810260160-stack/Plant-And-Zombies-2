@@ -110,4 +110,6 @@ public class Level {
     public void setNightOpsSun(int n) { this.nightOpsSun = n; }
     public int getMaxPlantsLost() { return maxPlantsLost; }
     public void setMaxPlantsLost(int m) { this.maxPlantsLost = m; }
+    public void setMapRows(int mapRows) { this.mapRows = mapRows; }
+    public void setMapCols(int mapCols) { this.mapCols = mapCols; }
 }

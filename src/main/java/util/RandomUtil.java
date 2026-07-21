@@ -3,38 +3,30 @@ package util;
 import java.util.Random;
 
 /**
- * ابزار تصادفی‌سازی برای بازی.
- * برای انتخاب ردیف، نوع خورشید، زامبی glowing و ... استفاده می‌شود.
+ * ابزار تصادفی‌سازی.
  */
 public class RandomUtil {
 
     private static final Random RANDOM = new Random();
 
-    /**
-     * یک عدد صحیح تصادفی در بازه [min, max] برمی‌گرداند.
-     * @param min حداقل
-     * @param max حداکثر
-     * @return عدد تصادفی
-     */
-    public static int nextInt(int min, int max) { return 0; }
+    public static int nextInt(int bound) {
+        return RANDOM.nextInt(bound);
+    }
 
-    /**
-     * با احتمال مشخص true یا false برمی‌گرداند.
-     * @param probability احتمال (0.0 تا 1.0)
-     * @return true یا false
-     */
-    public static boolean chance(double probability) { return false; }
+    public static double nextDouble() {
+        return RANDOM.nextDouble();
+    }
 
-    /**
-     * یک عنصر تصادفی از آرایه برمی‌گرداند.
-     * @param array آرایه
-     * @return عنصر تصادفی
-     */
-    public static <T> T pick(T[] array) { return null; }
+    public static boolean chance(double probability) {
+        return RANDOM.nextDouble() < probability;
+    }
 
-    /**
-     * سید random را تنظیم می‌کند (برای بازی امتیازی با الگوریتم یکسان).
-     * @param seed سید
-     */
-    public static void setSeed(long seed) { RANDOM.setSeed(seed); }
+    public static int between(int min, int max) {
+        return min + RANDOM.nextInt(max - min + 1);
+    }
+
+    /** یک seed ثابت برای بازی امتیازی روزانه */
+    public static Random getDailyRandom(long seed) {
+        return new Random(seed);
+    }
 }
