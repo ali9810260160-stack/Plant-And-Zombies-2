@@ -126,6 +126,7 @@ public class UserRepository {
               u.getLastDailyOfferDate() != null ? u.getLastDailyOfferDate() : "");
         m.put("unlockedPlants", listToJsonArray(u.getUnlockedPlants()));
         m.put("seenZombies", listToJsonArray(u.getSeenZombies()));
+        m.put("unlockedLevels", listToJsonArray(u.getUnlockedLevels()));
         return m;
     }
 
@@ -197,6 +198,12 @@ public class UserRepository {
                 m.getOrDefault("unlockedPlants", "[]")));
             u.setSeenZombies(parseStringArray(
                 m.getOrDefault("seenZombies", "[]")));
+            java.util.List<String> unlocked = parseStringArray(
+                m.getOrDefault("unlockedLevels", "["ANCIENT_EGYPT_1"]"));
+            if (unlocked.isEmpty()) {
+                unlocked.add("ANCIENT_EGYPT_1");
+            }
+            u.setUnlockedLevels(unlocked);
             u.setUnreadNews(new ArrayList<>());
             return u;
         } catch (Exception e) {

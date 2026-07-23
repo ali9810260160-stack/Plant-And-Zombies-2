@@ -31,8 +31,10 @@ public class GameController {
     private final SunService sunService;
     private final ConsoleView view;
     private final MapView mapView;
+    private service.LevelProgressService levelProgressService;
 
     private Level pendingLevel;
+    private int pendingLevelNumber;
     private List<PlantType> selectedPlants;
     private List<PlantType> boostedPlants;
 
@@ -44,9 +46,70 @@ public class GameController {
         this.mapView = mapView;
         this.selectedPlants = new ArrayList<>();
         this.boostedPlants = new ArrayList<>();
+        this.pendingLevelNumber = 1;
+    }
+
+    public void setLevelProgressService(service.LevelProgressService lps) {
+        this.levelProgressService = lps;
+    }
+
+    /** نمایش فصل‌های موجود */
+    public void showAllChapters(AppState appState) {
+        if (levelProgressService == null) {
+            view.printError("Level service not initialized.");
+            return;
+        }
+        levelProgressService.showAllChapters(appState.getCurrentUser());
+    }
+
+    /** نمایش مراحل یک فصل */
+    public void showChapterLevels(String chapterName, AppState appState) {
+        try {
+            model.enums.ChapterType chapter =
+                model.enums.ChapterType.valueOf(chapterName.toUpperCase());
+            if (levelProgressService != null) {
+                levelProgressService.showChapterLevels(
+                    appState.getCurrentUser(), chapter);
+            }
+        } catch (IllegalArgumentException e) {
+            view.printError("Unknown chapter: " + chapterName);
+        }
+    }
+
+    public void enterChapterWithLevel(String chapterName, int levelNum,
+                                       AppState appState) {
+        model.enums.ChapterType chapter;
+        try {
+            chapter = model.enums.ChapterType.valueOf(chapterName.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            view.printError("Unknown chapter: " + chapterName);
+            return;
+        }
+        model.User user = appState.getCurrentUser();
+        if (levelProgressService != null
+                && !levelProgressService.isLevelUnlocked(
+                    user, chapter, levelNum)) {
+            view.printError("Level " + levelNum
+                + " of " + chapterName
+                + " is locked! Complete previous levels first.");
+            if (levelProgressService != null) {
+                levelProgressService.showChapterLevels(user, chapter);
+            }
+            return;
+        }
+        pendingLevel = buildLevel(chapter, levelNum);
+        pendingLevelNumber = levelNum;
+        selectedPlants = new ArrayList<>();
+        boostedPlants = new ArrayList<>();
+        appState.setCurrentMenu(model.enums.MenuType.PLANT_SELECT);
+        view.printHeader("🌿 Plant Selection — "
+            + chapterName + " Level " + levelNum);
+        view.printInfo("Select up to " + pendingLevel.getPlantSlots()
+            + " plants. Type 'show available plants'.");
     }
 
     public void enterChapter(String chapterName, AppState appState) {
+
         pendingLevel = createLevelFromChapter(chapterName);
         if (pendingLevel == null) {
             view.printError("Unknown chapter: " + chapterName);
@@ -60,20 +123,66 @@ public class GameController {
             + " plants. Type 'show all plants' to see available plants.");
     }
 
-    private Level createLevelFromChapter(String name) {
-        model.enums.ChapterType chapter;
-        try {
-            chapter = model.enums.ChapterType.valueOf(name.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-        Level level = new Level(1, chapter, LevelType.NORMAL);
-        level.setInitialWaveDifficulty(500);
-        level.setWaveCount(3);
+    private Level buildLevel(model.enums.ChapterType chapter,
+                              int levelNumber) {
+        LevelType type = getLevelType(chapter, levelNumber);
+        Level level = new Level(levelNumber, chapter, type);
+        int baseDiff = 400 + (getChapterIndex(chapter) * 200)
+                      + (levelNumber - 1) * 100;
+        level.setInitialWaveDifficulty(baseDiff);
+        level.setWaveCount(levelNumber == 4 ? 5 : 3);
         level.setMapRows(5);
         level.setMapCols(9);
         level.setPlantSlots(8);
+        if (type == LevelType.NIGHT_OPS) {
+            level.setNightOpsSun(150);
+        }
+        if (type == LevelType.DEAD_LINE) {
+            level.setDeadLineColumn(5);
+        }
+        if (type == LevelType.LOVE_YOUR_PLANTS) {
+            level.setMaxPlantsLost(3);
+        }
+        if (type == LevelType.PLANT_WHAT_YOU_GET) {
+            level.setInitialSunAmount(750);
+        }
         return level;
+    }
+
+    private LevelType getLevelType(model.enums.ChapterType chapter,
+                                    int levelNumber) {
+        if (levelNumber == 1) {
+            return LevelType.NORMAL;
+        }
+        if (levelNumber == 4) {
+            return LevelType.BOSS;
+        }
+        switch (chapter) {
+            case ANCIENT_EGYPT:
+                return levelNumber == 2
+                    ? LevelType.CONVEYOR_BELT : LevelType.SAVE_OUR_SEEDS;
+            case FROSTBITE_CAVES:
+                return levelNumber == 2
+                    ? LevelType.NIGHT_OPS : LevelType.TIMED_WAR;
+            case BIG_WAVE_BEACH:
+                return levelNumber == 2
+                    ? LevelType.LOCKED_PLANTS : LevelType.DEAD_LINE;
+            case DARK_AGES:
+                return levelNumber == 2
+                    ? LevelType.LOVE_YOUR_PLANTS : LevelType.PLANT_WHAT_YOU_GET;
+            default:
+                return LevelType.NORMAL;
+        }
+    }
+
+    private int getChapterIndex(model.enums.ChapterType chapter) {
+        switch (chapter) {
+            case ANCIENT_EGYPT:   return 0;
+            case FROSTBITE_CAVES: return 1;
+            case BIG_WAVE_BEACH:  return 2;
+            case DARK_AGES:       return 3;
+            default:              return 0;
+        }
     }
 
     public void showAllPlantsForSelect(AppState appState) {
@@ -115,9 +224,9 @@ public class GameController {
             }
             String mark = selected
                 ? ConsoleView.GREEN + " ✔ SELECTED" + ConsoleView.RESET : "";
-            view.printRaw("  " + i++ + ". " + plantName + mark);
+            System.out.println("  " + i++ + ". " + plantName + mark);
         }
-        view.printRaw(ConsoleView.CYAN + "  Selected: "
+        System.out.println(ConsoleView.CYAN + "  Selected: "
             + selectedPlants.size() + "/"
             + pendingLevel.getPlantSlots() + ConsoleView.RESET);
     }
@@ -207,6 +316,7 @@ public class GameController {
         }
         GameSession session = gameService.createSession(
             pendingLevel, selectedPlants);
+        session.setLevelNumber(pendingLevelNumber);
         session.setBoostedPlants(new ArrayList<>(boostedPlants));
         appState.setCurrentSession(session);
         appState.setCurrentMenu(MenuType.IN_GAME);
@@ -362,7 +472,7 @@ public class GameController {
             return;
         }
         view.printHeader("Tile (" + x + ", " + y + ")");
-        view.printRaw(ConsoleView.CYAN + "  Type: "
+        System.out.println(ConsoleView.CYAN + "  Type: "
             + ConsoleView.RESET + tile.getType().name());
         if (tile.getPlant() != null) {
             printPlantStatus(tile.getPlant(), x, y);
@@ -409,18 +519,18 @@ public class GameController {
     }
 
     private void printDetailedZombieInfo(Zombie zombie) {
-        view.printRaw(ConsoleView.RED + zombie.getType().name()
+        System.out.println(ConsoleView.RED + zombie.getType().name()
             + ":" + ConsoleView.RESET);
         System.out.printf("  position: %.1f, %d%n",
             zombie.getX(), zombie.getY());
-        view.printRaw("  health: " + zombie.getCurrentHealth());
+        System.out.println("  health: " + zombie.getCurrentHealth());
         if (!zombie.getArmors().isEmpty()) {
-            view.printRaw("  armor:");
+            System.out.println("  armor:");
             zombie.getArmors().forEach((at, hp) ->
-                view.printRaw("    " + at.name() + ": " + hp));
+                System.out.println("    " + at.name() + ": " + hp));
         }
         if (!zombie.getActiveEffects().isEmpty()) {
-            view.printRaw("  effects:");
+            System.out.println("  effects:");
             zombie.getActiveEffects().forEach((ef, ticks) ->
                 System.out.printf("    %s: %.1fs%n",
                     ef.name(), ticks / 10.0));
