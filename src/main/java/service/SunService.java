@@ -6,7 +6,6 @@ import model.enums.ChapterType;
 import model.enums.SunType;
 import model.tiles.Tile;
 import util.RandomUtil;
-import view.ConsoleView;
 
 import java.util.Iterator;
 import java.util.List;
@@ -16,13 +15,11 @@ import java.util.List;
  */
 public class SunService {
 
-    private final ConsoleView view;
-
-
     private static final int SKY_DROP_DURATION_TICKS = 50;
+    private service.CombatService combatService;
 
-    public SunService(ConsoleView view) {
-        this.view = view;
+    public void setCombatService(service.CombatService cs) {
+        this.combatService = cs;
     }
 
     /** محاسبه فاصله سقوط بعدی: max(6 + 0.05t, 12) ثانیه */
@@ -51,8 +48,8 @@ public class SunService {
         int y = RandomUtil.between(1, session.getGameMap().getRows());
         Sun sun = new Sun(type, x, y, tick);
         session.getActiveSuns().add(sun);
-        view.printRaw("\u001B[33m☀ New " + typeName(type)
-            + " sun is dropping at position (" + x + ", " + y + ")\u001B[0m");
+        System.out.println("\u001B[33m☀ New " + typeName(type)
+                + " sun is dropping at position (" + x + ", " + y + ")\u001B[0m");
     }
 
     private String typeName(SunType type) {
@@ -95,8 +92,8 @@ public class SunService {
         if (sun.getType() == SunType.RADIOACTIVE) {
             sun.setValue(sun.getValue() == 150 ? 25 : sun.getValue());
         }
-        view.printRaw("\u001B[33m☀ Sun reached the ground at position ("
-            + sun.getX() + ", " + sun.getY() + ")\u001B[0m");
+        System.out.println("\u001B[33m☀ Sun reached the ground at position ("
+                + sun.getX() + ", " + sun.getY() + ")\u001B[0m");
     }
 
     public int collectSun(GameSession session, int x, int y) {
@@ -112,6 +109,9 @@ public class SunService {
         target.setCollected(true);
         int value = getSunValue(target);
         session.addSun(value);
+        if (combatService != null) {
+            combatService.onSunCollectedForQuest(value);
+        }
         return value;
     }
 
@@ -125,7 +125,7 @@ public class SunService {
     }
 
     private void handleRadioactiveExplosion(Sun sun, GameSession session) {
-        view.printRaw("\u001B[31m☢ Radioactive sun exploded mid-air!\u001B[0m");
+        System.out.println("\u001B[31m☢ Radioactive sun exploded mid-air!\u001B[0m");
         int cx = sun.getX();
         int cy = sun.getY();
         for (model.zombies.Zombie z : session.getActiveZombies()) {
@@ -157,7 +157,7 @@ public class SunService {
         Tile tile = session.getGameMap().getTile(x, y);
         if (tile == null || tile.getPlant() == null) {
             throw new exception.GameException(
-                "No plant at (" + x + ", " + y + ")");
+                    "No plant at (" + x + ", " + y + ")");
         }
         model.plants.Plant plant = tile.getPlant();
         if (!(plant instanceof model.plants.GenericPlant)) {
@@ -166,13 +166,13 @@ public class SunService {
         model.plants.GenericPlant gp = (model.plants.GenericPlant) plant;
         if (!gp.isSunPending()) {
             throw new exception.GameException(
-                "No sun ready on plant at (" + x + ", " + y + ")");
+                    "No sun ready on plant at (" + x + ", " + y + ")");
         }
         int amount = gp.getSunProductionAmount();
         gp.collectSun();
         session.addSun(amount);
-        view.printRaw("\u001B[33m☀ plant " + plant.getType().name()
-            + " produced a sun at (" + x + ", " + y + ")\u001B[0m");
+        System.out.println("\u001B[33m☀ plant " + plant.getType().name()
+                + " produced a sun at (" + x + ", " + y + ")\u001B[0m");
     }
 
     public void cleanupCollectedSuns(GameSession session) {

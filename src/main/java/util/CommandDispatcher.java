@@ -34,6 +34,8 @@ public class CommandDispatcher {
     private final TravelLogController travelLogController;
     private final LeaderboardController leaderboardController;
     private CombatService combatService;
+    private SunService sunService;
+    private service.QuestService questService;
     private final MinigameController minigameController;
 
     public CommandDispatcher() {
@@ -49,7 +51,8 @@ public class CommandDispatcher {
         WaveService waveService = new WaveService();
         this.combatService = new CombatService(view);
         CombatService combatService = this.combatService;
-        SunService sunService = new SunService();
+        this.sunService = new SunService();
+        SunService sunService = this.sunService;
         GameService gameService = new GameService(
                 waveService, combatService, sunService, view, mapView);
         GreenhouseService greenhouseService = new GreenhouseService(
@@ -67,6 +70,7 @@ public class CommandDispatcher {
         this.travelLogController = new TravelLogController(view);
         service.LevelProgressService levelProgressService =
                 new service.LevelProgressService(userRepo, view);
+        this.questService = new service.QuestService(userRepo, userService, view);
         this.leaderboardController = new LeaderboardController(userService, view);
         this.minigameController = new MinigameController(view, userService);
 
@@ -74,6 +78,9 @@ public class CommandDispatcher {
         combatService.setLevelProgressService(levelProgressService);
         combatService.setScoredGameService(
                 minigameController.getScoredGameService());
+        combatService.setQuestService(this.questService);
+        sunService.setCombatService(this.combatService);
+        gameService.setCombatServiceRef(this.combatService);
     }
 
     public void run() {
@@ -97,6 +104,7 @@ public class CommandDispatcher {
             if (stayUser != null) {
                 appState.setCurrentUser(stayUser);
                 appState.setCurrentMenu(MenuType.MAIN);
+                questService.loadForUser(stayUser);
                 view.printSuccess("Welcome back, "
                         + stayUser.getNickname() + "!");
             }
@@ -107,6 +115,10 @@ public class CommandDispatcher {
         try {
             MenuType menu = appState.getCurrentMenu();
             dispatch(menu, input);
+            // load quests if user just logged in
+            if (appState.isLoggedIn() && appState.getCurrentUser() != null) {
+                questService.loadForUser(appState.getCurrentUser());
+            }
         } catch (AuthException | ValidationException | GameException e) {
             view.printError(e.getMessage());
         } catch (Exception e) {
@@ -499,7 +511,12 @@ public class CommandDispatcher {
         Matcher m;
         if ((m = InputParser.match(input,
                 model.enums.CommandRegex.TRAVEL_LOG_PAGE)) != null) {
-            travelLogController.showPage(m.group(1), appState);
+            String page = m.group(1).toLowerCase();
+            if (!page.equals("minigame")) {
+                questService.showPage(page);
+            } else {
+                travelLogController.showPage(page, appState);
+            }
         } else if ((m = InputParser.match(input,
                 model.enums.CommandRegex.MENU_ENTER_CHAPTER)) != null) {
             handleChapterEntry(m.group(1), appState);

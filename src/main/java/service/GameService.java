@@ -28,6 +28,7 @@ public class GameService {
     private final ConsoleView view;
     private final MapView mapView;
     private LevelProgressService levelProgressService;
+    private CombatService combatService;
 
     public GameService(WaveService waveService, CombatService combatService,
                        SunService sunService, ConsoleView view, MapView mapView) {
@@ -36,6 +37,10 @@ public class GameService {
         this.sunService = sunService;
         this.view = view;
         this.mapView = mapView;
+    }
+
+    public void setCombatServiceRef(CombatService cs) {
+        this.combatService = cs;
     }
 
     public void setLevelProgressService(LevelProgressService lps) {
