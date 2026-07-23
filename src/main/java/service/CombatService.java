@@ -334,7 +334,7 @@ public class CombatService {
         model.Level level = session.getLevel();
         if (level.getLevelType() == LevelType.LOVE_YOUR_PLANTS) {
             if (session.getPlantsLost() >= level.getMaxPlantsLost()) {
-                session.setResult(GameResult.LOSS);
+                session.setResult(GameResult.LOSE);
                 view.printGameOver();
             }
         }
@@ -358,7 +358,7 @@ public class CombatService {
         if (session.getGameMap().isLawnMowerAvailable(rowIndex)) {
             triggerLawnMower(rowIndex, session);
         } else {
-            session.setResult(GameResult.LOSS);
+            session.setResult(GameResult.LOSE);
             view.printGameOver();
         }
     }
@@ -416,7 +416,6 @@ public class CombatService {
             wave.registerHealthLost(zombie.getMaxHealth());
         }
     }
-
     private void updateMeoPoints(Zombie zombie, GameSession session) {
         long now = session.getCurrentTick();
         if (now - session.getLastKillTick() <= 30) {
@@ -449,7 +448,6 @@ public class CombatService {
             view.printZombieDropped("pot", user.getPots());
         }
     }
-
     private void applyIceMeltNearFire(GameSession session) {
         for (int r = 1; r <= session.getGameMap().getRows(); r++) {
             for (int c = 1; c <= session.getGameMap().getCols(); c++) {
@@ -471,7 +469,6 @@ public class CombatService {
             }
         }
     }
-
     private boolean hasAdjacentFirePlant(GameSession session, int cx, int cy) {
         for (int dy = -1; dy <= 1; dy++) {
             for (int dx = -1; dx <= 1; dx++) {
@@ -505,7 +502,6 @@ public class CombatService {
             questService.onLawnmowerKill(count);
         }
     }
-
     public void checkWinCondition(GameSession session) {
         if (!session.isInProgress()) {
             return;
@@ -519,7 +515,6 @@ public class CombatService {
             }
         }
     }
-
     private void notifyLevelComplete(GameSession session) {
         model.User user = model.AppState.getInstance().getCurrentUser();
         if (user == null || session.getLevel() == null) {
@@ -534,5 +529,4 @@ public class CombatService {
             scoredGameService.saveHighScore(user, session.getMeoPoints());
         }
     }
-
 }

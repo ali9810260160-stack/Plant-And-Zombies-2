@@ -216,13 +216,12 @@ public class BeghouledMinigame {
 
     private PlantType getUpgradeTarget(PlantType from) {
         switch (from) {
-            case PEASHOOTER: return PlantType.REPEATER;
-            case REPEATER:   return PlantType.GATLING_PEA;
-            case GATLING_PEA: return PlantType.MEGA_GATLING_PEA;
-            case WALL_NUT:   return PlantType.TALL_NUT;
-            case CABBAGE_PULT: return PlantType.MELON_PULT;
-            case MELON_PULT: return PlantType.WINTER_MELON;
-            case PUFF_SHROOM: return PlantType.FUME_SHROOM;
+            case PEASHOOTER:       return PlantType.REPEATER;
+            case REPEATER:         return PlantType.MEGA_GATLING_PEA;
+            case WALL_NUT:         return PlantType.TALL_NUT;
+            case CABBAGE_PULT:     return PlantType.MELON_PULT;
+            case MELON_PULT:       return PlantType.WINTER_MELON;
+            case PUFF_SHROOM:      return PlantType.FUME_SHROOM;
             default: return null;
         }
     }
@@ -332,17 +331,17 @@ public class BeghouledMinigame {
 
     private String getPlantEmoji(PlantType type) {
         switch (type) {
-            case PEASHOOTER:   return ConsoleView.GREEN + "P" + ConsoleView.RESET;
-            case SUNFLOWER:    return ConsoleView.YELLOW + "S" + ConsoleView.RESET;
-            case WALL_NUT:     return ConsoleView.YELLOW + "W" + ConsoleView.RESET;
-            case SNOW_PEA:     return ConsoleView.CYAN + "N" + ConsoleView.RESET;
-            case CHERRY_BOMB:  return ConsoleView.RED + "C" + ConsoleView.RESET;
-            case REPEATER:     return ConsoleView.GREEN + "R" + ConsoleView.RESET;
-            case GATLING_PEA:  return ConsoleView.GREEN + "G" + ConsoleView.RESET;
-            case TALL_NUT:     return ConsoleView.YELLOW + "T" + ConsoleView.RESET;
-            case MELON_PULT:   return ConsoleView.GREEN + "M" + ConsoleView.RESET;
-            case WINTER_MELON: return ConsoleView.CYAN + "I" + ConsoleView.RESET;
-            default:           return ConsoleView.WHITE + "?" + ConsoleView.RESET;
+            case PEASHOOTER:        return ConsoleView.GREEN + "P" + ConsoleView.RESET;
+            case SUNFLOWER:         return ConsoleView.YELLOW + "S" + ConsoleView.RESET;
+            case WALL_NUT:          return ConsoleView.YELLOW + "W" + ConsoleView.RESET;
+            case SNOW_PEA:          return ConsoleView.CYAN + "N" + ConsoleView.RESET;
+            case CHERRY_BOMB:       return ConsoleView.RED + "C" + ConsoleView.RESET;
+            case REPEATER:          return ConsoleView.GREEN + "R" + ConsoleView.RESET;
+            case MEGA_GATLING_PEA:  return ConsoleView.GREEN + "G" + ConsoleView.RESET;
+            case TALL_NUT:          return ConsoleView.YELLOW + "T" + ConsoleView.RESET;
+            case MELON_PULT:        return ConsoleView.GREEN + "M" + ConsoleView.RESET;
+            case WINTER_MELON:      return ConsoleView.CYAN + "I" + ConsoleView.RESET;
+            default:                return ConsoleView.WHITE + "?" + ConsoleView.RESET;
         }
     }
 

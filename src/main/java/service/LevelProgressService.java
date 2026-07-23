@@ -53,12 +53,11 @@ public class LevelProgressService {
     public void onLevelCompleted(User user, ChapterType chapter,
                                  int levelNumber) {
         int totalLevels = LEVELS_PER_CHAPTER.getOrDefault(chapter, 4);
-        String completedKey = chapter.name() + "_" + levelNumber;
         updateLastReachedLevel(user, chapter, levelNumber);
 
         if (levelNumber < totalLevels) {
             user.unlockLevel(chapter.name(), levelNumber + 1);
-            System.out.println(ConsoleView.GREEN
+            view.printRaw(ConsoleView.GREEN
                     + "  🔓 Level " + chapter.name() + " " + (levelNumber + 1)
                     + " unlocked!" + ConsoleView.RESET);
         } else {
@@ -101,13 +100,13 @@ public class LevelProgressService {
     private void unlockNextChapter(User user, ChapterType current) {
         ChapterType next = getNextChapter(current);
         if (next == null) {
-            System.out.println(ConsoleView.BOLD + ConsoleView.YELLOW
+            view.printRaw(ConsoleView.BOLD + ConsoleView.YELLOW
                     + "  🏆 Congratulations! You completed ALL chapters!"
                     + ConsoleView.RESET);
             return;
         }
         user.unlockLevel(next.name(), 1);
-        System.out.println(ConsoleView.GREEN + ConsoleView.BOLD
+        view.printRaw(ConsoleView.GREEN + ConsoleView.BOLD
                 + "  🔓 New chapter unlocked: " + next.name() + "!"
                 + ConsoleView.RESET);
     }
@@ -124,12 +123,12 @@ public class LevelProgressService {
     private void giveCompletionRewards(User user, int levelNumber) {
         long coinReward = 100L * levelNumber;
         user.setCoins(user.getCoins() + coinReward);
-        System.out.println(ConsoleView.YELLOW
+        view.printRaw(ConsoleView.YELLOW
                 + "  💰 Level reward: +" + coinReward + " coins!"
                 + ConsoleView.RESET);
         if (levelNumber == 4) {
             user.setGems(user.getGems() + 1);
-            System.out.println(ConsoleView.MAGENTA
+            view.printRaw(ConsoleView.MAGENTA
                     + "  💎 Chapter completion bonus: +1 gem!"
                     + ConsoleView.RESET);
         }

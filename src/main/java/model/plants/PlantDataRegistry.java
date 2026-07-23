@@ -205,10 +205,10 @@ public class PlantDataRegistry {
         reg(PlantType.WINTER_MELON,PlantFamily.LOBBER,300,200,7.5,80,
                 "Lobber","AoE+chill icy melon.",
                 PlantTag.DAY,PlantTag.ICE,PlantTag.AOE);
-        reg(PlantType.CHOMPER,PlantFamily.MELEE_ATTACKER,300,150,7.5,9999,
+        reg(PlantType.CHOMPER,PlantFamily.MELEE,300,150,7.5,9999,
                 "MeleeAttacker","Swallows zombie whole.",
                 PlantTag.DAY);
-        reg(PlantType.BONK_CHOY,PlantFamily.MELEE_ATTACKER,300,125,7.5,40,
+        reg(PlantType.BONK_CHOY,PlantFamily.MELEE,300,125,7.5,40,
                 "MeleeAttacker","Punches front and back.",
                 PlantTag.DAY);
         reg(PlantType.GARLIC,PlantFamily.MODIFIER,600,50,30,0,

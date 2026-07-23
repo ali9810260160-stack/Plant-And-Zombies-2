@@ -48,15 +48,14 @@ public class CommandDispatcher {
         UserService userService = new UserService(userRepo);
         AuthService authService = new AuthService(userRepo);
 
-        WaveService waveService = new WaveService();
+        WaveService waveService = new WaveService(view);
         this.combatService = new CombatService(view);
         CombatService combatService = this.combatService;
-        this.sunService = new SunService();
+        this.sunService = new SunService(view);
         SunService sunService = this.sunService;
         GameService gameService = new GameService(
                 waveService, combatService, sunService, view, mapView);
-        GreenhouseService greenhouseService = new GreenhouseService(
-                userService, userRepo);
+        GreenhouseService greenhouseService = new GreenhouseService(userService, userRepo, view);
 
         this.authController = new AuthController(authService, userService, view);
         this.menuController = new MenuController(view);

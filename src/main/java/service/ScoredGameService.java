@@ -33,7 +33,6 @@ public class ScoredGameService {
 
     private final ConsoleView view;
     private long meoPoints;
-    private int multiKillCount;
     private int lastKillTick;
     private int consecutiveKills;
     private int plantsLostThisWave;
@@ -48,7 +47,6 @@ public class ScoredGameService {
 
     public void reset() {
         meoPoints = 0;
-        multiKillCount = 0;
         lastKillTick = -1;
         consecutiveKills = 0;
         plantsLostThisWave = 0;

@@ -199,7 +199,7 @@ public class UserRepository {
             u.setSeenZombies(parseStringArray(
                 m.getOrDefault("seenZombies", "[]")));
             java.util.List<String> unlocked = parseStringArray(
-                m.getOrDefault("unlockedLevels", "["ANCIENT_EGYPT_1"]"));
+                m.getOrDefault("unlockedLevels", "[\"ANCIENT_EGYPT_1\"]"));
             if (unlocked.isEmpty()) {
                 unlocked.add("ANCIENT_EGYPT_1");
             }

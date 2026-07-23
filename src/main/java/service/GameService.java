@@ -23,12 +23,10 @@ import java.util.List;
 public class GameService {
 
     private final WaveService waveService;
-    private final CombatService combatService;
+    private CombatService combatService;
     private final SunService sunService;
     private final ConsoleView view;
     private final MapView mapView;
-    private LevelProgressService levelProgressService;
-    private CombatService combatService;
 
     public GameService(WaveService waveService, CombatService combatService,
                        SunService sunService, ConsoleView view, MapView mapView) {
@@ -41,10 +39,6 @@ public class GameService {
 
     public void setCombatServiceRef(CombatService cs) {
         this.combatService = cs;
-    }
-
-    public void setLevelProgressService(LevelProgressService lps) {
-        this.levelProgressService = lps;
     }
 
     public GameSession createSession(Level level, List<PlantType> selectedPlants) {
@@ -212,7 +206,7 @@ public class GameService {
                     && !tile.isTombstone()) {
                 TileType tombType = getTombstoneType();
                 session.getGameMap().setTileType(col, row, tombType);
-                System.out.println("\u001B[35m⛰ A tombstone appeared at ("
+                view.printRaw("\u001B[35m⛰ A tombstone appeared at ("
                         + col + "," + row + ")!\u001B[0m");
             }
         }
