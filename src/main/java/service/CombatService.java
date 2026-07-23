@@ -25,9 +25,19 @@ import java.util.List;
 public class CombatService {
 
     private final ConsoleView view;
+    private service.LevelProgressService levelProgressService;
+    private service.ScoredGameService scoredGameService;
 
     public CombatService(ConsoleView view) {
         this.view = view;
+    }
+
+    public void setLevelProgressService(service.LevelProgressService lps) {
+        this.levelProgressService = lps;
+    }
+
+    public void setScoredGameService(service.ScoredGameService sgs) {
+        this.scoredGameService = sgs;
     }
 
     public void processTick(GameSession session) {
@@ -99,7 +109,7 @@ public class CombatService {
             return;
         }
         for (int c = (int) proj.getX() + 1;
-                c <= session.getGameMap().getCols(); c++) {
+             c <= session.getGameMap().getCols(); c++) {
             Tile t = session.getGameMap().getTile(c, proj.getY());
             if (t == null || t.getPlant() == null) {
                 continue;
@@ -107,8 +117,8 @@ public class CombatService {
             Plant p = t.getPlant();
             if (p.getType() == PlantType.TORCHWOOD) {
                 proj = new Projectile(ProjectileType.FIRE,
-                                      proj.getX(), proj.getY(),
-                                      proj.getDamage() * 2);
+                        proj.getX(), proj.getY(),
+                        proj.getDamage() * 2);
                 break;
             }
         }
@@ -208,7 +218,7 @@ public class CombatService {
     }
 
     private boolean handleJesterDeflect(Zombie zombie, Projectile proj,
-                                         GameSession session) {
+                                        GameSession session) {
         if (!(zombie instanceof JesterZombie)) {
             return false;
         }
@@ -302,7 +312,7 @@ public class CombatService {
     }
 
     private void handlePlantDestroyed(Tile tile, Plant plant,
-                                       Zombie zombie, GameSession session) {
+                                      Zombie zombie, GameSession session) {
         view.printPlantDestroyed(plant.getType().name(), tile.getX(), tile.getY());
         if (tile.getSecondLayerPlant() != null) {
             tile.setPlant(tile.getSecondLayerPlant());
@@ -319,7 +329,7 @@ public class CombatService {
         model.Level level = session.getLevel();
         if (level.getLevelType() == LevelType.LOVE_YOUR_PLANTS) {
             if (session.getPlantsLost() >= level.getMaxPlantsLost()) {
-                session.setResult(GameResult.LOSE);
+                session.setResult(GameResult.LOSS);
                 view.printGameOver();
             }
         }
@@ -343,7 +353,7 @@ public class CombatService {
         if (session.getGameMap().isLawnMowerAvailable(rowIndex)) {
             triggerLawnMower(rowIndex, session);
         } else {
-            session.setResult(GameResult.LOSE);
+            session.setResult(GameResult.LOSS);
             view.printGameOver();
         }
     }
@@ -375,7 +385,7 @@ public class CombatService {
         }
         session.getActiveZombies().removeAll(toRemove);
         session.getActiveProjectiles().removeIf(
-            p -> p.getX() < 0 || p.getX() > session.getGameMap().getCols() + 2);
+                p -> p.getX() < 0 || p.getX() > session.getGameMap().getCols() + 2);
     }
 
     private void handleZombieDeath(Zombie zombie, GameSession session) {
@@ -474,6 +484,22 @@ public class CombatService {
         if (session.allWavesFinished()) {
             session.setResult(GameResult.WIN);
             view.printGameWon();
+            notifyLevelComplete(session);
+        }
+    }
+
+    private void notifyLevelComplete(GameSession session) {
+        model.User user = model.AppState.getInstance().getCurrentUser();
+        if (user == null || session.getLevel() == null) {
+            return;
+        }
+        model.enums.ChapterType chapter = session.getLevel().getChapter();
+        int levelNum = session.getLevelNumber();
+        if (levelProgressService != null) {
+            levelProgressService.onLevelCompleted(user, chapter, levelNum);
+        }
+        if (scoredGameService != null) {
+            scoredGameService.saveHighScore(user, session.getMeoPoints());
         }
     }
 

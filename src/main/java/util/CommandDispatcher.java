@@ -33,6 +33,7 @@ public class CommandDispatcher {
     private final GreenhouseController greenhouseController;
     private final TravelLogController travelLogController;
     private final LeaderboardController leaderboardController;
+    private CombatService combatService;
     private final MinigameController minigameController;
 
     public CommandDispatcher() {
@@ -45,13 +46,14 @@ public class CommandDispatcher {
         UserService userService = new UserService(userRepo);
         AuthService authService = new AuthService(userRepo);
 
-        WaveService waveService = new WaveService(view);
-        CombatService combatService = new CombatService(view);
-        SunService sunService = new SunService(view);
+        WaveService waveService = new WaveService();
+        this.combatService = new CombatService(view);
+        CombatService combatService = this.combatService;
+        SunService sunService = new SunService();
         GameService gameService = new GameService(
-            waveService, combatService, sunService, view, mapView);
+                waveService, combatService, sunService, view, mapView);
         GreenhouseService greenhouseService = new GreenhouseService(
-            userService, userRepo, view);
+                userService, userRepo);
 
         this.authController = new AuthController(authService, userService, view);
         this.menuController = new MenuController(view);
@@ -59,12 +61,19 @@ public class CommandDispatcher {
         this.collectionController = new CollectionController(userService, view);
         this.newsController = new NewsController(view);
         this.gameController = new GameController(
-            gameService, sunService, view, mapView);
+                gameService, sunService, view, mapView);
         this.greenhouseController = new GreenhouseController(
-            greenhouseService, view);
+                greenhouseService, view);
         this.travelLogController = new TravelLogController(view);
+        service.LevelProgressService levelProgressService =
+                new service.LevelProgressService(userRepo, view);
         this.leaderboardController = new LeaderboardController(userService, view);
         this.minigameController = new MinigameController(view, userService);
+
+        gameController.setLevelProgressService(levelProgressService);
+        combatService.setLevelProgressService(levelProgressService);
+        combatService.setScoredGameService(
+                minigameController.getScoredGameService());
     }
 
     public void run() {
@@ -89,7 +98,7 @@ public class CommandDispatcher {
                 appState.setCurrentUser(stayUser);
                 appState.setCurrentMenu(MenuType.MAIN);
                 view.printSuccess("Welcome back, "
-                    + stayUser.getNickname() + "!");
+                        + stayUser.getNickname() + "!");
             }
         } catch (Exception ignored) { }
     }
@@ -191,6 +200,10 @@ public class CommandDispatcher {
                 model.enums.CommandRegex.MENU_ENTER)) != null) {
             menuController.handleEnter(m.group(1), appState);
         } else if ((m = InputParser.match(input,
+                model.enums.CommandRegex.MENU_ENTER_CHAPTER_LEVEL)) != null) {
+            gameController.enterChapterWithLevel(
+                    m.group(1), Integer.parseInt(m.group(2)), appState);
+        } else if ((m = InputParser.match(input,
                 model.enums.CommandRegex.MENU_ENTER_CHAPTER)) != null) {
             handleChapterEntry(m.group(1), appState);
         } else if (InputParser.matches(input,
@@ -206,11 +219,11 @@ public class CommandDispatcher {
         } else if (InputParser.matches(input,
                 model.enums.CommandRegex.MENU_COIN_WALLET)) {
             view.printInfo("Coins: "
-                + appState.getCurrentUser().getCoins());
+                    + appState.getCurrentUser().getCoins());
         } else if (InputParser.matches(input,
                 model.enums.CommandRegex.MENU_GEM_WALLET)) {
             view.printInfo("Gems: "
-                + appState.getCurrentUser().getGems());
+                    + appState.getCurrentUser().getGems());
         } else if ((m = InputParser.match(input,
                 model.enums.CommandRegex.CHEAT_ADD_CURRENCY)) != null) {
             gameController.cheatCurrency(m, appState);
@@ -257,7 +270,7 @@ public class CommandDispatcher {
                 return true;
             }
             gameController.enterChapter(chapterArg, appState);
-            return true;
+            return true;  // shows level list
         } catch (NumberFormatException e) {
             view.printError("Invalid minigame level in: " + chapterArg);
             return false;
@@ -310,13 +323,25 @@ public class CommandDispatcher {
     private void handleGameMenu(String input) {
         Matcher m;
         if ((m = InputParser.match(input,
+                model.enums.CommandRegex.MENU_ENTER_CHAPTER_LEVEL)) != null) {
+            gameController.enterChapterWithLevel(
+                    m.group(1), Integer.parseInt(m.group(2)), appState);
+        } else if ((m = InputParser.match(input,
                 model.enums.CommandRegex.MENU_ENTER_CHAPTER)) != null) {
             handleChapterEntry(m.group(1), appState);
+        } else if ((m = InputParser.match(input,
+                model.enums.CommandRegex.SHOW_CHAPTER_LEVELS)) != null) {
+            gameController.showChapterLevels(m.group(1), appState);
+        } else if (input.equalsIgnoreCase("show chapters")
+                || input.equalsIgnoreCase("show map")) {
+            gameController.showAllChapters(appState);
         } else if ((m = InputParser.match(input,
                 model.enums.CommandRegex.MENU_ENTER)) != null) {
             menuController.handleEnter(m.group(1), appState);
         } else {
-            view.printError("Unknown game menu command.");
+            view.printError("Unknown game menu command. "
+                    + "Try: show chapters | show levels -c <CHAPTER> "
+                    + "| menu enter chapter <CHAPTER> -l <N>");
         }
     }
 
@@ -373,6 +398,7 @@ public class CommandDispatcher {
             view.printError("Unknown plant select command.");
         }
     }
+
     private void handleInGameMenu(String input) {
         Matcher m;
         // اگر مینی‌گیمی فعال است، دستور ابتدا به آن داده می‌شود
@@ -383,7 +409,7 @@ public class CommandDispatcher {
         if ((m = InputParser.match(input,
                 model.enums.CommandRegex.ADVANCE_TIME)) != null) {
             gameController.advanceTime(
-                Integer.parseInt(m.group(1)), appState);
+                    Integer.parseInt(m.group(1)), appState);
         } else if ((m = InputParser.match(input,
                 model.enums.CommandRegex.PLANT_PLANT)) != null) {
             gameController.plantPlant(m, appState);
@@ -413,7 +439,7 @@ public class CommandDispatcher {
         } else if ((m = InputParser.match(input,
                 model.enums.CommandRegex.CHEAT_ADD_SUNS)) != null) {
             gameController.cheatAddSuns(
-                Integer.parseInt(m.group(1)), appState);
+                    Integer.parseInt(m.group(1)), appState);
         } else if (InputParser.matches(input,
                 model.enums.CommandRegex.CHEAT_RELEASE_NUKE)) {
             gameController.releaseNuke(appState);
@@ -433,6 +459,7 @@ public class CommandDispatcher {
             view.printError("Unknown in-game command.");
         }
     }
+
     private void handleGreenhouseMenu(String input) {
         Matcher m;
         if (InputParser.matches(input, model.enums.CommandRegex.SHOW_GREENHOUSE)) {
@@ -453,6 +480,7 @@ public class CommandDispatcher {
             view.printError("Unknown greenhouse command.");
         }
     }
+
     private void handleShopMenu(String input) {
         Matcher m;
         if (InputParser.matches(input, model.enums.CommandRegex.SHOP_LIST)) {
@@ -466,6 +494,7 @@ public class CommandDispatcher {
             view.printError("Unknown shop command.");
         }
     }
+
     private void handleTravelLogMenu(String input) {
         Matcher m;
         if ((m = InputParser.match(input,
@@ -479,9 +508,10 @@ public class CommandDispatcher {
             menuController.handleEnter(m.group(1), appState);
         } else {
             view.printError("Unknown travel-log command. Use 'travel log page <name>' "
-                + "or 'menu enter chapter <MINIGAME_N>'.");
+                    + "or 'menu enter chapter <MINIGAME_N>'.");
         }
     }
+
     private void handleLeaderboardMenu(String input) {
         Matcher m;
         if ((m = InputParser.match(input,
@@ -491,10 +521,11 @@ public class CommandDispatcher {
             leaderboardController.show(appState);
         }
     }
+
     private void promptCurrentMenu() {
         System.out.print(
-            ConsoleView.CYAN + "["
-            + appState.getCurrentMenu().name().toLowerCase()
-            + "]> " + ConsoleView.RESET);
+                ConsoleView.CYAN + "["
+                        + appState.getCurrentMenu().name().toLowerCase()
+                        + "]> " + ConsoleView.RESET);
     }
 }

@@ -21,7 +21,7 @@ public class ConsoleView {
     public static final String BG_DARK = "\u001B[40m";
 
     private static final String SEPARATOR =
-        CYAN + "═══════════════════════════════════════════════════" + RESET;
+            CYAN + "═══════════════════════════════════════════════════" + RESET;
 
     public void printSuccess(String message) {
         System.out.println(GREEN + "✔ " + message + RESET);
@@ -39,11 +39,9 @@ public class ConsoleView {
         System.out.println(YELLOW + "⚠ " + message + RESET);
     }
 
-    public void printRaw(String message) { System.out.println(message); }
-
-    public void print(String message) { System.out.print(message); }
-
-    public void printF(String message) { System.out.printf(message); }
+    public void printRaw(String message) {
+        System.out.println(message);
+    }
 
     public void printSeparator() {
         System.out.println(SEPARATOR);
@@ -85,53 +83,55 @@ public class ConsoleView {
     public void printWaveStarted(int waveNumber, boolean isFinal) {
         if (isFinal) {
             System.out.println(BOLD + RED
-                + "\n⚠️  THE FINAL WAVE HAS COME! ⚠️" + RESET);
+                    + "\n⚠️  THE FINAL WAVE HAS COME! ⚠️" + RESET);
         } else {
             System.out.println(BOLD + YELLOW
-                + "\n🌊 Wave " + waveNumber + " started." + RESET);
+                    + "\n🌊 Wave " + waveNumber + " started." + RESET);
         }
     }
 
     public void printZombieSpawned(String type, int wave, int lane, int cost) {
         System.out.println(RED + "🧟 Zombie " + type
-            + " spawned at wave " + wave
-            + " in lane " + lane
-            + " which costed " + cost + "." + RESET);
+                + " spawned at wave " + wave
+                + " in lane " + lane
+                + " which costed " + cost + "." + RESET);
     }
 
     public void printZombieDead(String type, double x, int y) {
         System.out.println(GREEN + "💀 Zombie of type " + type
-            + " is dead at (" + String.format("%.1f", x) + ", " + y + ")" + RESET);
+                + " is dead at (" + String.format("%.1f", x) + ", " + y + ")" + RESET);
     }
 
     public void printPlantDestroyed(String type, int x, int y) {
         System.out.println(YELLOW + "🌿 Plant " + type
-            + " at (" + x + ", " + y + ") is destroyed." + RESET);
+                + " at (" + x + ", " + y + ") is destroyed." + RESET);
     }
 
     public void printPlantProducedSun(String plantType, int x, int y) {
         System.out.println(YELLOW + "☀ plant " + plantType
-            + " produced a sun at (" + x + ", " + y + ")" + RESET);
+                + " produced a sun at (" + x + ", " + y + ")" + RESET);
     }
 
     public void printSunDropping(String type, int x, int y) {
         System.out.println(YELLOW + "☀ New " + type
-            + " sun is dropping at position (" + x + ", " + y + ")" + RESET);
+                + " sun is dropping at position (" + x + ", " + y + ")" + RESET);
     }
 
     public void printSunLanded(int x, int y) {
         System.out.println(YELLOW + "☀ Sun reached the ground at position ("
-            + x + ", " + y + ")" + RESET);
+                + x + ", " + y + ")" + RESET);
     }
 
     public void printZombieDropped(String item, int count) {
-        System.out.println(MAGENTA + "💎 A zombie dropped a " + item
-            + "; you have " + count + " " + item + "(s) now." + RESET);
+        String plural = item.equals("coin") ? "coins"
+                : item.equals("diamond") ? "diamonds" : "pots";
+        System.out.println(MAGENTA + "💎 A zombie dropeed a " + item
+                + "; you have " + count + " " + plural + " now." + RESET);
     }
 
     public void printLawnMowerTriggered(int row, List<String> killed) {
         System.out.println(CYAN + "🚜 The lawn mower in the row "
-            + row + " is triggered and killed these zombies:" + RESET);
+                + row + " is triggered and killed these zombies:" + RESET);
         for (String z : killed) {
             System.out.println(CYAN + "   • " + z + RESET);
         }
@@ -158,7 +158,7 @@ public class ConsoleView {
 
     public void printGlowingZombieDroppedFood(int currentCount) {
         System.out.println(MAGENTA + "✨ The glowing zombie dropped a plant food;"
-            + " you have " + currentCount + " plant foods now." + RESET);
+                + " you have " + currentCount + " plant foods now." + RESET);
     }
 
     public void printLawnMowerGameOver() {
