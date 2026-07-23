@@ -18,7 +18,7 @@ public class Sun {
     private int spawnTick;
 
     /** ارزش خورشید */
-    private int value;
+    private int value;  // mutable: radioactive→normal on landing
 
     public Sun(SunType type, int x, int y, int spawnTick) {
         this.type = type;
@@ -51,6 +51,5 @@ public class Sun {
     public void setCollected(boolean collected) { this.collected = collected; }
     public int getSpawnTick() { return spawnTick; }
     public int getValue() { return value; }
-    public void setValue(int value) { this.value = value; }
-
+    public void setValue(int v) { this.value = v; }
 }

@@ -61,6 +61,8 @@ public class User {
 
     /** آخرین فصل و مرحله رسیده‌شده (برای لیدربورد) */
     private String lastReachedLevel;
+    /** مراحل باز‌شده: فرمت "ANCIENT_EGYPT_1"، "FROSTBITE_CAVES_2" و ... */
+    private java.util.List<String> unlockedLevels;
 
     /** میزان سختی انتخابی (1 تا 5، پیش‌فرض 3) */
     private int difficultyLevel;
@@ -211,5 +213,29 @@ public class User {
     public java.util.List<NewsItem> getAllNews() {
         if (allNews == null) allNews = new java.util.ArrayList<>();
         return allNews;
+    }
+
+    public java.util.List<String> getUnlockedLevels() {
+        if (unlockedLevels == null) {
+            unlockedLevels = new java.util.ArrayList<>();
+            unlockedLevels.add("ANCIENT_EGYPT_1");
+        }
+        return unlockedLevels;
+    }
+
+    public void setUnlockedLevels(java.util.List<String> levels) {
+        this.unlockedLevels = levels;
+    }
+
+    public boolean isLevelUnlocked(String chapterName, int levelNumber) {
+        String key = chapterName.toUpperCase() + "_" + levelNumber;
+        return getUnlockedLevels().contains(key);
+    }
+
+    public void unlockLevel(String chapterName, int levelNumber) {
+        String key = chapterName.toUpperCase() + "_" + levelNumber;
+        if (!getUnlockedLevels().contains(key)) {
+            getUnlockedLevels().add(key);
+        }
     }
 }

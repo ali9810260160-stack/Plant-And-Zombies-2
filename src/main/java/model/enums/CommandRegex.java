@@ -4,8 +4,7 @@ package model.enums;
  * الگوهای Regex برای پارس کردن تمام دستورات ورودی.
  */
 public enum CommandRegex {
-    REGISTER("register\\s+-u\\s+(\\S+)\\s+-p\\s+(\\S+)\\s+(\\S+)" +
-             "\\s+-n\\s+(\\S+)\\s+-e\\s+(\\S+)\\s+-g\\s+(male|female)"),
+    REGISTER("register\\s+-u\\s+(\\S+)\\s+-p\\s+(\\S+)\\s+(\\S+)\\s+-n\\s+(\\S+)\\s+-e\\s+(\\S+)\\s+-g\\s+(male|female)"),
     PICK_QUESTION("pick question\\s+-q\\s+(\\d+)\\s+-a\\s+(\\S+)\\s+-c\\s+(\\S+)"),
     LOGIN("login\\s+-u\\s+(\\S+)\\s+-p\\s+(\\S+)(\\s+-stay-logged-in)?"),
     FORGET_PASSWORD("forget password\\s+-u\\s+(\\S+)\\s+-e\\s+(\\S+)"),
@@ -13,6 +12,8 @@ public enum CommandRegex {
     SET_NEW_PASSWORD("new password\\s+-p\\s+(\\S+)\\s+-c\\s+(\\S+)"),
     MENU_ENTER("menu enter\\s+(?!chapter)(\\S+)"),
     MENU_ENTER_CHAPTER("menu enter chapter(?:\\s+-c)?\\s+(\\S+)"),
+    MENU_ENTER_CHAPTER_LEVEL("menu enter chapter(?:\\s+-c)?\\s+(\\S+)\\s+-l\\s+(\\d+)"),
+    SHOW_CHAPTER_LEVELS("show levels\\s+-c\\s+(\\S+)"),
     MENU_SHOW_CURRENT("menu show current"),
     MENU_EXIT("menu exit"),
     MENU_LOGOUT("menu logout"),

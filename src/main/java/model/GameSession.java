@@ -36,9 +36,11 @@ public class GameSession {
     /** تیک آخرین سقوط خورشید از آسمان */
     private int lastSkyDropTick;
     /** تیک شروع نبرد زمان‌دار */
-//    private int timedWarStartTick;
+    private int timedWarStartTick;
     /** حالت انتظار بین موج‌ها */
     private boolean betweenWaves;
+    /** شماره مرحله در حال اجرا */
+    private int levelNumber;
     /** آیا گردباد مصر باید اتفاق بیفتد */
     private boolean egyptTornadoActive;
     /** ردیف‌هایی که باد یخی زده */
@@ -59,7 +61,7 @@ public class GameSession {
         this.result = GameResult.IN_PROGRESS;
         this.cooldownCheated = false;
         this.sunAmount = level.getInitialSunAmount() > 0
-                         ? level.getInitialSunAmount() : 50;
+                ? level.getInitialSunAmount() : 50;
         this.plantFoodCount = 0;
         this.currentWaveIndex = 0;
         this.activeZombies = new ArrayList<>();
@@ -184,4 +186,6 @@ public class GameSession {
     public void setConsecutiveKills(int n) { this.consecutiveKills = n; }
     public long getLastKillTick() { return lastKillTick; }
     public void setLastKillTick(long t) { this.lastKillTick = t; }
+    public int getLevelNumber() { return levelNumber; }
+    public void setLevelNumber(int n) { this.levelNumber = n; }
 }
