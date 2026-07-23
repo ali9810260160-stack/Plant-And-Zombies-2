@@ -27,6 +27,7 @@ public class CombatService {
     private final ConsoleView view;
     private service.LevelProgressService levelProgressService;
     private service.ScoredGameService scoredGameService;
+    private service.QuestService questService;
 
     public CombatService(ConsoleView view) {
         this.view = view;
@@ -38,6 +39,10 @@ public class CombatService {
 
     public void setScoredGameService(service.ScoredGameService sgs) {
         this.scoredGameService = sgs;
+    }
+
+    public void setQuestService(service.QuestService qs) {
+        this.questService = qs;
     }
 
     public void processTick(GameSession session) {
@@ -373,6 +378,7 @@ public class CombatService {
             session.setZombiesKilled(session.getZombiesKilled() + 1);
         });
         view.printLawnMowerTriggered(rowIndex + 1, killed);
+        onLawnmowerKill(killed.size());
     }
 
     private void removeDeadEntities(GameSession session) {
@@ -393,6 +399,11 @@ public class CombatService {
         session.setZombiesKilled(session.getZombiesKilled() + 1);
         zombie.onDeath(session);
         updateMeoPoints(zombie, session);
+        if (questService != null) {
+            questService.onZombieKilled(
+                    zombie.getType().name(),
+                    session.getGameMap().getChapter(), null);
+        }
         handleDrops(zombie, session);
         if (zombie.isGlowing()) {
             boolean added = session.addPlantFood();
@@ -477,6 +488,24 @@ public class CombatService {
         return false;
     }
 
+    public void onSunCollectedForQuest(int amount) {
+        if (questService != null) {
+            questService.onSunCollected(amount);
+        }
+    }
+
+    public void onExplosiveUsed() {
+        if (questService != null) {
+            questService.onExplosiveUsed();
+        }
+    }
+
+    public void onLawnmowerKill(int count) {
+        if (questService != null) {
+            questService.onLawnmowerKill(count);
+        }
+    }
+
     public void checkWinCondition(GameSession session) {
         if (!session.isInProgress()) {
             return;
@@ -485,6 +514,9 @@ public class CombatService {
             session.setResult(GameResult.WIN);
             view.printGameWon();
             notifyLevelComplete(session);
+            if (questService != null) {
+                questService.onGameWon(session);
+            }
         }
     }
 

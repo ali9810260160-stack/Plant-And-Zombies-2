@@ -8,8 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * DTO حاوی آمار ثابت یک گیاه (از JSON بارگذاری می‌شود).
- * این داده‌ها به ازای هر نوع گیاه یک بار در حافظه موجودند.
+ * DTO آمار ثابت یک گیاه — از JSON بارگذاری می‌شود.
  */
 public class PlantStats {
 
@@ -24,6 +23,8 @@ public class PlantStats {
     private int range;
     private String category;
     private String description;
+    private String baseAbility;
+    private String plantFoodEffect;
 
     public PlantStats(PlantType type, PlantFamily family, int baseHp,
                       int sunCost, double rechargeTime, int baseDamage,
@@ -40,6 +41,8 @@ public class PlantStats {
         this.category = category;
         this.description = description;
         this.tags = new ArrayList<>();
+        this.baseAbility = "";
+        this.plantFoodEffect = "";
     }
 
     public PlantType getType() { return type; }
@@ -54,4 +57,8 @@ public class PlantStats {
     public int getRange() { return range; }
     public String getCategory() { return category; }
     public String getDescription() { return description; }
+    public String getBaseAbility() { return baseAbility; }
+    public void setBaseAbility(String s) { this.baseAbility = s; }
+    public String getPlantFoodEffect() { return plantFoodEffect; }
+    public void setPlantFoodEffect(String s) { this.plantFoodEffect = s; }
 }
