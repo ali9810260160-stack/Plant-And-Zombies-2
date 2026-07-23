@@ -1,0 +1,247 @@
+[
+  {
+    "id": "DAILY_SUN_COLLECTOR",
+    "nameFA": "آفتاب‌گیر روزانه",
+    "type": "DAILY",
+    "condition": "COLLECT_SUN",
+    "description": "جمع‌آوری {target} واحد خورشید در طول یک روز",
+    "rewardType": "COIN",
+    "rewardBase": 100,
+    "rewardMultiplier": true,
+    "priority": "MEDIUM",
+    "targets": [
+      3000,
+      4000,
+      5000
+    ]
+  },
+  {
+    "id": "CHAPTER_HUNTER",
+    "nameFA": "شکارچی فصل",
+    "type": "STORY",
+    "condition": "KILL_CHAPTER_ZOMBIES",
+    "description": "شکست دادن 50 زامبی از فصل {chapter}",
+    "rewardType": "SEED_PACKET",
+    "rewardAmount": 10,
+    "priority": "HIGH",
+    "targets": [
+      "ANCIENT_EGYPT",
+      "FROSTBITE_CAVES",
+      "BIG_WAVE_BEACH",
+      "DARK_AGES"
+    ]
+  },
+  {
+    "id": "DAILY_PLANT_KILLER",
+    "nameFA": "باز حرفه‌ای",
+    "type": "DAILY",
+    "condition": "KILL_WITH_PLANT",
+    "description": "10 زامبی را فقط با {plant} بکش",
+    "rewardType": "RANDOM_PLANT",
+    "rewardAmount": 1,
+    "priority": "HIGH",
+    "targets": []
+  },
+  {
+    "id": "DAILY_CACTUS_ONLY",
+    "nameFA": "only cactus",
+    "type": "DAILY",
+    "condition": "KILL_WITH_CACTUS",
+    "description": "10 زامبی را فقط با کاکتوس بکش",
+    "rewardType": "GEM",
+    "rewardAmount": 20,
+    "priority": "HIGH",
+    "targets": []
+  },
+  {
+    "id": "PLANT_SAVER",
+    "nameFA": "گیاه‌خوار اقتصادی",
+    "type": "STORY",
+    "condition": "WIN_WITH_MAX_PLANT_LOSS",
+    "description": "پیروزی بدون از دست دادن بیش از {target} گیاه",
+    "rewardType": "SEED_PACKET",
+    "rewardBase": 20,
+    "rewardMultiplier": true,
+    "priority": "HIGH",
+    "targets": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "id": "EPIC_ZERO_SUN",
+    "nameFA": "استاد دفاع",
+    "type": "EPIC",
+    "condition": "WIN_WITH_ZERO_SUN",
+    "description": "اتمام یک مرحله دقیقاً با صفر خورشید",
+    "rewardType": "GEM",
+    "rewardAmount": 200,
+    "priority": "CRITICAL",
+    "targets": []
+  },
+  {
+    "id": "FAST_KILLER",
+    "nameFA": "سرعت عمل",
+    "type": "STORY",
+    "condition": "KILL_10_IN_30SEC",
+    "description": "کشتن 10 زامبی در کمتر از 30 ثانیه از شروع موج اول",
+    "rewardType": "COIN",
+    "rewardAmount": 500,
+    "priority": "MEDIUM",
+    "targets": []
+  },
+  {
+    "id": "DAILY_EXPLOSIVE_USER",
+    "nameFA": "تخریب‌گر حرفه‌ای",
+    "type": "DAILY",
+    "condition": "USE_EXPLOSIVES",
+    "description": "استفاده از 3 گیاه انفجاری در یک مرحله",
+    "rewardType": "COIN",
+    "rewardAmount": 100,
+    "priority": "LOW",
+    "targets": []
+  },
+  {
+    "id": "DAILY_SYMMETRY",
+    "nameFA": "تقارن",
+    "type": "DAILY",
+    "condition": "WIN_WITH_SYMMETRIC_GARDEN",
+    "description": "باغچه در پایان مرحله باید متقارن باشد",
+    "rewardType": "COIN",
+    "rewardAmount": 500,
+    "priority": "HIGH",
+    "targets": []
+  },
+  {
+    "id": "DAILY_FAMILY_KILLER",
+    "nameFA": "کشتار خانوادگی",
+    "type": "DAILY",
+    "condition": "KILL_WITH_FAMILY",
+    "description": "تنها از گیاهان {family} برای کشتن زامبی‌ها استفاده شود",
+    "rewardType": "COIN",
+    "rewardAmount": 1000,
+    "priority": "MEDIUM",
+    "targets": []
+  },
+  {
+    "id": "DAILY_NO_FAMILY",
+    "nameFA": "شکوفایی در محدودیت‌ها",
+    "type": "DAILY",
+    "condition": "WIN_WITHOUT_FAMILY",
+    "description": "برد بدون استفاده از خانواده {family}",
+    "rewardType": "GEM",
+    "rewardAmount": 100,
+    "priority": "HIGH",
+    "targets": []
+  },
+  {
+    "id": "EPIC_NIGHT_PLANTS",
+    "nameFA": "شب یا صبح",
+    "type": "EPIC",
+    "condition": "WIN_DAY_WITH_NIGHT_PLANTS",
+    "description": "تمام کردن یک مرحله روز فقط با گیاهان شب",
+    "rewardType": "GEM",
+    "rewardAmount": 20,
+    "priority": "HIGH",
+    "targets": []
+  },
+  {
+    "id": "DAILY_WIN_STREAK",
+    "nameFA": "برد پشت برد",
+    "type": "DAILY",
+    "condition": "WIN_STREAK",
+    "description": "5 مرحله را پشت سر هم با بیشترین سختی ببر",
+    "rewardType": "COIN",
+    "rewardAmount": 5000,
+    "priority": "MEDIUM",
+    "targets": []
+  },
+  {
+    "id": "DAILY_NO_MOWER_KILL",
+    "nameFA": "تقریباً پیروز",
+    "type": "DAILY",
+    "condition": "KILL_NEAR_HOME",
+    "description": "10 زامبی را در ستون اول ردیفی بکش که چمن‌زن ندارد",
+    "rewardType": "COIN",
+    "rewardAmount": 300,
+    "priority": "MEDIUM",
+    "targets": []
+  },
+  {
+    "id": "DAILY_ASYMMETRY",
+    "nameFA": "OCD نَمَنَ",
+    "type": "DAILY",
+    "condition": "WIN_WITH_ASYMMETRIC_GARDEN",
+    "description": "مرحله را ببر بدون هیچ تقارنی در باغچه",
+    "rewardType": "COIN",
+    "rewardAmount": 800,
+    "priority": "MEDIUM",
+    "targets": []
+  },
+  {
+    "id": "DAILY_FEW_SUN_PLANTS",
+    "nameFA": "روز ابری",
+    "type": "DAILY",
+    "condition": "WIN_WITH_MAX_SUN_PRODUCERS",
+    "description": "یک مرحله را فقط با 3 گیاه تولید‌کننده خورشید ببر",
+    "rewardType": "GEM",
+    "rewardAmount": 10,
+    "priority": "HIGH",
+    "targets": []
+  },
+  {
+    "id": "DAILY_EMPTY_COLUMN",
+    "nameFA": "یه ستون کمتر",
+    "type": "DAILY",
+    "condition": "WIN_WITH_EMPTY_COLUMN",
+    "description": "یک مرحله ببر با ستون {col} کاملاً خالی",
+    "rewardType": "GEM",
+    "rewardAmount": 10,
+    "priority": "HIGH",
+    "targets": []
+  },
+  {
+    "id": "DAILY_EMPTY_ROW",
+    "nameFA": "سطر بی‌دفاع",
+    "type": "DAILY",
+    "condition": "WIN_WITH_EMPTY_ROW",
+    "description": "یک مرحله ببر با سطر {row} کاملاً خالی",
+    "rewardType": "GEM",
+    "rewardAmount": 20,
+    "priority": "HIGH",
+    "targets": []
+  },
+  {
+    "id": "DAILY_EMPTY_CROSS",
+    "nameFA": "صلیب بی‌دفاع",
+    "type": "DAILY",
+    "condition": "WIN_WITH_EMPTY_CROSS",
+    "description": "یک مرحله ببر با ستون و ردیف {n} کاملاً خالی",
+    "rewardType": "GEM",
+    "rewardAmount": 25,
+    "priority": "HIGH",
+    "targets": []
+  },
+  {
+    "id": "EPIC_LAWNMOWER",
+    "nameFA": "وقت چمن‌زنی",
+    "type": "EPIC",
+    "condition": "LAWNMOWER_KILLS",
+    "description": "حداقل {target} زامبی را با چمن‌زن بکش",
+    "rewardType": "GEM",
+    "rewardBase": 1,
+    "rewardMultiplier": true,
+    "priority": "MEDIUM",
+    "targets": [
+      10,
+      20,
+      30,
+      40,
+      50
+    ]
+  }
+]

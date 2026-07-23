@@ -1,0 +1,102 @@
+[
+  {
+    "alias": "ConeDefault",
+    "enumType": "CONE",
+    "armorType": "Cone",
+    "baseHealth": 370,
+    "metallic": false,
+    "droppable": true,
+    "magnetAttracts": false,
+    "flags": [
+      "damageable",
+      "droppable",
+      "helm"
+    ],
+    "description": "Cone armor with 370 HP."
+  },
+  {
+    "alias": "BucketDefault",
+    "enumType": "BUCKET",
+    "armorType": "Bucket",
+    "baseHealth": 1100,
+    "metallic": true,
+    "droppable": true,
+    "magnetAttracts": true,
+    "flags": [
+      "metallic",
+      "damageable",
+      "droppable",
+      "helm"
+    ],
+    "description": "Bucket armor with 1100 HP."
+  },
+  {
+    "alias": "BrickDefault",
+    "enumType": "BLOCK",
+    "armorType": "Brick",
+    "baseHealth": 2200,
+    "metallic": false,
+    "droppable": true,
+    "magnetAttracts": false,
+    "flags": [
+      "damageable",
+      "droppable",
+      "helm"
+    ],
+    "description": "Brick armor with 2200 HP."
+  },
+  {
+    "alias": "ShoulderArmorDefault",
+    "enumType": "SHOULDER_ARMOR",
+    "armorType": "ShoulderArmor",
+    "baseHealth": 1600,
+    "metallic": false,
+    "droppable": false,
+    "magnetAttracts": false,
+    "flags": [
+      "damageable",
+      "passdamage"
+    ],
+    "description": "ShoulderArmor armor with 1600 HP."
+  },
+  {
+    "alias": "CrownDefault",
+    "enumType": "HELMET",
+    "armorType": "Crown",
+    "baseHealth": 1600,
+    "metallic": true,
+    "droppable": true,
+    "magnetAttracts": true,
+    "flags": [
+      "damageable",
+      "droppable",
+      "metallic",
+      "helm"
+    ],
+    "description": "Crown armor with 1600 HP."
+  },
+  {
+    "alias": "NewspaperDefault",
+    "enumType": "NEWSPAPER",
+    "armorType": "Newspaper",
+    "baseHealth": 800,
+    "metallic": false,
+    "droppable": false,
+    "magnetAttracts": false,
+    "flags": [
+      "damageable"
+    ],
+    "description": "Newspaper armor with 800 HP."
+  },
+  {
+    "alias": "BarrelDefault",
+    "enumType": "BARREL",
+    "armorType": "Barrel",
+    "baseHealth": 1100,
+    "metallic": true,
+    "droppable": true,
+    "flags": [
+      "damageable"
+    ]
+  }
+]
