@@ -4,7 +4,8 @@ import java.util.List;
 
 /**
  * کلاس مرکزی چاپ خروجی به ترمینال.
- * از ANSI برای رنگ‌آمیزی و قاب‌بندی استفاده می‌شود.
+ * متدهای عمومی مشترک در همه منوها اینجا هستند.
+ * برای خروجی اختصاصی هر منو، از view مربوطه از طریق getter استفاده کنید.
  */
 public class ConsoleView {
 
@@ -22,6 +23,30 @@ public class ConsoleView {
 
     private static final String SEPARATOR =
             CYAN + "═══════════════════════════════════════════════════" + RESET;
+
+    // ── ارجاع به view های اختصاصی هر منو ──────────────────────────────────
+    private final AuthView          authView          = new AuthView();
+    private final CollectionView    collectionView    = new CollectionView();
+    private final GameView          gameView          = new GameView();
+    private final GreenhouseView    greenhouseView    = new GreenhouseView();
+    private final LeaderboardView   leaderboardView   = new LeaderboardView();
+    private final ProfileView       profileView       = new ProfileView();
+    private final TravelLogView     travelLogView     = new TravelLogView();
+    private final LevelProgressView levelProgressView = new LevelProgressView();
+    private final PlantFoodView     plantFoodView     = new PlantFoodView();
+
+    // ── دسترسی به view های اختصاصی ─────────────────────────────────────────
+    public AuthView          getAuthView()          { return authView; }
+    public CollectionView    getCollectionView()    { return collectionView; }
+    public GameView          getGameView()          { return gameView; }
+    public GreenhouseView    getGreenhouseView()    { return greenhouseView; }
+    public LeaderboardView   getLeaderboardView()   { return leaderboardView; }
+    public ProfileView       getProfileView()       { return profileView; }
+    public TravelLogView     getTravelLogView()     { return travelLogView; }
+    public LevelProgressView getLevelProgressView() { return levelProgressView; }
+    public PlantFoodView     getPlantFoodView()     { return plantFoodView; }
+
+    // ── متدهای عمومی مشترک بین همه منوها ──────────────────────────────────
 
     public void printSuccess(String message) {
         System.out.println(GREEN + "✔ " + message + RESET);
@@ -62,6 +87,18 @@ public class ConsoleView {
         }
     }
 
+    /** نمایش پرامپت ورودی در ترمینال (بدون newline). */
+    public void printPrompt(String menuName) {
+        System.out.print(CYAN + "[" + menuName.toLowerCase() + "] > " + RESET);
+    }
+
+    /** چاپ سوالات امنیتی — ارجاع به AuthView. */
+    public void printSecurityQuestions() {
+        authView.printSecurityQuestions();
+    }
+
+    // ── متدهای رویدادهای بازی (مشترک بین منوها) ────────────────────────────
+
     public void printZombiesInfo(List<String> zombieInfoLines) {
         System.out.println(BOLD + RED + "\n🧟 Zombies on field:" + RESET);
         System.out.println(RED + "─────────────────────────────────────────" + RESET);
@@ -82,11 +119,9 @@ public class ConsoleView {
 
     public void printWaveStarted(int waveNumber, boolean isFinal) {
         if (isFinal) {
-            System.out.println(BOLD + RED
-                    + "\n⚠️  THE FINAL WAVE HAS COME! ⚠️" + RESET);
+            System.out.println(BOLD + RED + "\n⚠️  THE FINAL WAVE HAS COME! ⚠️" + RESET);
         } else {
-            System.out.println(BOLD + YELLOW
-                    + "\n🌊 Wave " + waveNumber + " started." + RESET);
+            System.out.println(BOLD + YELLOW + "\n🌊 Wave " + waveNumber + " started." + RESET);
         }
     }
 
@@ -163,15 +198,6 @@ public class ConsoleView {
 
     public void printLawnMowerGameOver() {
         printGameOver();
-    }
-
-    public void printSecurityQuestions() {
-        System.out.println(BOLD + CYAN + "\n🔒 Security Questions:" + RESET);
-        System.out.println(CYAN + "  1. What is the name of your first pet?" + RESET);
-        System.out.println(CYAN + "  2. What is your mother's maiden name?" + RESET);
-        System.out.println(CYAN + "  3. What was the name of your first school?" + RESET);
-        System.out.println(CYAN + "  4. What is your favorite book?" + RESET);
-        System.out.println(CYAN + "  5. What city were you born in?" + RESET);
     }
 
     public void printCurrentMenu(String menuName) {

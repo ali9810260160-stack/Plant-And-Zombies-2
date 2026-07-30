@@ -306,24 +306,24 @@ public class BeghouledMinigame {
         view.printHeader("🧩 Beghouled — Level " + level
             + "  Matches: " + matchCount + "/" + targetMatches
             + "  ☀ " + sunAmount);
-        System.out.print("    ");
+        StringBuilder header = new StringBuilder("    ");
         for (int c = 1; c <= COLS; c++) {
-            System.out.printf(" %-4d", c);
+            header.append(String.format(" %-4d", c));
         }
-        view.printRaw("");
+        view.printRaw(header.toString());
         view.printRaw("    " + "─────".repeat(COLS));
         for (int r = 0; r < ROWS; r++) {
-            System.out.printf(" %d │ ", r + 1);
+            StringBuilder rowSb = new StringBuilder(String.format(" %d │ ", r + 1));
             for (int c = 0; c < COLS; c++) {
                 if (crater[r][c]) {
-                    System.out.print(ConsoleView.RED + "💥   " + ConsoleView.RESET);
+                    rowSb.append(ConsoleView.RED).append("💥   ").append(ConsoleView.RESET);
                 } else if (grid[r][c] == null) {
-                    System.out.print("     ");
+                    rowSb.append("     ");
                 } else {
-                    System.out.print(getPlantEmoji(grid[r][c]) + "   ");
+                    rowSb.append(getPlantEmoji(grid[r][c])).append("   ");
                 }
             }
-            view.printRaw("");
+            view.printRaw(rowSb.toString());
         }
         view.printRaw("    " + "─────".repeat(COLS));
         printUpgradeTable();

@@ -371,10 +371,10 @@ public class CommandDispatcher {
             collectionController.showAllZombies();
         } else if ((m = InputParser.match(input,
                 model.enums.CommandRegex.COLLECTION_SHOW_PLANT)) != null) {
-            collectionController.showPlant(m.group(1));
+            collectionController.showPlantDetail(m.group(1), appState);
         } else if ((m = InputParser.match(input,
                 model.enums.CommandRegex.COLLECTION_SHOW_ZOMBIE)) != null) {
-            collectionController.showZombie(m.group(1));
+            collectionController.showZombieDetail(m.group(1));
         } else if ((m = InputParser.match(input,
                 model.enums.CommandRegex.COLLECTION_UPGRADE_PLANT)) != null) {
             collectionController.upgradePlant(m.group(1), appState);
@@ -538,9 +538,6 @@ public class CommandDispatcher {
     }
 
     private void promptCurrentMenu() {
-        System.out.print(
-                ConsoleView.CYAN + "["
-                        + appState.getCurrentMenu().name().toLowerCase()
-                        + "]> " + ConsoleView.RESET);
+        view.printPrompt(appState.getCurrentMenu().name());
     }
 }

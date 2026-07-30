@@ -69,23 +69,15 @@ public class LeaderboardController {
     }
 
     private void printTableHeader() {
-        System.out.printf(ConsoleView.BOLD + ConsoleView.CYAN
-            + "  %-4s %-15s %-12s %-10s %-10s %-12s %-10s%n"
-            + ConsoleView.RESET,
-            "Rank", "Username", "Level", "Minigames",
-            "DailyQ", "RegularQ", "MeoPoint");
+        view.getLeaderboardView().printTableHeader();
         view.printRaw(ConsoleView.CYAN
             + "  " + "─".repeat(75) + ConsoleView.RESET);
     }
 
     private void printRow(int rank, User u) {
-        System.out.printf("  %-4d %-15s %-12s %-10d %-10d %-12d %-10d%n",
-            rank,
-            u.getUsername(),
+        view.getLeaderboardView().printRow(rank, u.getUsername(),
             u.getLastReachedLevel() != null ? u.getLastReachedLevel() : "-",
-            u.getMinigamesCompleted(),
-            u.getDailyQuestsCompleted(),
-            u.getRegularQuestsCompleted(),
-            u.getHighestMeoPoint());
+            u.getMinigamesCompleted(), u.getDailyQuestsCompleted(),
+            u.getRegularQuestsCompleted(), u.getHighestMeoPoint());
     }
 }

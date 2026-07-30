@@ -213,12 +213,12 @@ public class VasebreakerMinigame {
         view.printRaw(ConsoleView.CYAN
             + "  " + "─".repeat(maxCols * 6) + ConsoleView.RESET);
         for (int r = 1; r <= 5; r++) {
-            System.out.print("  ");
+            StringBuilder row = new StringBuilder("  ");
             for (int c = 1; c <= maxCols; c++) {
                 Vase v = findVase(c, r);
-                System.out.print(formatVase(v) + " ");
+                row.append(formatVase(v)).append(" ");
             }
-            view.printRaw("");
+            view.printRaw(row.toString());
         }
         view.printRaw(ConsoleView.CYAN
             + "  " + "─".repeat(maxCols * 6) + ConsoleView.RESET);

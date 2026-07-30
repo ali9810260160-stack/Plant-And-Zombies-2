@@ -35,8 +35,7 @@ public class QuestService {
                     QUESTS.put(qd.getId(), qd);
                 }
             }
-            System.out.println("[QuestService] Loaded "
-                + QUESTS.size() + " quests from data/quests.json");
+            // quests loaded successfully
         } catch (Exception e) {
             System.err.println("[QuestService] Cannot load quests.json: "
                 + e.getMessage());
@@ -338,18 +337,14 @@ public class QuestService {
             : ConsoleView.RED   + "[TODO]" + ConsoleView.RESET;
         int target = qd.getTargetForLevel(qp.getCurrentLevel());
         String prog = qp.getCurrentValue() + "/" + target;
-        System.out.println("  " + status + " ["
-            + qd.getPriority() + "] "
-            + ConsoleView.BOLD + qd.getNameFA() + ConsoleView.RESET);
-        System.out.println("         " + qd.getDescription()
-            .replace("{target}", String.valueOf(target))
-            + "  (" + prog + ")");
         int rew = qd.isRewardMultiplier()
                   ? qd.getRewardBase() * qp.getCurrentLevel()
                   : qd.getRewardBase();
-        System.out.println("         Reward: "
-            + ConsoleView.YELLOW + rew + " " + qd.getRewardType()
-            + ConsoleView.RESET);
+        String desc = qd.getDescription()
+            .replace("{target}", String.valueOf(target))
+            + "  (" + prog + ")";
+        view.getTravelLogView().printQuestRow(status, qd.getPriority().toString(),
+            qd.getNameFA(), desc, rew, qd.getRewardType().toString());
     }
 
     private List<QuestDefinition> filterByPage(String page) {

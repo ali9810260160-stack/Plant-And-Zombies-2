@@ -1,9 +1,12 @@
 package model.plants;
 
+import model.GameSession;
 import model.enums.PlantEffect;
 import model.enums.PlantFamily;
 import model.enums.PlantTag;
 import model.enums.PlantType;
+import model.zombies.Zombie;
+import view.ConsoleView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,9 +57,34 @@ public abstract class Plant {
         this.seedPackets = 0;
     }
 
-    public abstract void onTick(int tickCount);
-    public abstract void activatePlantFood();
+    /** تیک بازی — مدیریت تایمرها و رفتار دوره‌ای گیاه */
+    public abstract void onTick(int tickCount, GameSession session);
+
+    /**
+     * فعال‌سازی اثر غذای گیاه.
+     *
+     * @param session نشست بازی جاری (می‌تواند null باشد در حالت‌های خاص)
+     */
+    public abstract void activatePlantFood(GameSession session);
+
+    /** توضیح توانایی منحصربه‌فرد گیاه */
     public abstract String getDescription();
+
+    /**
+     * هنگامی که زامبی به این گیاه حمله می‌کند فراخوانده می‌شود.
+     * @return true اگر حمله «مدیریت شد» و گیاه نباید آسیب بخورد (مثل Chomper)
+     */
+    public boolean onZombieAttack(Zombie zombie, GameSession session) {
+        return false;
+    }
+
+    /**
+     * هنگامی که این گیاه نابود می‌شود فراخوانده می‌شود.
+     * @param killer زامبی‌ای که آن را نابود کرد (ممکن است null باشد)
+     */
+    public void onPlantDestroyed(Zombie killer, GameSession session) {
+        // پیش‌فرض: بدون اثر
+    }
 
     public void takeDamage(int damage) {
         currentHealth = Math.max(0, currentHealth - damage);
@@ -137,6 +165,8 @@ public abstract class Plant {
         return type.name().replace("_", "-").toLowerCase();
     }
 
+    // ---- getters & setters ----
+
     public PlantType getType() { return type; }
     public PlantFamily getFamily() { return family; }
     public List<PlantTag> getTags() { return tags; }
@@ -145,6 +175,7 @@ public abstract class Plant {
     public int getCurrentHealth() { return currentHealth; }
     public void setCurrentHealth(int hp) { this.currentHealth = hp; }
     public int getMaxHealth() { return maxHealth; }
+    public void setMaxHealth(int hp) { this.maxHealth = hp; }
     public int getSunCost() { return sunCost; }
     public double getRechargeTime() { return rechargeTime; }
     public int getRemainingCooldownTicks() { return remainingCooldownTicks; }
@@ -164,8 +195,6 @@ public abstract class Plant {
     public int getFreezeLevel() { return freezeLevel; }
     public void setFreezeLevel(int lvl) {
         this.freezeLevel = lvl;
-        if (lvl >= 3) {
-            this.frozen = true;
-        }
+        if (lvl >= 3) this.frozen = true;
     }
 }

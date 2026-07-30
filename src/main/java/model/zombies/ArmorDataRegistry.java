@@ -77,8 +77,7 @@ public class ArmorDataRegistry {
                     dataMap.put(d.enumType, d);
                 }
             }
-            System.out.println("[ArmorDataRegistry] Loaded "
-                + dataMap.size() + " armor types from data/armors.json");
+            // armors loaded successfully
         } catch (Exception e) {
             System.err.println("[ArmorDataRegistry] Cannot load JSON: "
                 + e.getMessage() + " — using built-in defaults.");

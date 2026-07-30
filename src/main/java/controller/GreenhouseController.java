@@ -38,12 +38,11 @@ public class GreenhouseController {
             + "     1          2          3          4          5"
             + ConsoleView.RESET);
         for (int row = 1; row <= 4; row++) {
-            System.out.print(ConsoleView.CYAN + " " + row + " " + ConsoleView.RESET);
+            java.util.List<String> cells = new java.util.ArrayList<>();
             for (int col = 1; col <= 5; col++) {
-                Pot pot = gh.getPot(col, row);
-                System.out.print(formatPot(pot) + " ");
+                cells.add(formatPot(gh.getPot(col, row)));
             }
-            view.printRaw("");
+            view.getGreenhouseView().printGreenhouseRow(row, cells);
         }
     }
 

@@ -445,28 +445,28 @@ public class IZombieMinigame {
         view.printRaw("  Brains remaining: " + totalBrains
             + "   Zombies on field: "
             + zombies.stream().filter(PlacedZombie::isAlive).count());
-        System.out.print("     ");
+        StringBuilder header = new StringBuilder("     ");
         for (int c = 1; c <= COLS; c++) {
             if (c == plantCols + 1) {
-                System.out.print(ConsoleView.RED + "│" + ConsoleView.RESET);
+                header.append(ConsoleView.RED).append("│").append(ConsoleView.RESET);
             }
-            System.out.printf("%-3d", c);
+            header.append(String.format("%-3d", c));
         }
-        view.printRaw("");
+        view.printRaw(header.toString());
         view.printRaw("    " + "───".repeat(COLS + 1));
         for (int r = 1; r <= ROWS; r++) {
-            System.out.printf(" %d │ ", r);
+            StringBuilder rowSb = new StringBuilder(String.format(" %d │ ", r));
             for (int c = 1; c <= COLS; c++) {
                 if (c == plantCols + 1) {
-                    System.out.print(ConsoleView.RED + "│ " + ConsoleView.RESET);
+                    rowSb.append(ConsoleView.RED).append("│ ").append(ConsoleView.RESET);
                 }
-                System.out.print(getCell(c, r) + " ");
+                rowSb.append(getCell(c, r)).append(" ");
             }
             String brainStr = brains[r - 1] > 0
                 ? ConsoleView.RED + "🧠" + ConsoleView.RESET : "  ";
             String sunProdStr = sunProducerHp[r - 1] > 0
                 ? ConsoleView.YELLOW + "S" + ConsoleView.RESET : " ";
-            view.printRaw(brainStr + sunProdStr);
+            view.printRaw(rowSb.toString() + brainStr + sunProdStr);
         }
         view.printRaw("    " + "───".repeat(COLS + 1));
         printAvailableZombies();
@@ -489,8 +489,8 @@ public class IZombieMinigame {
         view.printRaw(ConsoleView.CYAN
             + "  Available Zombies:" + ConsoleView.RESET);
         for (ZombieType t : getAvailableZombies()) {
-            System.out.printf("    %-25s cost: %d sun%n",
-                t.name(), getZombieSunCost(t));
+            view.printRaw(String.format("    %-25s cost: %d sun",
+                t.name(), getZombieSunCost(t)));
         }
         view.printRaw("  Use: place zombie -t <TYPE> -l (<col>, <row>)");
     }
