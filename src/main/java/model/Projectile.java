@@ -20,6 +20,12 @@ public class Projectile {
     private boolean explodes;
     private int aoeRadius;
     private boolean hitsPlants;
+    /** اختلاف ردیف از گیاه پرتاب‌کننده — برای Threepeater، Starfruit و ... */
+    private int yOffset;
+    /** آیا این پرتابه هدف‌یاب است (Cat-tail) */
+    private boolean homing;
+    /** پرتابه کره Kernel-pult: Stun روی هدف */
+    private boolean stunOnHit;
 
     public Projectile(ProjectileType type, double x, int y, int damage) {
         this.type = type;
@@ -27,12 +33,14 @@ public class Projectile {
         this.y = y;
         this.damage = damage;
         this.speed = 3.0;
-        this.movingRight = false;
+        this.movingRight = true;  // گیاهان به سمت زامبی‌ها (راست) شلیک می‌کنند
         this.passesThrough = false;
         this.isArc = false;
         this.explodes = false;
         this.aoeRadius = 0;
         this.hitsPlants = false;
+        this.yOffset = 0;
+        this.homing = false;
     }
 
     public ProjectileType getType() { return type; }
@@ -61,4 +69,10 @@ public class Projectile {
     public void setAoeRadius(int aoeRadius) { this.aoeRadius = aoeRadius; }
     public boolean isHitsPlants() { return hitsPlants; }
     public void setHitsPlants(boolean hitsPlants) { this.hitsPlants = hitsPlants; }
+    public int getYOffset() { return yOffset; }
+    public void setYOffset(int yOffset) { this.yOffset = yOffset; }
+    public boolean isHoming() { return homing; }
+    public void setHoming(boolean homing) { this.homing = homing; }
+    public boolean isStunOnHit() { return stunOnHit; }
+    public void setStunOnHit(boolean s) { this.stunOnHit = s; }
 }

@@ -85,9 +85,9 @@ public class MinigameController {
     public void startZombotany(int level, AppState appState) {
         validateLevel(level);
         List<PlantType> defaultPlants = Arrays.asList(
-            PlantType.PEASHOOTER, PlantType.REPEATER,
-            PlantType.SNOW_PEA, PlantType.WALL_NUT,
-            PlantType.CHERRY_BOMB, PlantType.CABBAGE_PULT
+                PlantType.PEASHOOTER, PlantType.REPEATER,
+                PlantType.SNOW_PEA, PlantType.WALL_NUT,
+                PlantType.CHERRY_BOMB, PlantType.CABBAGE_PULT
         );
         zombotanyGame = new ZombotanyMinigame(level, view, defaultPlants);
         activeMinigame = "ZOMBOTANY";
@@ -102,9 +102,9 @@ public class MinigameController {
         List<PlantType> plants = scoredGameService.getDefaultScoredPlants();
         view.printHeader("🏆 Scored Game — Daily Challenge");
         view.printRaw(ConsoleView.YELLOW
-            + "  Daily Seed: " + scoredGameService.getDailySeed() + ConsoleView.RESET);
+                + "  Daily Seed: " + scoredGameService.getDailySeed() + ConsoleView.RESET);
         view.printRaw(ConsoleView.CYAN
-            + "  All players use the same zombie patterns today!" + ConsoleView.RESET);
+                + "  All players use the same zombie patterns today!" + ConsoleView.RESET);
         view.printRaw("  Your plants: " + plants);
         view.printRaw("");
         view.printRaw("  MeoPoint Scoring Patterns:");
@@ -150,7 +150,7 @@ public class MinigameController {
             vasebreakerGame.breakVase(x, y);
             vasebreakerGame.printBoard();
             checkMinigameEnd(vasebreakerGame.isGameOver(),
-                vasebreakerGame.isWon(), appState);
+                    vasebreakerGame.isWon(), appState);
             return true;
         }
         if ((m = util.InputParser.match(input,
@@ -178,10 +178,10 @@ public class MinigameController {
                 PlantType type = PlantType.valueOf(typeName);
                 bowlingGame.placeBowling(type, x, y);
                 checkMinigameEnd(bowlingGame.isGameOver(),
-                    bowlingGame.isWon(), appState);
+                        bowlingGame.isWon(), appState);
             } catch (IllegalArgumentException e) {
                 view.printError("Unknown bowling type: " + typeName
-                    + ". Use: WALLNUT_BOWLING, EXPLODE_O_NUT_BOWLING, BIG_WALLNUT");
+                        + ". Use: WALLNUT_BOWLING, EXPLODE_O_NUT_BOWLING, BIG_WALLNUT");
             }
             return true;
         }
@@ -200,7 +200,7 @@ public class MinigameController {
             }
             bowlingGame.printBoard();
             checkMinigameEnd(bowlingGame.isGameOver(),
-                bowlingGame.isWon(), appState);
+                    bowlingGame.isWon(), appState);
             return true;
         }
         return false;
@@ -236,7 +236,7 @@ public class MinigameController {
             }
             iZombieGame.printBoard();
             checkMinigameEnd(iZombieGame.isGameOver(),
-                iZombieGame.isWon(), appState);
+                    iZombieGame.isWon(), appState);
             return true;
         }
         return false;
@@ -253,7 +253,7 @@ public class MinigameController {
             beghouledGame.swapPlants(x1, y1, x2, y2);
             beghouledGame.checkAndResetIfNoMoves();
             checkMinigameEnd(beghouledGame.isGameOver(),
-                beghouledGame.isWon(), appState);
+                    beghouledGame.isWon(), appState);
             return true;
         }
         if ((m = util.InputParser.match(input,
@@ -298,7 +298,7 @@ public class MinigameController {
             }
             zombotanyGame.printBoard();
             checkMinigameEnd(zombotanyGame.isGameOver(),
-                zombotanyGame.isWon(), appState);
+                    zombotanyGame.isWon(), appState);
             return true;
         }
         return false;
@@ -307,13 +307,13 @@ public class MinigameController {
     private boolean handleScored(String input, AppState appState) {
         if (input.equalsIgnoreCase("show scored-game score")) {
             view.printInfo("Current MeoPoints: "
-                + scoredGameService.getMeoPoints());
+                    + scoredGameService.getMeoPoints());
             return true;
         }
         if (input.equalsIgnoreCase("end scored game")) {
             scoredGameService.printFinalScore(appState.getCurrentUser());
             userService.updateHighScore(appState.getCurrentUser(),
-                scoredGameService.getMeoPoints());
+                    scoredGameService.getMeoPoints());
             userService.save(appState.getCurrentUser());
             appState.setActiveMinigame(null);
             appState.setCurrentMenu(MenuType.MAIN);
@@ -341,14 +341,14 @@ public class MinigameController {
     private void validateLevel(int level) {
         if (level < 1 || level > 3) {
             throw new exception.GameException(
-                "Level must be 1, 2, or 3. Got: " + level);
+                    "Level must be 1, 2, or 3. Got: " + level);
         }
     }
 
     private int extractTicks(String input) {
         java.util.regex.Matcher m = java.util.regex.Pattern
-            .compile("advance time -t (\\d+) ticks")
-            .matcher(input);
+                .compile("advance time -t (\\d+) ticks")
+                .matcher(input);
         if (m.matches()) {
             return Integer.parseInt(m.group(1));
         }

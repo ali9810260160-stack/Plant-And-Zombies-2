@@ -39,19 +39,19 @@ public class MapView {
     private void printHeader(GameSession session) {
         System.out.println();
         System.out.println(BOLD + CYAN
-            + "╔══════════════════════ GAME STATUS ═══════════════════════╗" + RESET);
+                + "╔══════════════════════ GAME STATUS ═══════════════════════╗" + RESET);
         System.out.printf(CYAN + "║  " + RESET
-            + YELLOW + "☀ Sun: %-5d" + RESET
-            + "  " + MAGENTA + "🌿 Plant Food: %d/3" + RESET
-            + "  " + RED + "🌊 Wave: %d/%d" + RESET
-            + "  " + GREEN + "💀 Killed: %d" + RESET + CYAN + "   ║%n" + RESET,
-            session.getSunAmount(),
-            session.getPlantFoodCount(),
-            session.getCurrentWaveIndex() + 1,
-            session.getWaves() != null ? session.getWaves().size() : 0,
-            session.getZombiesKilled());
+                        + YELLOW + "☀ Sun: %-5d" + RESET
+                        + "  " + MAGENTA + "🌿 Plant Food: %d/3" + RESET
+                        + "  " + RED + "🌊 Wave: %d/%d" + RESET
+                        + "  " + GREEN + "💀 Killed: %d" + RESET + CYAN + "   ║%n" + RESET,
+                session.getSunAmount(),
+                session.getPlantFoodCount(),
+                session.getCurrentWaveIndex() + 1,
+                session.getWaves() != null ? session.getWaves().size() : 0,
+                session.getZombiesKilled());
         System.out.println(BOLD + CYAN
-            + "╚═══════════════════════════════════════════════════════════╝" + RESET);
+                + "╚═══════════════════════════════════════════════════════════╝" + RESET);
     }
 
     private void printTopBorder(int cols) {
@@ -114,7 +114,7 @@ public class MapView {
     }
 
     private String getCellContent(Tile tile, int col, int row,
-                                   GameSession session) {
+                                  GameSession session) {
         StringBuilder sb = new StringBuilder();
         Zombie zombie = getZombieOnTile(col, row, session);
         Plant plant = tile.getPlant();
@@ -219,10 +219,10 @@ public class MapView {
 
     private void printRowSideInfo(int row, GameSession session) {
         boolean mowerAvail = session.getGameMap()
-                                    .isLawnMowerAvailable(row - 1);
+                .isLawnMowerAvailable(row - 1);
         String mowerStr = mowerAvail
-                          ? GREEN + " 🚜" + RESET
-                          : RED   + " ✗ " + RESET;
+                ? GREEN + " 🚜" + RESET
+                : RED   + " ✗ " + RESET;
         System.out.print(mowerStr);
     }
 
@@ -231,19 +231,19 @@ public class MapView {
         for (int r = 0; r < session.getGameMap().getRows(); r++) {
             boolean avail = session.getGameMap().isLawnMowerAvailable(r);
             System.out.print("Row " + (r + 1) + ":"
-                + (avail ? GREEN + "✔ " + RESET : RED + "✘ " + RESET));
+                    + (avail ? GREEN + "✔ " + RESET : RED + "✘ " + RESET));
         }
         System.out.println();
     }
 
     private void printLegend() {
         System.out.println(CYAN + "Legend: "
-            + GREEN + "🌻/🌿/🌱=Plants  "
-            + RED + "Z=Zombie G!=Garg  "
-            + YELLOW + "☀=Sun  "
-            + BLUE + "≈=Water  "
-            + WHITE + "⛰=Tombstone"
-            + RESET);
+                + GREEN + "🌻/🌿/🌱=Plants  "
+                + RED + "Z=Zombie G!=Garg  "
+                + YELLOW + "☀=Sun  "
+                + BLUE + "≈=Water  "
+                + WHITE + "⛰=Tombstone"
+                + RESET);
     }
 
 }

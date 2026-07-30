@@ -23,7 +23,7 @@ public class MenuController {
         }
         if (!isTransitionAllowed(appState.getCurrentMenu(), target)) {
             view.printError("Cannot go to " + menuName
-                + " from " + appState.getCurrentMenu().name());
+                    + " from " + appState.getCurrentMenu().name());
             return;
         }
         appState.setCurrentMenu(target);
@@ -67,9 +67,9 @@ public class MenuController {
                 return to == MenuType.REGISTER;
             case MAIN:
                 return to == MenuType.GAME || to == MenuType.SETTINGS
-                    || to == MenuType.NEWS || to == MenuType.PROFILE
-                    || to == MenuType.GREENHOUSE || to == MenuType.LEADERBOARD
-                    || to == MenuType.TRAVEL_LOG;
+                        || to == MenuType.NEWS || to == MenuType.PROFILE
+                        || to == MenuType.GREENHOUSE || to == MenuType.LEADERBOARD
+                        || to == MenuType.TRAVEL_LOG;
             case GAME:
                 return to == MenuType.COLLECTION || to == MenuType.MAIN;
             case SETTINGS:

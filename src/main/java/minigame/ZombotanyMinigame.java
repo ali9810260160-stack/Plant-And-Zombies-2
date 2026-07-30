@@ -17,13 +17,13 @@ public class ZombotanyMinigame {
 
     public enum ZombotanyType {
         PEASHOOTER_ZOMBIE("ZomboPea", ZombieType.ZOMBOTANY_PEASHOOTER,
-            "Fires peas leftward at your plants!", 190, 100, 0.185),
+                "Fires peas leftward at your plants!", 190, 100, 0.185),
         WALLNUT_ZOMBIE("ZomboNut", ZombieType.ZOMBOTANY_WALLNUT,
-            "Extremely tough — 4000 HP!", 4000, 100, 0.185),
+                "Extremely tough — 4000 HP!", 4000, 100, 0.185),
         JALAPENO_ZOMBIE("ZomboJala", ZombieType.ZOMBOTANY_JALAPENO,
-            "Burns entire row if alive for 10+ seconds!", 190, 100, 0.185),
+                "Burns entire row if alive for 10+ seconds!", 190, 100, 0.185),
         SQUASH_ZOMBIE("ZomboSquash", ZombieType.ZOMBOTANY_SQUASH,
-            "Moves fast; destroys itself and the plant it hits!", 190, 500, 0.4);
+                "Moves fast; destroys itself and the plant it hits!", 190, 500, 0.4);
 
         public final String displayName;
         public final ZombieType zombieType;
@@ -124,7 +124,7 @@ public class ZombotanyMinigame {
     private boolean won;
 
     public ZombotanyMinigame(int level, ConsoleView view,
-                              List<PlantType> playerSelectedPlants) {
+                             List<PlantType> playerSelectedPlants) {
         this.level = level;
         this.view = view;
         this.zombies = new ArrayList<>();
@@ -142,12 +142,12 @@ public class ZombotanyMinigame {
 
     private void spawnInitialZombies() {
         ZombotanyType[] wave1 = { ZombotanyType.PEASHOOTER_ZOMBIE,
-            ZombotanyType.WALLNUT_ZOMBIE };
+                ZombotanyType.WALLNUT_ZOMBIE };
         ZombotanyType[] wave2 = { ZombotanyType.PEASHOOTER_ZOMBIE,
-            ZombotanyType.WALLNUT_ZOMBIE, ZombotanyType.JALAPENO_ZOMBIE };
+                ZombotanyType.WALLNUT_ZOMBIE, ZombotanyType.JALAPENO_ZOMBIE };
         ZombotanyType[] wave3 = { ZombotanyType.PEASHOOTER_ZOMBIE,
-            ZombotanyType.WALLNUT_ZOMBIE, ZombotanyType.JALAPENO_ZOMBIE,
-            ZombotanyType.SQUASH_ZOMBIE };
+                ZombotanyType.WALLNUT_ZOMBIE, ZombotanyType.JALAPENO_ZOMBIE,
+                ZombotanyType.SQUASH_ZOMBIE };
 
         ZombotanyType[] pool = level == 1 ? wave1 : level == 2 ? wave2 : wave3;
         int count = 3 + level * 2;
@@ -162,10 +162,10 @@ public class ZombotanyMinigame {
 
     private void printSpawnMessage() {
         view.printRaw(ConsoleView.RED
-            + "  🧟 Zombotany zombies incoming!" + ConsoleView.RESET);
+                + "  🧟 Zombotany zombies incoming!" + ConsoleView.RESET);
         for (ZombotanyType t : ZombotanyType.values()) {
             view.printRaw(ConsoleView.RED + "  ⚡ " + t.displayName
-                + ": " + t.description + ConsoleView.RESET);
+                    + ": " + t.description + ConsoleView.RESET);
         }
     }
 
@@ -210,13 +210,13 @@ public class ZombotanyMinigame {
             return;
         }
         target.takeDamage(20);
-        System.out.printf("  🟢 ZomboPea fires at %s at (%d,%d)! HP: %d%n",
-            target.getType().name(), target.getX(), target.getY(),
-            target.getHp());
+        view.printRaw(String.format("  🟢 ZomboPea fires at %s at (%d,%d)! HP: %d",
+                target.getType().name(), target.getX(), target.getY(),
+                target.getHp()));
         if (!target.isAlive()) {
             view.printRaw(ConsoleView.YELLOW + "  🌿 Plant "
-                + target.getType().name() + " destroyed by ZomboPea!"
-                + ConsoleView.RESET);
+                    + target.getType().name() + " destroyed by ZomboPea!"
+                    + ConsoleView.RESET);
         }
     }
 
@@ -240,13 +240,13 @@ public class ZombotanyMinigame {
 
     private void burnEntireRow(int row) {
         view.printRaw(ConsoleView.RED
-            + "  🌶 ZomboJalapeno burns entire row " + row + "!"
-            + ConsoleView.RESET);
+                + "  🌶 ZomboJalapeno burns entire row " + row + "!"
+                + ConsoleView.RESET);
         for (ZombotanyPlant p : plants) {
             if (p.getY() == row && p.isAlive()) {
                 p.takeDamage(9999);
                 view.printRaw(ConsoleView.YELLOW + "  🌿 "
-                    + p.getType().name() + " burned!" + ConsoleView.RESET);
+                        + p.getType().name() + " burned!" + ConsoleView.RESET);
             }
         }
     }
@@ -255,8 +255,8 @@ public class ZombotanyMinigame {
         ZombotanyPlant target = findNearestPlantLeft(zombie);
         if (target != null && Math.abs(target.getX() - zombie.getX()) < 1) {
             view.printRaw(ConsoleView.RED + "  💥 ZomboSquash crushes "
-                + target.getType().name() + " — both destroyed!"
-                + ConsoleView.RESET);
+                    + target.getType().name() + " — both destroyed!"
+                    + ConsoleView.RESET);
             target.takeDamage(9999);
             zombie.takeDamage(zombie.getHp());
         }
@@ -272,9 +272,9 @@ public class ZombotanyMinigame {
                 blocked.takeDamage(z.getZombotanyType().dps / 10);
                 if (!blocked.isAlive()) {
                     view.printRaw(ConsoleView.YELLOW + "  🌿 Plant "
-                        + blocked.getType().name()
-                        + " eaten by " + z.getZombotanyType().displayName
-                        + "!" + ConsoleView.RESET);
+                            + blocked.getType().name()
+                            + " eaten by " + z.getZombotanyType().displayName
+                            + "!" + ConsoleView.RESET);
                 }
             } else {
                 z.setX(z.getX() - z.getZombotanyType().speed * 0.1);
@@ -306,8 +306,8 @@ public class ZombotanyMinigame {
                 lawnMowers[rowIdx] = false;
                 killAllInRow(z.getY());
                 view.printRaw(ConsoleView.CYAN
-                    + "  🚜 Lawn mower triggered in row "
-                    + z.getY() + "!" + ConsoleView.RESET);
+                        + "  🚜 Lawn mower triggered in row "
+                        + z.getY() + "!" + ConsoleView.RESET);
             } else {
                 gameOver = true;
                 view.printGameOver();
@@ -339,8 +339,8 @@ public class ZombotanyMinigame {
         }
         plants.add(new ZombotanyPlant(type, getPlantHp(type), x, y));
         view.printRaw(ConsoleView.GREEN + "  🌱 "
-            + type.name() + " planted at (" + x + "," + y + ")"
-            + ConsoleView.RESET);
+                + type.name() + " planted at (" + x + "," + y + ")"
+                + ConsoleView.RESET);
     }
 
     private int getPlantHp(PlantType type) {
@@ -354,27 +354,27 @@ public class ZombotanyMinigame {
     public void printBoard() {
         view.printHeader("⚡ Zombotany — Level " + level);
         view.printRaw(ConsoleView.RED
-            + "  Zombies with plant powers!" + ConsoleView.RESET);
-        System.out.print("     ");
+                + "  Zombies with plant powers!" + ConsoleView.RESET);
+        StringBuilder header = new StringBuilder("     ");
         for (int c = 1; c <= COLS; c++) {
-            System.out.printf("%-3d", c);
+            header.append(String.format("%-3d", c));
         }
-        view.printRaw("");
+        view.printRaw(header.toString());
         view.printRaw("    " + "───".repeat(COLS));
         for (int r = 1; r <= ROWS; r++) {
-            System.out.printf(" %d │ ", r);
+            StringBuilder rowSb = new StringBuilder(String.format(" %d │ ", r));
             for (int c = 1; c <= COLS; c++) {
-                System.out.print(getCell(c, r) + "  ");
+                rowSb.append(getCell(c, r)).append("  ");
             }
             String mower = lawnMowers[r - 1]
-                ? ConsoleView.GREEN + "🚜" + ConsoleView.RESET
-                : ConsoleView.RED + "✗" + ConsoleView.RESET;
-            view.printRaw(mower);
+                    ? ConsoleView.GREEN + "🚜" + ConsoleView.RESET
+                    : ConsoleView.RED + "✗" + ConsoleView.RESET;
+            view.printRaw(rowSb.toString() + mower);
         }
         view.printRaw("    " + "───".repeat(COLS));
         view.printRaw(ConsoleView.YELLOW
-            + "  Legend: 🟢=ZomboPea ⬜=ZomboNut 🌶=ZomboJala 💥=ZomboSquash"
-            + ConsoleView.RESET);
+                + "  Legend: 🟢=ZomboPea ⬜=ZomboNut 🌶=ZomboJala 💥=ZomboSquash"
+                + ConsoleView.RESET);
     }
 
     private String getCell(int c, int r) {

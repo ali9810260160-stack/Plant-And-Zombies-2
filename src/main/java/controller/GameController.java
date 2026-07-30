@@ -66,10 +66,10 @@ public class GameController {
     public void showChapterLevels(String chapterName, AppState appState) {
         try {
             model.enums.ChapterType chapter =
-                model.enums.ChapterType.valueOf(chapterName.toUpperCase());
+                    model.enums.ChapterType.valueOf(chapterName.toUpperCase());
             if (levelProgressService != null) {
                 levelProgressService.showChapterLevels(
-                    appState.getCurrentUser(), chapter);
+                        appState.getCurrentUser(), chapter);
             }
         } catch (IllegalArgumentException e) {
             view.printError("Unknown chapter: " + chapterName);
@@ -77,7 +77,7 @@ public class GameController {
     }
 
     public void enterChapterWithLevel(String chapterName, int levelNum,
-                                       AppState appState) {
+                                      AppState appState) {
         model.enums.ChapterType chapter;
         try {
             chapter = model.enums.ChapterType.valueOf(chapterName.toUpperCase());
@@ -88,10 +88,10 @@ public class GameController {
         model.User user = appState.getCurrentUser();
         if (levelProgressService != null
                 && !levelProgressService.isLevelUnlocked(
-                    user, chapter, levelNum)) {
+                user, chapter, levelNum)) {
             view.printError("Level " + levelNum
-                + " of " + chapterName
-                + " is locked! Complete previous levels first.");
+                    + " of " + chapterName
+                    + " is locked! Complete previous levels first.");
             if (levelProgressService != null) {
                 levelProgressService.showChapterLevels(user, chapter);
             }
@@ -103,9 +103,9 @@ public class GameController {
         boostedPlants = new ArrayList<>();
         appState.setCurrentMenu(model.enums.MenuType.PLANT_SELECT);
         view.printHeader("🌿 Plant Selection — "
-            + chapterName + " Level " + levelNum);
+                + chapterName + " Level " + levelNum);
         view.printInfo("Select up to " + pendingLevel.getPlantSlots()
-            + " plants. Type 'show available plants'.");
+                + " plants. Type 'show available plants'.");
     }
 
     public void enterChapter(String chapterName, AppState appState) {
@@ -128,11 +128,11 @@ public class GameController {
     }
 
     private Level buildLevel(model.enums.ChapterType chapter,
-                              int levelNumber) {
+                             int levelNumber) {
         LevelType type = getLevelType(chapter, levelNumber);
         Level level = new Level(levelNumber, chapter, type);
         int baseDiff = 400 + (getChapterIndex(chapter) * 200)
-                      + (levelNumber - 1) * 100;
+                + (levelNumber - 1) * 100;
         level.setInitialWaveDifficulty(baseDiff);
         level.setWaveCount(levelNumber == 4 ? 5 : 3);
         level.setMapRows(5);
@@ -154,7 +154,7 @@ public class GameController {
     }
 
     private LevelType getLevelType(model.enums.ChapterType chapter,
-                                    int levelNumber) {
+                                   int levelNumber) {
         if (levelNumber == 1) {
             return LevelType.NORMAL;
         }
@@ -164,16 +164,16 @@ public class GameController {
         switch (chapter) {
             case ANCIENT_EGYPT:
                 return levelNumber == 2
-                    ? LevelType.CONVEYOR_BELT : LevelType.SAVE_OUR_SEEDS;
+                        ? LevelType.CONVEYOR_BELT : LevelType.SAVE_OUR_SEEDS;
             case FROSTBITE_CAVES:
                 return levelNumber == 2
-                    ? LevelType.NIGHT_OPS : LevelType.TIMED_WAR;
+                        ? LevelType.NIGHT_OPS : LevelType.TIMED_WAR;
             case BIG_WAVE_BEACH:
                 return levelNumber == 2
-                    ? LevelType.LOCKED_PLANTS : LevelType.DEAD_LINE;
+                        ? LevelType.LOCKED_PLANTS : LevelType.DEAD_LINE;
             case DARK_AGES:
                 return levelNumber == 2
-                    ? LevelType.LOVE_YOUR_PLANTS : LevelType.PLANT_WHAT_YOU_GET;
+                        ? LevelType.LOVE_YOUR_PLANTS : LevelType.PLANT_WHAT_YOU_GET;
             default:
                 return LevelType.NORMAL;
         }
@@ -198,12 +198,11 @@ public class GameController {
                 continue;
             }
             boolean owned = user.getUnlockedPlants() != null
-                && user.getUnlockedPlants().contains(type.name());
+                    && user.getUnlockedPlants().contains(type.name());
             String status = owned
-                ? ConsoleView.GREEN + "[owned]" + ConsoleView.RESET
-                : ConsoleView.RED + "[locked]" + ConsoleView.RESET;
-            System.out.printf("  %-30s  Cost:%-5d  %s%n",
-                type.name(), stats.getSunCost(), status);
+                    ? ConsoleView.GREEN + "[owned]" + ConsoleView.RESET
+                    : ConsoleView.RED + "[locked]" + ConsoleView.RESET;
+            view.getGameView().printAllPlantsForSelectRow(type.name(), stats.getSunCost(), status);
         }
     }
 
@@ -213,7 +212,7 @@ public class GameController {
         List<String> unlocked = user.getUnlockedPlants();
         if (unlocked == null || unlocked.isEmpty()) {
             view.printInfo("You need to unlock plants first "
-                + "(menu collection purchase-plant -p <name>).");
+                    + "(menu collection purchase-plant -p <name>).");
             view.printInfo("Starter plants: SUNFLOWER, PEASHOOTER, WALL_NUT");
             return;
         }
@@ -227,12 +226,12 @@ public class GameController {
                 }
             }
             String mark = selected
-                ? ConsoleView.GREEN + " ✔ SELECTED" + ConsoleView.RESET : "";
+                    ? ConsoleView.GREEN + " ✔ SELECTED" + ConsoleView.RESET : "";
             view.printRaw("  " + i++ + ". " + plantName + mark);
         }
         view.printRaw(ConsoleView.CYAN + "  Selected: "
-            + selectedPlants.size() + "/"
-            + pendingLevel.getPlantSlots() + ConsoleView.RESET);
+                + selectedPlants.size() + "/"
+                + pendingLevel.getPlantSlots() + ConsoleView.RESET);
     }
 
     public void addPlantToSelect(String typeName, AppState appState) {
@@ -246,7 +245,7 @@ public class GameController {
         }
         if (!userHasPlant(user, type)) {
             view.printError("You don't own " + typeName
-                + ". Purchase it first from the collection menu.");
+                    + ". Purchase it first from the collection menu.");
             return;
         }
         if (selectedPlants.contains(type)) {
@@ -255,13 +254,13 @@ public class GameController {
         }
         if (selectedPlants.size() >= pendingLevel.getPlantSlots()) {
             view.printError("Plant slots full ("
-                + pendingLevel.getPlantSlots() + " max).");
+                    + pendingLevel.getPlantSlots() + " max).");
             return;
         }
         selectedPlants.add(type);
         view.printSuccess(typeName + " added. ("
-            + selectedPlants.size() + "/"
-            + pendingLevel.getPlantSlots() + ")");
+                + selectedPlants.size() + "/"
+                + pendingLevel.getPlantSlots() + ")");
     }
 
     private boolean userHasPlant(User user, PlantType type) {
@@ -301,7 +300,7 @@ public class GameController {
         }
         if (user.getGems() < 2) {
             view.printError("Need 2 gems to boost. You have: "
-                + user.getGems());
+                    + user.getGems());
             return;
         }
         user.setGems(user.getGems() - 2);
@@ -319,7 +318,7 @@ public class GameController {
             return;
         }
         GameSession session = gameService.createSession(
-            pendingLevel, selectedPlants);
+                pendingLevel, selectedPlants);
         session.setLevelNumber(pendingLevelNumber);
         session.setBoostedPlants(new ArrayList<>(boostedPlants));
         appState.setCurrentSession(session);
@@ -404,7 +403,7 @@ public class GameController {
                 view.printError("No sun at (" + x + ", " + y + ").");
             } else {
                 view.printSuccess("Collected " + gained + " sun! Total: "
-                    + session.getSunAmount());
+                        + session.getSunAmount());
             }
         }
     }
@@ -449,17 +448,14 @@ public class GameController {
 
     private void printPlantStatus(Plant plant, int x, int y) {
         PlantStats stats = PlantDataRegistry.getInstance()
-                                            .getStats(plant.getType());
+                .getStats(plant.getType());
         int cost = stats != null ? stats.getSunCost() : 0;
         String cooldown = plant.getRemainingCooldownTicks() > 0
-            ? String.format("%.1fs", plant.getRemainingCooldownTicks() / 10.0)
-            : "Ready";
-        System.out.printf("  (%d,%d) %-20s  HP:%d/%d  Cost:%-4d  CD:%s%s%n",
-            x, y, plant.getType().name(),
-            plant.getCurrentHealth(), plant.getMaxHealth(),
-            cost, cooldown,
-            plant.isFrozen()
-                ? ConsoleView.CYAN + "  [FROZEN]" + ConsoleView.RESET : "");
+                ? String.format("%.1fs", plant.getRemainingCooldownTicks() / 10.0)
+                : "Ready";
+        view.getGameView().printPlantStatus(x, y, plant.getType().name(),
+                plant.getCurrentHealth(), plant.getMaxHealth(),
+                cost, cooldown, plant.isFrozen());
     }
 
     public void showTileStatus(Matcher m, AppState appState) {
@@ -477,7 +473,7 @@ public class GameController {
         }
         view.printHeader("Tile (" + x + ", " + y + ")");
         view.printRaw(ConsoleView.CYAN + "  Type: "
-            + ConsoleView.RESET + tile.getType().name());
+                + ConsoleView.RESET + tile.getType().name());
         if (tile.getPlant() != null) {
             printPlantStatus(tile.getPlant(), x, y);
         }
@@ -489,11 +485,9 @@ public class GameController {
     }
 
     private void printZombieStatus(Zombie zombie) {
-        System.out.printf(ConsoleView.RED
-            + "  Zombie: %-20s  HP:%d  X:%.2f  Y:%d  Armor:%s%n"
-            + ConsoleView.RESET,
-            zombie.getType().name(), zombie.getCurrentHealth(),
-            zombie.getX(), zombie.getY(), zombie.getArmors());
+        view.getGameView().printZombieStatus(
+                zombie.getType().name(), zombie.getCurrentHealth(),
+                zombie.getX(), zombie.getY(), zombie.getArmors().toString());
     }
 
     public void showSunAmount(AppState appState) {
@@ -503,7 +497,7 @@ public class GameController {
             return;
         }
         view.printInfo("☀ Current sun: "
-            + ConsoleView.YELLOW + session.getSunAmount());
+                + ConsoleView.YELLOW + session.getSunAmount());
     }
 
     public void showZombiesInfo(AppState appState) {
@@ -524,20 +518,18 @@ public class GameController {
 
     private void printDetailedZombieInfo(Zombie zombie) {
         view.printRaw(ConsoleView.RED + zombie.getType().name()
-            + ":" + ConsoleView.RESET);
-        System.out.printf("  position: %.1f, %d%n",
-            zombie.getX(), zombie.getY());
+                + ":" + ConsoleView.RESET);
+        view.getGameView().printZombiePosition(zombie.getX(), zombie.getY());
         view.printRaw("  health: " + zombie.getCurrentHealth());
         if (!zombie.getArmors().isEmpty()) {
             view.printRaw("  armor:");
             zombie.getArmors().forEach((at, hp) ->
-                view.printRaw("    " + at.name() + ": " + hp));
+                    view.printRaw("    " + at.name() + ": " + hp));
         }
         if (!zombie.getActiveEffects().isEmpty()) {
             view.printRaw("  effects:");
             zombie.getActiveEffects().forEach((ef, ticks) ->
-                System.out.printf("    %s: %.1fs%n",
-                    ef.name(), ticks / 10.0));
+                    view.getGameView().printZombieEffect(ef.name(), ticks / 10.0));
         }
     }
 
@@ -549,7 +541,7 @@ public class GameController {
         }
         session.addSun(count);
         view.printSuccess("Added " + count + " sun! Total: "
-            + session.getSunAmount());
+                + session.getSunAmount());
     }
 
     public void releaseNuke(AppState appState) {
@@ -601,11 +593,11 @@ public class GameController {
         if (type.equalsIgnoreCase("coin")) {
             user.setCoins(user.getCoins() + amount);
             view.printSuccess("Added " + amount + " coins! Total: "
-                + user.getCoins());
+                    + user.getCoins());
         } else {
             user.setGems(user.getGems() + amount);
             view.printSuccess("Added " + amount + " gems! Total: "
-                + user.getGems());
+                    + user.getGems());
         }
     }
 }

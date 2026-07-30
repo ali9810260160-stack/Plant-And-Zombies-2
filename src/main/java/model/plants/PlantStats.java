@@ -25,6 +25,14 @@ public class PlantStats {
     private String description;
     private String baseAbility;
     private String plantFoodEffect;
+    /** فاصله زمانی تولید خورشید (برای تولیدکنندگان) — ثانیه */
+    private double actionIntervalSeconds;
+    /** رشته ارتقا سطح ۱→۲ */
+    private String lvl2Upgrade;
+    /** رشته ارتقا سطح ۲→۳ */
+    private String lvl3Upgrade;
+    /** رشته ارتقا سطح ۳→۴ */
+    private String lvl4Upgrade;
 
     public PlantStats(PlantType type, PlantFamily family, int baseHp,
                       int sunCost, double rechargeTime, int baseDamage,
@@ -43,6 +51,22 @@ public class PlantStats {
         this.tags = new ArrayList<>();
         this.baseAbility = "";
         this.plantFoodEffect = "";
+        this.actionIntervalSeconds = 24.0;
+        this.lvl2Upgrade = "";
+        this.lvl3Upgrade = "";
+        this.lvl4Upgrade = "";
+    }
+
+    /**
+     * رشته ارتقا برای یک سطح مشخص (۱ = سطح اول ارتقا، ۲ = دوم، ۳ = سوم).
+     */
+    public String getUpgradeEffect(int upgradeLevel) {
+        switch (upgradeLevel) {
+            case 1: return lvl2Upgrade != null ? lvl2Upgrade : "";
+            case 2: return lvl3Upgrade != null ? lvl3Upgrade : "";
+            case 3: return lvl4Upgrade != null ? lvl4Upgrade : "";
+            default: return "";
+        }
     }
 
     public PlantType getType() { return type; }
@@ -61,4 +85,12 @@ public class PlantStats {
     public void setBaseAbility(String s) { this.baseAbility = s; }
     public String getPlantFoodEffect() { return plantFoodEffect; }
     public void setPlantFoodEffect(String s) { this.plantFoodEffect = s; }
+    public double getActionIntervalSeconds() { return actionIntervalSeconds; }
+    public void setActionIntervalSeconds(double s) { this.actionIntervalSeconds = s; }
+    public String getLvl2Upgrade() { return lvl2Upgrade; }
+    public void setLvl2Upgrade(String s) { this.lvl2Upgrade = s != null ? s : ""; }
+    public String getLvl3Upgrade() { return lvl3Upgrade; }
+    public void setLvl3Upgrade(String s) { this.lvl3Upgrade = s != null ? s : ""; }
+    public String getLvl4Upgrade() { return lvl4Upgrade; }
+    public void setLvl4Upgrade(String s) { this.lvl4Upgrade = s != null ? s : ""; }
 }

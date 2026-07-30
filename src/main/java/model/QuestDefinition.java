@@ -30,10 +30,10 @@ public class QuestDefinition {
     private final int[] targets;
 
     public QuestDefinition(String id, String nameFA, QuestType type,
-                            Condition condition, String description,
-                            RewardType rewardType, int rewardBase,
-                            boolean rewardMultiplier, Priority priority,
-                            int[] targets) {
+                           Condition condition, String description,
+                           RewardType rewardType, int rewardBase,
+                           boolean rewardMultiplier, Priority priority,
+                           int[] targets) {
         this.id = id;
         this.nameFA = nameFA;
         this.type = type;

@@ -133,8 +133,8 @@ public class WallnutBowlingMinigame {
     private void initZombies() {
         int count = 5 + level * 5;
         ZombieType[] pool = {
-            ZombieType.NORMAL, ZombieType.CONEHEAD,
-            ZombieType.BUCKETHEAD, ZombieType.NEWSPAPER_ZOMBIE
+                ZombieType.NORMAL, ZombieType.CONEHEAD,
+                ZombieType.BUCKETHEAD, ZombieType.NEWSPAPER_ZOMBIE
         };
         for (int i = 0; i < count; i++) {
             ZombieType t = pool[RandomUtil.nextInt(pool.length)];
@@ -149,11 +149,11 @@ public class WallnutBowlingMinigame {
 
     private void fillConveyorQueue() {
         PlantType[] bowlingTypes = {
-            PlantType.WALLNUT_BOWLING,
-            PlantType.WALLNUT_BOWLING,
-            PlantType.WALLNUT_BOWLING,
-            PlantType.EXPLODE_O_NUT_BOWLING,
-            PlantType.BIG_WALLNUT
+                PlantType.WALLNUT_BOWLING,
+                PlantType.WALLNUT_BOWLING,
+                PlantType.WALLNUT_BOWLING,
+                PlantType.EXPLODE_O_NUT_BOWLING,
+                PlantType.BIG_WALLNUT
         };
         for (int i = 0; i < 15 + level * 5; i++) {
             conveyorQueue.add(bowlingTypes[RandomUtil.nextInt(bowlingTypes.length)]);
@@ -166,7 +166,7 @@ public class WallnutBowlingMinigame {
         if (conveyorTimer >= 120 && !conveyorQueue.isEmpty()) {
             PlantType next = conveyorQueue.remove(0);
             view.printRaw(ConsoleView.CYAN + "  🎳 Conveyor: "
-                + next.name() + " is ready to place!" + ConsoleView.RESET);
+                    + next.name() + " is ready to place!" + ConsoleView.RESET);
             conveyorTimer = 0;
         }
         moveBalls();
@@ -234,7 +234,7 @@ public class WallnutBowlingMinigame {
         }
         if (!zombie.isAlive()) {
             view.printRaw(ConsoleView.GREEN + "  💀 "
-                + zombie.getType().name() + " crushed!" + ConsoleView.RESET);
+                    + zombie.getType().name() + " crushed!" + ConsoleView.RESET);
             totalKilled++;
         }
     }
@@ -250,12 +250,12 @@ public class WallnutBowlingMinigame {
             ball.setDirY(0);
         }
         view.printRaw(ConsoleView.YELLOW
-            + "  🎳 Ball deflects 45° after hit!" + ConsoleView.RESET);
+                + "  🎳 Ball deflects 45° after hit!" + ConsoleView.RESET);
     }
 
     private void explodeArea(BowlingBall ball) {
         view.printRaw(ConsoleView.RED
-            + "  💥 EXPLODE-O-NUT explodes in 3x3 area!" + ConsoleView.RESET);
+                + "  💥 EXPLODE-O-NUT explodes in 3x3 area!" + ConsoleView.RESET);
         int cx = (int) ball.getX();
         int cy = ball.getY();
         for (BowlingZombie z : zombies) {
@@ -264,17 +264,17 @@ public class WallnutBowlingMinigame {
                 if (!z.isAlive()) {
                     totalKilled++;
                     view.printRaw(ConsoleView.GREEN
-                        + "  💀 " + z.getType().name()
-                        + " destroyed by explosion!" + ConsoleView.RESET);
+                            + "  💀 " + z.getType().name()
+                            + " destroyed by explosion!" + ConsoleView.RESET);
                 }
             }
         }
     }
 
     private void printHit(BowlingBall ball, BowlingZombie zombie) {
-        System.out.printf("  🎳 %s hit %s (HP: %d → %d)%n",
-            ball.getType().name(), zombie.getType().name(),
-            zombie.getHp() + ball.getDamage(), zombie.getHp());
+        view.printRaw(String.format("  🎳 %s hit %s (HP: %d → %d)",
+                ball.getType().name(), zombie.getType().name(),
+                zombie.getHp() + ball.getDamage(), zombie.getHp()));
     }
 
     private void moveZombies() {
@@ -286,7 +286,7 @@ public class WallnutBowlingMinigame {
             if (z.getX() <= deadlineCol) {
                 gameOver = true;
                 view.printError(
-                    "A zombie crossed the red line! You lose!");
+                        "A zombie crossed the red line! You lose!");
                 return;
             }
         }
@@ -296,7 +296,7 @@ public class WallnutBowlingMinigame {
     public void placeBowling(PlantType type, int x, int y) {
         if (x > deadlineCol) {
             view.printError("You can only place walnut bowling between columns 1 and "
-                + deadlineCol + ".");
+                    + deadlineCol + ".");
             return;
         }
         if (y < 1 || y > rows) {
@@ -306,7 +306,7 @@ public class WallnutBowlingMinigame {
         BowlingBall ball = new BowlingBall(type, x, y);
         balls.add(ball);
         view.printRaw(ConsoleView.GREEN + "  🎳 " + type.name()
-            + " placed at (" + x + "," + y + ") — rolling!" + ConsoleView.RESET);
+                + " placed at (" + x + "," + y + ") — rolling!" + ConsoleView.RESET);
         for (int t = 0; t < 20; t++) {
             tick();
             if (!ball.isActive() || gameOver) {
@@ -326,34 +326,33 @@ public class WallnutBowlingMinigame {
             gameOver = true;
             view.printGameWon();
             view.printRaw(ConsoleView.GREEN
-                + "  Crushed " + totalKilled + " zombies!" + ConsoleView.RESET);
+                    + "  Crushed " + totalKilled + " zombies!" + ConsoleView.RESET);
         }
     }
 
     public void printBoard() {
         view.printHeader("🎳 Wallnut Bowling — Level " + level
-            + "  Killed: " + totalKilled + "/" + targetKills);
+                + "  Killed: " + totalKilled + "/" + targetKills);
         view.printRaw("    Red line at column " + deadlineCol);
-        System.out.print("     ");
+        StringBuilder header = new StringBuilder("     ");
         for (int c = 1; c <= cols; c++) {
-            System.out.printf("%-4d", c);
+            header.append(String.format("%-4d", c));
         }
-        view.printRaw("");
+        view.printRaw(header.toString());
         view.printRaw("    " + "────".repeat(cols));
         for (int r = 1; r <= rows; r++) {
-            System.out.printf(" %d │ ", r);
+            StringBuilder row = new StringBuilder(String.format(" %d │ ", r));
             for (int c = 1; c <= cols; c++) {
                 if (c == deadlineCol) {
-                    System.out.print(ConsoleView.RED + "│" + ConsoleView.RESET);
+                    row.append(ConsoleView.RED).append("│").append(ConsoleView.RESET);
                 }
-                String cell = getCellDisplay(c, r);
-                System.out.print(cell);
+                row.append(getCellDisplay(c, r));
             }
-            view.printRaw("");
+            view.printRaw(row.toString());
         }
         view.printRaw("    " + "────".repeat(cols));
         view.printRaw(ConsoleView.CYAN + "  Conveyor queue: "
-            + conveyorQueue.size() + " balls remaining" + ConsoleView.RESET);
+                + conveyorQueue.size() + " balls remaining" + ConsoleView.RESET);
         view.printRaw("  Use: place bowling -t <TYPE> -l (<col>, <row>)");
         view.printRaw("  Types: WALLNUT_BOWLING | EXPLODE_O_NUT_BOWLING | BIG_WALLNUT");
     }

@@ -45,8 +45,7 @@ public class ZombieDataRegistry {
                     map.put(s.getType(), s);
                 }
             }
-            System.out.println("[ZombieDataRegistry] Loaded "
-                    + map.size() + " zombies from data/zombies.json");
+            // zombies loaded successfully
         } catch (Exception e) {
             System.err.println("[ZombieDataRegistry] Cannot load JSON: "
                     + e.getMessage() + " — using built-in defaults.");

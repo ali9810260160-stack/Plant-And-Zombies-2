@@ -58,26 +58,26 @@ public class ProfileController {
         view.printSeparator();
         view.printHeader("👤 Profile: " + user.getNickname());
         view.printRaw(ConsoleView.CYAN + "  Username:          "
-            + ConsoleView.WHITE + user.getUsername() + ConsoleView.RESET);
+                + ConsoleView.WHITE + user.getUsername() + ConsoleView.RESET);
         view.printRaw(ConsoleView.CYAN + "  Nickname:          "
-            + ConsoleView.WHITE + user.getNickname() + ConsoleView.RESET);
+                + ConsoleView.WHITE + user.getNickname() + ConsoleView.RESET);
         view.printRaw(ConsoleView.CYAN + "  Email:             "
-            + ConsoleView.WHITE + user.getEmail() + ConsoleView.RESET);
+                + ConsoleView.WHITE + user.getEmail() + ConsoleView.RESET);
         view.printRaw(ConsoleView.CYAN + "  Gender:            "
-            + ConsoleView.WHITE + user.getGender() + ConsoleView.RESET);
+                + ConsoleView.WHITE + user.getGender() + ConsoleView.RESET);
         view.printRaw(ConsoleView.CYAN + "  Difficulty:        "
-            + ConsoleView.WHITE + user.getDifficultyLevel() + "/5"
-            + ConsoleView.RESET);
+                + ConsoleView.WHITE + user.getDifficultyLevel() + "/5"
+                + ConsoleView.RESET);
         view.printRaw(ConsoleView.YELLOW + "  Coins:             "
-            + user.getCoins() + ConsoleView.RESET);
+                + user.getCoins() + ConsoleView.RESET);
         view.printRaw(ConsoleView.YELLOW + "  Gems:              "
-            + user.getGems() + ConsoleView.RESET);
+                + user.getGems() + ConsoleView.RESET);
         view.printRaw(ConsoleView.GREEN + "  Games Played:      "
-            + user.getGamesPlayed() + ConsoleView.RESET);
+                + user.getGamesPlayed() + ConsoleView.RESET);
         view.printRaw(ConsoleView.GREEN + "  Levels Completed:  "
-            + user.getLevelsCompleted() + ConsoleView.RESET);
+                + user.getLevelsCompleted() + ConsoleView.RESET);
         view.printRaw(ConsoleView.MAGENTA + "  Highest MeoPoint:  "
-            + user.getHighestMeoPoint() + ConsoleView.RESET);
+                + user.getHighestMeoPoint() + ConsoleView.RESET);
         view.printSeparator();
     }
 
@@ -92,11 +92,7 @@ public class ProfileController {
     private void printDifficultyEffects(int level) {
         double mult = (double) level / 3;
         view.printRaw(ConsoleView.YELLOW
-            + "  Effects at difficulty " + level + ":" + ConsoleView.RESET);
-        System.out.printf("  Zombie HP multiplier:     %.2fx%n", mult);
-        System.out.printf("  Zombie damage multiplier: %.2fx%n", mult);
-        System.out.printf("  Wave cost multiplier:     %.2fx%n", 3.0 / level);
-        System.out.printf("  Sun drop rate:            %.2fx%n", 3.0 / level);
-        System.out.printf("  Game speed:               %.2fx%n", mult);
+                + "  Effects at difficulty " + level + ":" + ConsoleView.RESET);
+        view.getProfileView().printDifficultyEffects(level, mult);
     }
 }

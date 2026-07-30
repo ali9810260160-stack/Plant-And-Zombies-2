@@ -147,8 +147,7 @@ public class LevelProgressService {
             } else {
                 status = ConsoleView.RED + "🔒 LOCKED  " + ConsoleView.RESET;
             }
-            System.out.printf("  Level %-2d  [%s]  %-18s%n",
-                    i, status, levelType);
+            view.getLevelProgressView().printLevelRow(i, status, levelType);
         }
         view.printInfo("Play with: menu enter chapter "
                 + chapter.name() + " -l <number>");
@@ -164,8 +163,7 @@ public class LevelProgressService {
             String status = chapterOpen
                     ? ConsoleView.GREEN + "OPEN" + ConsoleView.RESET
                     : ConsoleView.RED + "LOCKED" + ConsoleView.RESET;
-            System.out.printf("  %-22s  [%s]  %d/%d levels unlocked%n",
-                    chapter.name(), status, unlocked, total);
+            view.getLevelProgressView().printChapterRow(chapter.name(), status, unlocked, total);
         }
         view.printInfo("show levels -c <CHAPTER_NAME>  to see level details");
     }

@@ -20,7 +20,7 @@ public class Pot {
     public boolean isReady() {
         if (plantedAt == null || plantType == null) return false;
         long elapsed = java.time.temporal.ChronoUnit.HOURS.between(
-            plantedAt, LocalDateTime.now());
+                plantedAt, LocalDateTime.now());
         return elapsed >= growthHours;
     }
 

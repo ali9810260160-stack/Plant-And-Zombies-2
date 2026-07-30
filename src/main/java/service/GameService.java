@@ -8,6 +8,7 @@ import model.enums.*;
 import model.plants.Plant;
 import model.plants.PlantFactory;
 import model.plants.GenericPlant;
+import model.plants.PeaPodPlant;
 import model.tiles.Tile;
 import model.zombies.Zombie;
 import util.RandomUtil;
@@ -63,7 +64,7 @@ public class GameService {
                 Tile t = session.getGameMap().getTile(c, r);
                 if (t != null && t.getPlant() != null
                         && boosted.contains(t.getPlant().getType())) {
-                    t.getPlant().activatePlantFood();
+                    t.getPlant().activatePlantFood(session);
                     t.getPlant().setBoosted(true);
                 }
             }
@@ -236,6 +237,17 @@ public class GameService {
                 throw new exception.GameException(
                         "Pumpkin needs a plant to protect underneath.");
             }
+        } else if (type == PlantType.PEA_POD && tile.getPlant() instanceof PeaPodPlant) {
+            // Pea Pod روی Pea Pod موجود: افزودن یک سر (بدون کاشت جدید)
+            PeaPodPlant existingPod = (PeaPodPlant) tile.getPlant();
+            int cost = PlantFactory.getSunCost(type);
+            if (session.getSunAmount() < cost)
+                throw new exception.GameException(
+                        "Not enough sun. Need " + cost + ", have " + session.getSunAmount() + ".");
+            if (!existingPod.addHead())
+                throw new exception.GameException("Pea Pod already at maximum 5 heads.");
+            session.spendSun(cost);
+            return;
         } else {
             if (!tile.isPlantable()) {
                 throw new exception.GameException(
@@ -249,7 +261,8 @@ public class GameService {
                             + ", have " + session.getSunAmount() + ".");
         }
         session.spendSun(cost);
-        Plant plant = PlantFactory.create(type);
+        Plant plant = PlantFactory.createWithUpgrade(type,
+                AppState.getInstance().getCurrentUser());
         if (plant == null) {
             throw new exception.GameException(
                     "Unknown plant type: " + type.name());
@@ -273,7 +286,7 @@ public class GameService {
             return;
         }
         if (plant.isHasStoredBoost()) {
-            plant.activatePlantFood();
+            plant.activatePlantFood(session);
             plant.setHasStoredBoost(false);
         }
     }
@@ -303,7 +316,7 @@ public class GameService {
                     "No plant at (" + x + ", " + y + ").");
         }
         session.usePlantFood();
-        tile.getPlant().activatePlantFood();
+        tile.getPlant().activatePlantFood(session);
         view.printSuccess("Plant food used on "
                 + tile.getPlant().getType().name() + "!");
     }
