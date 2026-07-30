@@ -43,7 +43,7 @@ public final class PlantFoodEffectHandler {
      * @param session نشست بازی (می‌تواند null باشد)
      */
     public static void apply(PlantType type, GenericPlant plant,
-                             GameSession session, ConsoleView view) {
+                             GameSession session) {
         switch (type) {
             // ── تولیدکنندگان خورشید ──────────────────────────────────
             case SUNFLOWER:
