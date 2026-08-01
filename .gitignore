@@ -34,3 +34,6 @@ bin/
 /.idea/
 /target/
 /roadmap/
+/data/plants-last.json
+/data/users.json
+/data/zombies-last.json

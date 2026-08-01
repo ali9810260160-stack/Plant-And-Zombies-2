@@ -1,4 +1,4 @@
-package util;
+package view;
 
 import controller.*;
 import controller.MinigameController;
@@ -9,8 +9,7 @@ import model.AppState;
 import model.enums.MenuType;
 import repository.UserRepository;
 import service.*;
-import view.ConsoleView;
-import view.MapView;
+import util.InputParser;
 
 import java.util.Scanner;
 import java.util.regex.Matcher;

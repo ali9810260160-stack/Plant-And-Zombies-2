@@ -1,4 +1,3 @@
-// fixed
 package service;
 
 import model.GameSession;
@@ -7,7 +6,6 @@ import model.Wave;
 import model.enums.*;
 import model.plants.GenericPlant;
 import model.plants.Plant;
-import model.plants.PlantFactory;
 import model.tiles.Tile;
 import model.zombies.Gargantuar;
 import model.zombies.JesterZombie;
