@@ -3,6 +3,7 @@ package com.pvz2.service;
 import com.pvz2.model.GameSession;
 import com.pvz2.model.Sun;
 import com.pvz2.model.enums.ChapterType;
+import com.pvz2.model.enums.LevelType;
 import com.pvz2.model.enums.SunType;
 import com.pvz2.model.tiles.Tile;
 import com.pvz2.util.RandomUtil;
@@ -10,6 +11,11 @@ import com.pvz2.view.ConsoleView;
 
 /**
  * سرویس مدیریت خورشید — تولید، سقوط، برداشت.
+ *
+ * مراحلی که خورشید از آسمان نمی‌بارد:
+ *  - DARK_AGES  (عصر تاریکی)
+ *  - NIGHT_OPS  (شب عملیات)
+ *  - PLANT_WHAT_YOU_GET (هر چه رسد بکار)
  */
 public class SunService {
 
@@ -25,14 +31,23 @@ public class SunService {
         this.combatService = cs;
     }
 
-    /** محاسبه فاصله سقوط بعدی: max(6 + 0.05t, 12) ثانیه */
+    /** فاصله سقوط بعدی: max(6+0.05t, 12) ثانیه — طبق داکیومنت */
     public int calculateDropIntervalTicks(double elapsedSeconds) {
         double interval = Math.min(6 + 0.05 * elapsedSeconds, 12);
         return (int) (interval * 10);
     }
 
+    /**
+     * هر تیک — مدیریت سقوط خورشید از آسمان.
+     * بلوک‌های خورشید آسمان:
+     *  1. DARK_AGES
+     *  2. NIGHT_OPS  ← اضافه شد
+     *  3. PLANT_WHAT_YOU_GET ← اضافه شد
+     */
     public void tickSkyDrops(GameSession session) {
-        if (session.getGameMap().getChapter() == ChapterType.DARK_AGES) {
+        if (isSkyDropBlocked(session)) {
+            // در این مراحل خورشید از آسمان نمی‌بارد
+            tickFallingSuns(session); // سان‌های در حال سقوط رو ادامه بده
             return;
         }
         int currentTick = session.getCurrentTick();
@@ -43,6 +58,27 @@ public class SunService {
             session.setLastSkyDropTick(currentTick);
         }
         tickFallingSuns(session);
+    }
+
+    /**
+     * آیا سقوط خورشید از آسمان در این session بلوک است؟
+     */
+    private boolean isSkyDropBlocked(GameSession session) {
+        if (session.getLevel() == null) return false;
+        // فصل عصر تاریکی
+        if (session.getGameMap().getChapter() == ChapterType.DARK_AGES) {
+            return true;
+        }
+        LevelType lt = session.getLevel().getLevelType();
+        // شب عملیات — هیچ آفتابی از آسمان نمی‌بارد
+        if (lt == LevelType.NIGHT_OPS) {
+            return true;
+        }
+        // هر چه رسد بکار — فقط خورشید اولیه، بعداً هم نمی‌بارد
+        if (lt == LevelType.PLANT_WHAT_YOU_GET) {
+            return true;
+        }
+        return false;
     }
 
     private void dropSunFromSky(GameSession session, int tick) {
@@ -66,21 +102,15 @@ public class SunService {
 
     private SunType pickSunType() {
         double roll = RandomUtil.nextDouble();
-        if (roll < 0.80) {
-            return SunType.NORMAL;
-        }
-        if (roll < 0.95) {
-            return SunType.SPECIAL;
-        }
+        if (roll < 0.80) return SunType.NORMAL;
+        if (roll < 0.95) return SunType.SPECIAL;
         return SunType.RADIOACTIVE;
     }
 
     private void tickFallingSuns(GameSession session) {
         int currentTick = session.getCurrentTick();
         for (Sun sun : session.getActiveSuns()) {
-            if (sun.isLanded() || sun.isCollected()) {
-                continue;
-            }
+            if (sun.isLanded() || sun.isCollected()) continue;
             int ticksElapsed = currentTick - sun.getSpawnTick();
             double progress = (double) ticksElapsed / SKY_DROP_DURATION_TICKS;
             sun.setFallProgress(Math.min(1.0, progress));
@@ -101,9 +131,7 @@ public class SunService {
 
     public int collectSun(GameSession session, int x, int y) {
         Sun target = findCollectableSun(session, x, y);
-        if (target == null) {
-            return -1;
-        }
+        if (target == null) return -1;
         if (target.getType() == SunType.RADIOACTIVE && !target.isLanded()) {
             handleRadioactiveExplosion(target, session);
             target.setCollected(true);
@@ -112,6 +140,12 @@ public class SunService {
         target.setCollected(true);
         int value = getSunValue(target);
         session.addSun(value);
+        // ثبت برای Timed War (حالت خورشید)
+        if (session.getLevel() != null
+                && session.getLevel().getLevelType() == LevelType.TIMED_WAR
+                && session.getLevel().isTimedWarSunMode()) {
+            session.registerTimedWarSun(value);
+        }
         if (combatService != null) {
             combatService.onSunCollectedForQuest(value);
         }
@@ -159,8 +193,7 @@ public class SunService {
     public void collectPlantProducedSun(GameSession session, int x, int y) {
         Tile tile = session.getGameMap().getTile(x, y);
         if (tile == null || tile.getPlant() == null) {
-            throw new com.pvz2.exception.GameException(
-                    "No plant at (" + x + ", " + y + ")");
+            throw new com.pvz2.exception.GameException("No plant at (" + x + ", " + y + ")");
         }
         com.pvz2.model.plants.Plant plant = tile.getPlant();
         if (!(plant instanceof com.pvz2.model.plants.GenericPlant)) {
@@ -174,6 +207,12 @@ public class SunService {
         int amount = gp.getSunProductionAmount();
         gp.collectSun();
         session.addSun(amount);
+        // ثبت برای Timed War (حالت خورشید)
+        if (session.getLevel() != null
+                && session.getLevel().getLevelType() == LevelType.TIMED_WAR
+                && session.getLevel().isTimedWarSunMode()) {
+            session.registerTimedWarSun(amount);
+        }
         view.printRaw("\u001B[33m☀ plant " + plant.getType().name()
                 + " produced a sun at (" + x + ", " + y + ")\u001B[0m");
     }

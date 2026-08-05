@@ -34,6 +34,54 @@ public class MapView {
         printLegend();
     }
 
+    /**
+     * نمایش وضعیت مرحله ویژه در header نقشه.
+     */
+    private void printSpecialLevelHeader(GameSession session) {
+        if (session.getLevel() == null) return;
+        com.pvz2.model.enums.LevelType lt = session.getLevel().getLevelType();
+        switch (lt) {
+            case TIMED_WAR:
+                int rem = session.getTimedWarRemainingSeconds();
+                String objective = session.getLevel().isTimedWarSunMode()
+                    ? "Sun: " + session.getTimedWarSunAchieved()
+                      + "/" + session.getLevel().getTimedWarSunTarget()
+                    : "Kills: " + session.getTimedWarKillsAchieved()
+                      + "/" + session.getLevel().getTimedWarZombieTarget();
+                System.out.println("  [33m⏱ TIMED WAR | Time left: "
+                        + rem + "s | " + objective + "[0m");
+                break;
+            case DEAD_LINE:
+                System.out.println("  [31m🚫 DEAD LINE at column "
+                        + session.getLevel().getDeadLineColumn() + "[0m");
+                break;
+            case LOVE_YOUR_PLANTS:
+                System.out.println("  [35m💚 Plants lost: "
+                        + session.getPlantsLost() + "/"
+                        + session.getLevel().getMaxPlantsLost() + "[0m");
+                break;
+            case SAVE_OUR_SEEDS:
+                System.out.println("  [33m🌱 Protected plants remaining: "
+                        + session.getProtectedPlantPositions().size() + "[0m");
+                break;
+            case CONVEYOR_BELT:
+                System.out.println("  [33m📦 Conveyor: "
+                        + session.getConveyorQueue() + "[0m");
+                break;
+            case NIGHT_OPS:
+                System.out.println("  [34m🌙 NIGHT OPS — no sky sun[0m");
+                break;
+            case PLANT_WHAT_YOU_GET:
+                System.out.println("  [33m🌿 PLANT WHAT YOU GET | Sun: "
+                        + session.getSunAmount()
+                        + (session.isWaveStarted() ? "" : " | [FREE PLANT PHASE]")
+                        + "[0m");
+                break;
+            default:
+                break;
+        }
+    }
+
     private void printHeader(GameSession session) {
         System.out.println();
         System.out.println(BOLD + CYAN

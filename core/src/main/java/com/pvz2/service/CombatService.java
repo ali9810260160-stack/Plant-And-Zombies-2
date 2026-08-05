@@ -1,6 +1,7 @@
 package com.pvz2.service;
 
 import com.pvz2.model.GameSession;
+import com.pvz2.model.Level;
 import com.pvz2.model.Projectile;
 import com.pvz2.model.Wave;
 import com.pvz2.model.enums.*;
@@ -14,12 +15,11 @@ import com.pvz2.util.RandomUtil;
 import com.pvz2.view.ConsoleView;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
- * سرویس مرکزی مبارزه — هر تیک پردازش می‌شود.
- * شامل پیاده‌سازی کامل توانایی‌های منحصربه‌فرد گیاهان.
+ * سرویس مبارزه — هر تیک پردازش می‌شود.
+ * شامل بررسی کامل شرایط باخت/برد همه ۸ نوع مرحله ویژه.
  */
 public class CombatService {
 
@@ -44,10 +44,12 @@ public class CombatService {
         this.questService = qs;
     }
 
+    // ════════════════════════════════════════════════════════
+    //  MAIN TICK
+    // ════════════════════════════════════════════════════════
+
     public void processTick(GameSession session) {
-        if (!session.isInProgress()) {
-            return;
-        }
+        if (!session.isInProgress()) return;
         tickAllPlants(session);
         collectPlantProjectiles(session);
         moveProjectiles(session);
@@ -57,13 +59,18 @@ public class CombatService {
         checkZombiesAtEnd(session);
         removeDeadEntities(session);
         applyIceMeltNearFire(session);
+        checkTimedWarCondition(session);
     }
+
+    // ════════════════════════════════════════════════════════
+    //  PLANTS
+    // ════════════════════════════════════════════════════════
 
     private void tickAllPlants(GameSession session) {
         for (int r = 1; r <= session.getGameMap().getRows(); r++) {
             for (int c = 1; c <= session.getGameMap().getCols(); c++) {
                 Tile tile = session.getGameMap().getTile(c, r);
-                if (tile == null) { continue; }
+                if (tile == null) continue;
                 tickPlantOnTile(tile, session);
             }
         }
@@ -73,11 +80,14 @@ public class CombatService {
         Plant plant = tile.getPlant();
         if (plant != null && plant.isAlive())
             plant.onTick(session.getCurrentTick(), session);
-
-        Plant secondPlant = tile.getSecondLayerPlant();
-        if (secondPlant != null && secondPlant.isAlive())
-            secondPlant.onTick(session.getCurrentTick(), session);
+        Plant second = tile.getSecondLayerPlant();
+        if (second != null && second.isAlive())
+            second.onTick(session.getCurrentTick(), session);
     }
+
+    // ════════════════════════════════════════════════════════
+    //  PROJECTILES
+    // ════════════════════════════════════════════════════════
 
     private void collectPlantProjectiles(GameSession session) {
         for (int r = 1; r <= session.getGameMap().getRows(); r++) {
@@ -93,7 +103,6 @@ public class CombatService {
         if (!(plant instanceof GenericPlant)) return;
         GenericPlant gp = (GenericPlant) plant;
         int maxRows = session.getGameMap().getRows();
-
         for (Projectile proj : gp.pollPendingProjectiles()) {
             proj.setX(plant.getX());
             int targetRow = plant.getY() + proj.getYOffset();
@@ -111,11 +120,9 @@ public class CombatService {
              c <= session.getGameMap().getCols(); c++) {
             Tile t = session.getGameMap().getTile(c, proj.getY());
             if (t == null || t.getPlant() == null) continue;
-            Plant p = t.getPlant();
-            if (p.getType() == PlantType.TORCHWOOD) {
+            if (t.getPlant().getType() == PlantType.TORCHWOOD) {
                 proj = new Projectile(ProjectileType.FIRE,
-                        proj.getX(), proj.getY(),
-                        proj.getDamage() * 2);
+                        proj.getX(), proj.getY(), proj.getDamage() * 2);
                 break;
             }
         }
@@ -137,24 +144,20 @@ public class CombatService {
                 toRemove.add(proj);
                 continue;
             }
-            // پرتابه‌های کوتاه‌برد (Sea-shroom / Puff-shroom)
             if (proj.getTargetX() > 0 && proj.getX() >= proj.getTargetX()) {
-                toRemove.add(proj); continue;
+                toRemove.add(proj);
+                continue;
             }
             if (isTombstoneBlocking(proj, session)) {
                 toRemove.add(proj);
                 continue;
             }
             if (proj.isHitsPlants()) {
-                if (hitPlants(proj, session)) {
-                    toRemove.add(proj);
-                }
+                if (hitPlants(proj, session)) toRemove.add(proj);
                 continue;
             }
             boolean hit = checkHitZombies(proj, session);
-            if (hit && !proj.isPassesThrough()) {
-                toRemove.add(proj);
-            }
+            if (hit && !proj.isPassesThrough()) toRemove.add(proj);
         }
         session.getActiveProjectiles().removeAll(toRemove);
     }
@@ -192,17 +195,11 @@ public class CombatService {
             if (!zombie.isAlive()) continue;
             if (Math.abs(zombie.getX() - proj.getX()) < 0.6
                     && zombie.getY() == proj.getY()) {
-                if (handleJesterDeflect(zombie, proj, session)) {
-                    return true;
-                }
+                if (handleJesterDeflect(zombie, proj, session)) return true;
                 applyProjectileToZombie(proj, zombie);
                 updateWaveHealth(session, proj.getDamage());
                 hitSomething = true;
-                if (zombie.getType() == ZombieType.PARASOL_ZOMBIE
-                        && proj.isArc()) {
-                    hitSomething = true;
-                    break;
-                }
+                if (zombie.getType() == ZombieType.PARASOL_ZOMBIE && proj.isArc()) break;
             }
         }
         return hitSomething;
@@ -210,9 +207,7 @@ public class CombatService {
 
     private boolean handleJesterDeflect(Zombie zombie, Projectile proj,
                                         GameSession session) {
-        if (!(zombie instanceof JesterZombie)) {
-            return false;
-        }
+        if (!(zombie instanceof JesterZombie)) return false;
         JesterZombie jester = (JesterZombie) zombie;
         Projectile deflected = jester.deflect(proj);
         session.getActiveProjectiles().add(deflected);
@@ -226,32 +221,30 @@ public class CombatService {
             zombie.removeEffect(ZombieEffect.CHILLED);
             zombie.addEffect(ZombieEffect.BURNING, 30);
         }
-        if (proj.getType() == ProjectileType.POISON) {
+        if (proj.getType() == ProjectileType.POISON)
             zombie.takePoisonDamage(dmg);
-        } else {
+        else
             zombie.takeDamage(dmg);
-        }
-        if (proj.getType() == ProjectileType.ICE) {
+        if (proj.getType() == ProjectileType.ICE)
             zombie.addEffect(ZombieEffect.CHILLED, 50);
-        }
-        // ← کره Kernel-pult: Stun
         if (proj.isStunOnHit())
             zombie.addEffect(ZombieEffect.STUNNED, 60);
-
-        // ← Winter Melon / AoE پرتابه‌های منفجره
         if (proj.isExplodes() && proj.getAoeRadius() > 0)
             applyAoEDamage(zombie, proj, dmg);
     }
 
     private void applyAoEDamage(Zombie center, Projectile proj, int baseDmg) {
-        // اطلاع‌رسانی به زامبی‌های مجاور
-        // (GameSession دسترس نداریم اینجا — AoE در checkHitZombies handle می‌شه)
+        // handled at higher level
     }
 
     private void updateWaveHealth(GameSession session, int damage) {
         Wave wave = session.getCurrentWave();
         if (wave != null) wave.registerHealthLost(damage);
     }
+
+    // ════════════════════════════════════════════════════════
+    //  ZOMBIE MOVEMENT
+    // ════════════════════════════════════════════════════════
 
     private void moveZombies(GameSession session) {
         for (Zombie zombie : session.getActiveZombies()) {
@@ -267,9 +260,7 @@ public class CombatService {
 
     private boolean isBlockedByPlant(Zombie zombie, GameSession session) {
         int col = (int) Math.ceil(zombie.getX());
-        if (!session.getGameMap().isValidPosition(col, zombie.getY())) {
-            return false;
-        }
+        if (!session.getGameMap().isValidPosition(col, zombie.getY())) return false;
         Tile tile = session.getGameMap().getTile(col, zombie.getY());
         return tile != null && tile.getPlant() != null;
     }
@@ -277,13 +268,9 @@ public class CombatService {
     private void applySlipperyTile(Zombie zombie, GameSession session) {
         int col = (int) Math.round(zombie.getX());
         int row = zombie.getY();
-        if (!session.getGameMap().isValidPosition(col, row)) {
-            return;
-        }
+        if (!session.getGameMap().isValidPosition(col, row)) return;
         Tile tile = session.getGameMap().getTile(col, row);
-        if (tile == null || !tile.isSlippery()) {
-            return;
-        }
+        if (tile == null || !tile.isSlippery()) return;
         int newRow = tile.isSlipperyUp() ? row - 1 : row + 1;
         if (session.getGameMap().isValidPosition(1, newRow)) {
             zombie.setY(newRow);
@@ -291,11 +278,13 @@ public class CombatService {
         }
     }
 
+    // ════════════════════════════════════════════════════════
+    //  ZOMBIE ATTACKS
+    // ════════════════════════════════════════════════════════
+
     private void zombiesAttackPlants(GameSession session) {
         for (Zombie zombie : session.getActiveZombies()) {
-            if (!zombie.isAlive() || !zombie.isAttacking()) {
-                continue;
-            }
+            if (!zombie.isAlive() || !zombie.isAttacking()) continue;
             int col = (int) Math.ceil(zombie.getX());
             Tile tile = session.getGameMap().getTile(col, zombie.getY());
             if (tile == null || tile.getPlant() == null) {
@@ -303,26 +292,24 @@ public class CombatService {
                 continue;
             }
             Plant plant = tile.getPlant();
-            // ← فراخوانی توانایی منحصربه‌فرد دفاعی گیاه
             boolean handled = plant.onZombieAttack(zombie, session);
-
             if (!handled) {
-                // حمله عادی
                 int dmgPerTick = zombie.getDamagePerSecond() / 10;
                 plant.takeDamage(dmgPerTick);
             }
             if (!plant.isAlive()) {
-                handlePlantDestroyed(tile, plant, zombie, session);
+                handlePlantDestroyed(tile, plant, zombie, session, col,
+                        zombie.getY());
             }
         }
     }
 
     private void handlePlantDestroyed(Tile tile, Plant plant,
-                                      Zombie zombie, GameSession session) {
-        // ← هوک: توانایی خاص هنگام نابودی (Explode-o-nut, Hypno-shroom)
+                                      Zombie zombie, GameSession session,
+                                      int x, int y) {
         plant.onPlantDestroyed(zombie, session);
+        view.printPlantDestroyed(plant.getType().name(), x, y);
 
-        view.printPlantDestroyed(plant.getType().name(), tile.getX(), tile.getY());
         if (tile.getSecondLayerPlant() != null) {
             tile.setPlant(tile.getSecondLayerPlant());
             tile.setSecondLayerPlant(null);
@@ -331,30 +318,92 @@ public class CombatService {
         }
         zombie.setAttacking(false);
         session.setPlantsLost(session.getPlantsLost() + 1);
-        checkSpecialLevelLoseConditions(session);
+
+        // ── بررسی شرایط باخت مراحل ویژه ──
+        checkSpecialLevelLoseOnPlantDestroyed(session, plant, x, y);
     }
 
-    private void checkSpecialLevelLoseConditions(GameSession session) {
-        com.pvz2.model.Level level = session.getLevel();
-        if (level.getLevelType() == LevelType.LOVE_YOUR_PLANTS) {
-            if (session.getPlantsLost() >= level.getMaxPlantsLost()) {
-                session.setResult(GameResult.LOSE);
-                view.printGameOver();
-            }
+    // ════════════════════════════════════════════════════════
+    //  SPECIAL LEVEL — LOSE CONDITIONS
+    // ════════════════════════════════════════════════════════
+
+    /**
+     * بررسی شرایط باخت بعد از نابودی هر گیاه.
+     * شامل: LOVE_YOUR_PLANTS، SAVE_OUR_SEEDS
+     */
+    private void checkSpecialLevelLoseOnPlantDestroyed(GameSession session,
+                                                        Plant plant, int x, int y) {
+        Level level = session.getLevel();
+        if (level == null || !session.isInProgress()) return;
+
+        switch (level.getLevelType()) {
+
+            // ── LOVE_YOUR_PLANTS: تعداد مجاز گیاه از دست رفته ─────
+            case LOVE_YOUR_PLANTS:
+                if (session.getPlantsLost() >= level.getMaxPlantsLost()) {
+                    session.setResult(GameResult.LOSE);
+                    view.printRaw("\u001B[31m\u001B[1m"
+                            + "💔 You've lost too many plants! (" + session.getPlantsLost()
+                            + "/" + level.getMaxPlantsLost() + ") — GAME OVER!\u001B[0m");
+                    view.printGameOver();
+                }
+                break;
+
+            // ── SAVE_OUR_SEEDS: گیاه محافظت‌شده خورده شد ──────────
+            case SAVE_OUR_SEEDS:
+                if (session.isProtectedPosition(x, y)) {
+                    session.removeProtectedPosition(x, y);
+                    session.setResult(GameResult.LOSE);
+                    view.printRaw("\u001B[31m\u001B[1m"
+                            + "🌱 A protected seed was eaten at (" + x + "," + y
+                            + ")! — GAME OVER!\u001B[0m");
+                    view.printGameOver();
+                }
+                break;
+
+            default:
+                break;
         }
     }
 
+    // ════════════════════════════════════════════════════════
+    //  DEAD_LINE CHECK — زامبی از خط ممنوع رد شد
+    // ════════════════════════════════════════════════════════
+
     private void checkZombiesAtEnd(GameSession session) {
-        Iterator<Zombie> iter = session.getActiveZombies().iterator();
-        while (iter.hasNext()) {
-            Zombie zombie = iter.next();
-            if (!zombie.isAlive()) {
-                continue;
-            }
+        for (Zombie zombie : session.getActiveZombies()) {
+            if (!zombie.isAlive()) continue;
+
+            // ── DEAD_LINE: رسیدن به ستون ممنوع ─────────────────────
+            if (checkDeadLine(zombie, session)) continue;
+
+            // ── رسیدن به انتهای مسیر (ماشین چمن‌زنی) ───────────────
             if (zombie.getX() <= 0) {
                 handleZombieReachedEnd(zombie, session);
             }
         }
+    }
+
+    /**
+     * بررسی DEAD_LINE: اگر زامبی از ستون deadLineColumn عبور کرد → باخت.
+     * @return true اگر بازی تموم شد
+     */
+    private boolean checkDeadLine(Zombie zombie, GameSession session) {
+        Level level = session.getLevel();
+        if (level == null || level.getLevelType() != LevelType.DEAD_LINE) {
+            return false;
+        }
+        int deadCol = level.getDeadLineColumn();
+        // زامبی‌ها از راست به چپ می‌آیند؛ X<=deadCol یعنی از خط رد شده
+        if (zombie.getX() <= deadCol && zombie.isAlive()) {
+            session.setResult(GameResult.LOSE);
+            view.printRaw("\u001B[31m\u001B[1m"
+                    + "🚫 A zombie crossed the DEAD LINE at column "
+                    + deadCol + "! — GAME OVER!\u001B[0m");
+            view.printGameOver();
+            return true;
+        }
+        return false;
     }
 
     private void handleZombieReachedEnd(Zombie zombie, GameSession session) {
@@ -385,15 +434,63 @@ public class CombatService {
         onLawnmowerKill(killed.size());
     }
 
+    // ════════════════════════════════════════════════════════
+    //  TIMED_WAR CHECK — بررسی برد/باخت نبرد زماندار
+    // ════════════════════════════════════════════════════════
+
+    /**
+     * هر تیک بررسی می‌کند آیا هدف Timed War رسیده یا وقت تموم شده.
+     */
+    private void checkTimedWarCondition(GameSession session) {
+        Level level = session.getLevel();
+        if (level == null || level.getLevelType() != LevelType.TIMED_WAR) return;
+        if (!session.isInProgress()) return;
+        if (session.isTimedWarGoalReached()) return;
+
+        boolean goalMet;
+        if (level.isTimedWarSunMode()) {
+            // حالت خورشید: جمع‌آوری مقدار هدف خورشید
+            goalMet = session.getTimedWarSunAchieved() >= level.getTimedWarSunTarget();
+        } else {
+            // حالت زامبی: کشتن تعداد هدف زامبی
+            goalMet = session.getTimedWarKillsAchieved() >= level.getTimedWarZombieTarget();
+        }
+
+        if (goalMet) {
+            session.setTimedWarGoalReached(true);
+            session.setResult(GameResult.WIN);
+            view.printRaw("\u001B[32m\u001B[1m"
+                    + "⏱ Timed War objective reached! VICTORY!\u001B[0m");
+            view.printGameWon();
+            notifyLevelComplete(session);
+            return;
+        }
+
+        // بررسی اتمام وقت
+        if (session.isTimedWarExpired()) {
+            session.setResult(GameResult.LOSE);
+            String objective = level.isTimedWarSunMode()
+                    ? "Collected " + session.getTimedWarSunAchieved()
+                    + "/" + level.getTimedWarSunTarget() + " sun"
+                    : "Killed " + session.getTimedWarKillsAchieved()
+                    + "/" + level.getTimedWarZombieTarget() + " zombies";
+            view.printRaw("\u001B[31m\u001B[1m"
+                    + "⏱ Time's up! " + objective + " — GAME OVER!\u001B[0m");
+            view.printGameOver();
+        }
+    }
+
+    // ════════════════════════════════════════════════════════
+    //  DEAD ENTITIES
+    // ════════════════════════════════════════════════════════
+
     private void removeDeadEntities(GameSession session) {
-        // گیاهان مرده (HP=0) از کاشی‌ها برداشته می‌شوند
         for (int r = 1; r <= session.getGameMap().getRows(); r++) {
             for (int c = 1; c <= session.getGameMap().getCols(); c++) {
                 Tile tile = session.getGameMap().getTile(c, r);
                 if (tile == null) continue;
                 Plant plant = tile.getPlant();
                 if (plant != null && !plant.isAlive()) {
-                    // اگر قبلاً handlePlantDestroyed صدا نشده (مثلاً گیاهان آنی)
                     plant.onPlantDestroyed(null, session);
                     if (tile.getSecondLayerPlant() != null) {
                         tile.setPlant(tile.getSecondLayerPlant());
@@ -419,6 +516,14 @@ public class CombatService {
     private void handleZombieDeath(Zombie zombie, GameSession session) {
         view.printZombieDead(zombie.getType().name(), zombie.getX(), zombie.getY());
         session.setZombiesKilled(session.getZombiesKilled() + 1);
+
+        // ثبت کشتن زامبی برای TIMED_WAR
+        if (session.getLevel() != null
+                && session.getLevel().getLevelType() == LevelType.TIMED_WAR
+                && !session.getLevel().isTimedWarSunMode()) {
+            session.registerTimedWarKill();
+        }
+
         zombie.onDeath(session);
         updateMeoPoints(zombie, session);
         if (questService != null) {
@@ -429,15 +534,12 @@ public class CombatService {
         handleDrops(zombie, session);
         if (zombie.isGlowing()) {
             boolean added = session.addPlantFood();
-            if (added) {
-                view.printGlowingZombieDroppedFood(session.getPlantFoodCount());
-            }
+            if (added) view.printGlowingZombieDroppedFood(session.getPlantFoodCount());
         }
         Wave wave = session.getCurrentWave();
-        if (wave != null) {
-            wave.registerHealthLost(zombie.getMaxHealth());
-        }
+        if (wave != null) wave.registerHealthLost(zombie.getMaxHealth());
     }
+
     private void updateMeoPoints(Zombie zombie, GameSession session) {
         long now = session.getCurrentTick();
         if (now - session.getLastKillTick() <= 30) {
@@ -451,13 +553,9 @@ public class CombatService {
     }
 
     private void handleDrops(Zombie zombie, GameSession session) {
-        if (!RandomUtil.chance(0.1)) {
-            return;
-        }
+        if (!RandomUtil.chance(0.1)) return;
         com.pvz2.model.User user = com.pvz2.model.AppState.getInstance().getCurrentUser();
-        if (user == null) {
-            return;
-        }
+        if (user == null) return;
         double roll = RandomUtil.nextDouble();
         if (roll < 0.33) {
             user.setCoins(user.getCoins() + 50);
@@ -470,78 +568,53 @@ public class CombatService {
             view.printZombieDropped("pot", user.getPots());
         }
     }
+
     private void applyIceMeltNearFire(GameSession session) {
         for (int r = 1; r <= session.getGameMap().getRows(); r++) {
             for (int c = 1; c <= session.getGameMap().getCols(); c++) {
                 Tile tile = session.getGameMap().getTile(c, r);
-                if (tile == null || tile.getPlant() == null) {
-                    continue;
-                }
+                if (tile == null || tile.getPlant() == null) continue;
                 Plant p = tile.getPlant();
                 if (p.isFrozen() && hasAdjacentFirePlant(session, c, r)) {
                     p.takeDamage(6);
-                    if (p.getFreezeLevel() > 0
-                            && RandomUtil.chance(0.1)) {
+                    if (p.getFreezeLevel() > 0 && RandomUtil.chance(0.1)) {
                         p.setFreezeLevel(p.getFreezeLevel() - 1);
-                        if (p.getFreezeLevel() < 3) {
-                            p.thaw();
-                        }
+                        if (p.getFreezeLevel() < 3) p.thaw();
                     }
                 }
             }
         }
     }
+
     private boolean hasAdjacentFirePlant(GameSession session, int cx, int cy) {
         for (int dy = -1; dy <= 1; dy++) {
             for (int dx = -1; dx <= 1; dx++) {
-                if (dx == 0 && dy == 0) {
-                    continue;
-                }
+                if (dx == 0 && dy == 0) continue;
                 Tile t = session.getGameMap().getTile(cx + dx, cy + dy);
-                if (t != null && t.getPlant() != null
-                        && t.getPlant().isFirePlant()) {
+                if (t != null && t.getPlant() != null && t.getPlant().isFirePlant())
                     return true;
-                }
             }
         }
         return false;
     }
 
-    public void onSunCollectedForQuest(int amount) {
-        if (questService != null) {
-            questService.onSunCollected(amount);
-        }
-    }
+    // ════════════════════════════════════════════════════════
+    //  WIN CONDITION
+    // ════════════════════════════════════════════════════════
 
-    public void onExplosiveUsed() {
-        if (questService != null) {
-            questService.onExplosiveUsed();
-        }
-    }
-
-    public void onLawnmowerKill(int count) {
-        if (questService != null) {
-            questService.onLawnmowerKill(count);
-        }
-    }
     public void checkWinCondition(GameSession session) {
-        if (!session.isInProgress()) {
-            return;
-        }
+        if (!session.isInProgress()) return;
         if (session.allWavesFinished()) {
             session.setResult(GameResult.WIN);
             view.printGameWon();
             notifyLevelComplete(session);
-            if (questService != null) {
-                questService.onGameWon(session);
-            }
+            if (questService != null) questService.onGameWon(session);
         }
     }
+
     private void notifyLevelComplete(GameSession session) {
         com.pvz2.model.User user = com.pvz2.model.AppState.getInstance().getCurrentUser();
-        if (user == null || session.getLevel() == null) {
-            return;
-        }
+        if (user == null || session.getLevel() == null) return;
         com.pvz2.model.enums.ChapterType chapter = session.getLevel().getChapter();
         int levelNum = session.getLevelNumber();
         if (levelProgressService != null) {
@@ -550,5 +623,21 @@ public class CombatService {
         if (scoredGameService != null) {
             scoredGameService.saveHighScore(user, session.getMeoPoints());
         }
+    }
+
+    // ════════════════════════════════════════════════════════
+    //  PUBLIC HOOKS
+    // ════════════════════════════════════════════════════════
+
+    public void onSunCollectedForQuest(int amount) {
+        if (questService != null) questService.onSunCollected(amount);
+    }
+
+    public void onExplosiveUsed() {
+        if (questService != null) questService.onExplosiveUsed();
+    }
+
+    public void onLawnmowerKill(int count) {
+        if (questService != null) questService.onLawnmowerKill(count);
     }
 }

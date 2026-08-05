@@ -79,7 +79,10 @@ public enum CommandRegex {
     PLACE_ZOMBIE("place zombie\\s+-t\\s+(\\S+)\\s+-l\\s+\\((\\d+),\\s*(\\d+)\\)"),
     PLACE_BOWLING("place bowling\\s+-t\\s+(\\S+)\\s+-l\\s+\\((\\d+),\\s*(\\d+)\\)"),
     SHOW_SCORED_SCORE("show scored-game score"),
-    END_SCORED_GAME("end scored game");
+    END_SCORED_GAME("end scored game"),
+    // ── مراحل ویژه ─────────────────────────────────────────
+    SHOW_SPECIAL_STATUS("show special status"),
+    SHOW_CONVEYOR("show conveyor");
 
     private final String pattern;
     CommandRegex(String pattern) { this.pattern = pattern; }

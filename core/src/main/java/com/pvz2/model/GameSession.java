@@ -11,6 +11,7 @@ import java.util.Map;
 
 /**
  * وضعیت جاری یک مرحله در حال اجرا.
+ * شامل state کامل هر 8 نوع مرحله ویژه.
  */
 public class GameSession {
 
@@ -32,24 +33,54 @@ public class GameSession {
     private int zombiesKilled;
     private long meoPoints;
     private boolean waveStarted;
-
-    /** تیک آخرین سقوط خورشید از آسمان */
     private int lastSkyDropTick;
-    /** حالت انتظار بین موج‌ها */
     private boolean betweenWaves;
-    /** شماره مرحله در حال اجرا */
     private int levelNumber;
-    /** آیا گردباد مصر باید اتفاق بیفتد */
     private boolean egyptTornadoActive;
-    /** ردیف‌هایی که باد یخی زده */
     private List<Integer> frostbiteWindAffectedRows;
-    /** گیاهانی که تبدیل به گربه شدند (برای Wizard) */
     private Map<String, com.pvz2.model.plants.Plant> catPlants;
-    /** مینی‌گیم state */
     private Object minigameState;
-    /** امتیاز multi-kill برای scoreservice */
     private int consecutiveKills;
     private long lastKillTick;
+
+    // ════════════════════════════════════════════════════════
+    //  CONVEYOR_BELT state
+    // ════════════════════════════════════════════════════════
+    /** گیاهانی که روی نوار کناری آماده کاشت هستند */
+    private List<PlantType> conveyorQueue;
+    /** تیک آخرین گیاه نوار */
+    private int lastConveyorTick;
+    /** فاصله تیک بین گیاهان نوار (120 = 12 ثانیه) */
+    private static final int CONVEYOR_INTERVAL_TICKS = 120;
+
+    // ════════════════════════════════════════════════════════
+    //  SAVE_OUR_SEEDS state
+    // ════════════════════════════════════════════════════════
+    /**
+     * موقعیت‌های گیاهان محافظت‌شده: int[]{x, y}
+     * اگر هر کدام خورده شوند → باخت فوری
+     */
+    private List<int[]> protectedPlantPositions;
+
+    // ════════════════════════════════════════════════════════
+    //  TIMED_WAR state
+    // ════════════════════════════════════════════════════════
+    /** تعداد زامبی‌های کشته‌شده برای هدف Timed War */
+    private int timedWarKillsAchieved;
+    /** مقدار خورشید تولیدشده برای هدف Timed War (حالت خورشید) */
+    private int timedWarSunAchieved;
+    /** آیا هدف Timed War محقق شده (WIN) */
+    private boolean timedWarGoalReached;
+
+    // ════════════════════════════════════════════════════════
+    //  LOVE_YOUR_PLANTS state
+    // ════════════════════════════════════════════════════════
+    /** گیاهان اولیه‌ای که باید محافظت شوند (فقط برای نمایش) */
+    private List<int[]> protectedLovePlantPositions;
+
+    // ════════════════════════════════════════════════════════
+    //  Constructor
+    // ════════════════════════════════════════════════════════
 
     public GameSession(Level level, GameMap gameMap, List<PlantType> selectedPlants) {
         this.level = level;
@@ -77,52 +108,49 @@ public class GameSession {
         this.catPlants = new HashMap<>();
         this.consecutiveKills = 0;
         this.lastKillTick = 0;
+
+        // special level state init
+        this.conveyorQueue = new ArrayList<>();
+        this.lastConveyorTick = 0;
+        this.protectedPlantPositions = new ArrayList<>();
+        this.protectedLovePlantPositions = new ArrayList<>();
+        this.timedWarKillsAchieved = 0;
+        this.timedWarSunAchieved = 0;
+        this.timedWarGoalReached = false;
     }
 
-    public void advanceTick() {
-        currentTick++;
-    }
+    // ════════════════════════════════════════════════════════
+    //  General game methods
+    // ════════════════════════════════════════════════════════
 
-    public double getElapsedSeconds() {
-        return currentTick / 10.0;
-    }
+    public void advanceTick() { currentTick++; }
 
-    public boolean isInProgress() {
-        return result == GameResult.IN_PROGRESS;
-    }
+    public double getElapsedSeconds() { return currentTick / 10.0; }
 
-    public void addSun(int amount) {
-        sunAmount += amount;
-    }
+    public boolean isInProgress() { return result == GameResult.IN_PROGRESS; }
+
+    public void addSun(int amount) { sunAmount += amount; }
 
     public boolean spendSun(int amount) {
-        if (sunAmount < amount) {
-            return false;
-        }
+        if (sunAmount < amount) return false;
         sunAmount -= amount;
         return true;
     }
 
     public boolean addPlantFood() {
-        if (plantFoodCount >= 3) {
-            return false;
-        }
+        if (plantFoodCount >= 3) return false;
         plantFoodCount++;
         return true;
     }
 
     public boolean usePlantFood() {
-        if (plantFoodCount <= 0) {
-            return false;
-        }
+        if (plantFoodCount <= 0) return false;
         plantFoodCount--;
         return true;
     }
 
     public Wave getCurrentWave() {
-        if (waves == null || currentWaveIndex >= waves.size()) {
-            return null;
-        }
+        if (waves == null || currentWaveIndex >= waves.size()) return null;
         return waves.get(currentWaveIndex);
     }
 
@@ -131,14 +159,91 @@ public class GameSession {
     }
 
     public boolean allWavesFinished() {
-        if (waves == null || waves.isEmpty()) {
-            return false;
-        }
-        if (currentWaveIndex < waves.size() - 1) {
-            return false;
-        }
+        if (waves == null || waves.isEmpty()) return false;
+        if (currentWaveIndex < waves.size() - 1) return false;
         return activeZombies.isEmpty();
     }
+
+    // ════════════════════════════════════════════════════════
+    //  CONVEYOR_BELT methods
+    // ════════════════════════════════════════════════════════
+
+    /** آیا زمان اضافه کردن گیاه جدید به نوار رسیده */
+    public boolean isConveyorReady(int currentTick) {
+        return currentTick == 0
+                || (currentTick - lastConveyorTick) >= CONVEYOR_INTERVAL_TICKS;
+    }
+
+    /** اضافه کردن گیاه به نوار کناری */
+    public void addToConveyor(PlantType type, int currentTick) {
+        conveyorQueue.add(type);
+        lastConveyorTick = currentTick;
+    }
+
+    /** برداشتن گیاه از نوار کناری برای کاشت */
+    public boolean useConveyorPlant(PlantType type) {
+        return conveyorQueue.remove(type);
+    }
+
+    /** آیا این نوع گیاه در نوار کناری موجود است */
+    public boolean hasConveyorPlant(PlantType type) {
+        return conveyorQueue.contains(type);
+    }
+
+    // ════════════════════════════════════════════════════════
+    //  SAVE_OUR_SEEDS methods
+    // ════════════════════════════════════════════════════════
+
+    /** ثبت یک موقعیت به عنوان موقعیت گیاه محافظت‌شده */
+    public void addProtectedPosition(int x, int y) {
+        protectedPlantPositions.add(new int[]{x, y});
+    }
+
+    /** آیا این موقعیت یک گیاه محافظت‌شده دارد */
+    public boolean isProtectedPosition(int x, int y) {
+        for (int[] pos : protectedPlantPositions) {
+            if (pos[0] == x && pos[1] == y) return true;
+        }
+        return false;
+    }
+
+    /** حذف موقعیت از لیست محافظت (وقتی گیاه خورده می‌شود) */
+    public void removeProtectedPosition(int x, int y) {
+        protectedPlantPositions.removeIf(p -> p[0] == x && p[1] == y);
+    }
+
+    // ════════════════════════════════════════════════════════
+    //  TIMED_WAR methods
+    // ════════════════════════════════════════════════════════
+
+    /** ثبت کشتن زامبی برای Timed War */
+    public void registerTimedWarKill() {
+        timedWarKillsAchieved++;
+    }
+
+    /** ثبت خورشید تولیدشده برای Timed War (حالت خورشید) */
+    public void registerTimedWarSun(int amount) {
+        timedWarSunAchieved += amount;
+    }
+
+    /** ثانیه‌های باقیمانده Timed War */
+    public int getTimedWarRemainingSeconds() {
+        if (level == null) return 0;
+        int totalTicks = level.getTimedWarSeconds() * 10;
+        int elapsed = currentTick;
+        int remaining = totalTicks - elapsed;
+        return Math.max(0, remaining / 10);
+    }
+
+    /** بررسی اتمام زمان Timed War */
+    public boolean isTimedWarExpired() {
+        if (level == null) return false;
+        return currentTick >= level.getTimedWarSeconds() * 10;
+    }
+
+    // ════════════════════════════════════════════════════════
+    //  Standard getters/setters
+    // ════════════════════════════════════════════════════════
 
     public Level getLevel() { return level; }
     public GameMap getGameMap() { return gameMap; }
@@ -186,4 +291,26 @@ public class GameSession {
     public void setLastKillTick(long t) { this.lastKillTick = t; }
     public int getLevelNumber() { return levelNumber; }
     public void setLevelNumber(int n) { this.levelNumber = n; }
+
+    // Conveyor
+    public List<PlantType> getConveyorQueue() { return conveyorQueue; }
+    public int getLastConveyorTick() { return lastConveyorTick; }
+    public void setLastConveyorTick(int t) { this.lastConveyorTick = t; }
+
+    // Save Our Seeds
+    public List<int[]> getProtectedPlantPositions() { return protectedPlantPositions; }
+
+    // Timed War
+    public int getTimedWarKillsAchieved() { return timedWarKillsAchieved; }
+    public void setTimedWarKillsAchieved(int n) { this.timedWarKillsAchieved = n; }
+    public int getTimedWarSunAchieved() { return timedWarSunAchieved; }
+    public void setTimedWarSunAchieved(int n) { this.timedWarSunAchieved = n; }
+    public boolean isTimedWarGoalReached() { return timedWarGoalReached; }
+    public void setTimedWarGoalReached(boolean b) { this.timedWarGoalReached = b; }
+
+    // Love Your Plants
+    public List<int[]> getProtectedLovePlantPositions() { return protectedLovePlantPositions; }
+    public void addProtectedLovePlantPosition(int x, int y) {
+        protectedLovePlantPositions.add(new int[]{x, y});
+    }
 }
