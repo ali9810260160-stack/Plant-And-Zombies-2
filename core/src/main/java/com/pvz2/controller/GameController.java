@@ -117,7 +117,7 @@ public class GameController {
     //  BUILD LEVEL — کامل برای هر ۸ نوع
     // ════════════════════════════════════════════════════════
 
-    private Level buildLevel(ChapterType chapter, int levelNumber) {
+    public Level buildLevel(ChapterType chapter, int levelNumber) {
         LevelType type = getLevelType(chapter, levelNumber);
         Level level = new Level(levelNumber, chapter, type);
 

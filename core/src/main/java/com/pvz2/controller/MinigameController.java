@@ -32,7 +32,7 @@ public class MinigameController {
     public MinigameController(ConsoleView view, UserService userService) {
         this.view = view;
         this.userService = userService;
-        this.scoredGameService = new ScoredGameService(view);
+        this.scoredGameService = new ScoredGameService(userService.getUserRepository(), view);
         this.activeMinigame = null;
     }
 

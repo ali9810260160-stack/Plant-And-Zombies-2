@@ -24,6 +24,12 @@ public class Pot {
         return elapsed >= growthHours;
     }
 
+    public double getRemainingHours() {
+        long elapsed = java.time.temporal.ChronoUnit.HOURS.between(
+            plantedAt, LocalDateTime.now());
+        return growthHours - elapsed;
+    }
+
     public int getX() { return x; }
     public int getY() { return y; }
     public boolean isLocked() { return locked; }
