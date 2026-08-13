@@ -2,6 +2,7 @@ package com.pvz2.service;
 
 import com.pvz2.model.User;
 import com.pvz2.model.enums.PlantType;
+import com.pvz2.repository.UserRepository;
 import com.pvz2.view.ConsoleView;
 
 import java.time.LocalDate;
@@ -30,6 +31,7 @@ public class ScoredGameService {
     private static final long ITEM_COLLECT_BONUS = 200L;
 
     private final ConsoleView view;
+    private final UserRepository userRepository;
     private long meoPoints;
     private int lastKillTick;
     private int consecutiveKills;
@@ -38,8 +40,9 @@ public class ScoredGameService {
     private int itemWindowStartTick;
     private boolean inItemWindow;
 
-    public ScoredGameService(ConsoleView view) {
+    public ScoredGameService(UserRepository userRepository, ConsoleView view) {
         this.view = view;
+        this.userRepository = userRepository;
         reset();
     }
 

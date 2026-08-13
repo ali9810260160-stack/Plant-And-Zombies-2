@@ -91,7 +91,7 @@ public class GreenhouseService {
         return result;
     }
 
-    public void collectPot(User user, int x, int y) {
+    public String collectPot(User user, int x, int y) {
         Greenhouse gh = getOrCreateGreenhouse(user);
         Pot pot = gh.getPot(x, y);
         if (pot == null || pot.isLocked()) {
@@ -108,17 +108,17 @@ public class GreenhouseService {
         }
         if (pot.getPlantType().equals("MARIGOLD")) {
             userService.addCoins(user, MARIGOLD_REWARD_COINS);
-            view.printRaw("\u001B[32m🌸 Harvested marigold: +"
+            return ("\u001B[32m🌸 Harvested marigold: +"
                     + MARIGOLD_REWARD_COINS + " coins!\u001B[0m");
         } else {
             giveStoredBoost(user, pot.getPlantType());
-            view.printRaw("\u001B[32m🌱 Harvested "
+            pot.setPlantType(null);
+            pot.setPlantedAt(null);
+            userRepository.save(user);
+            return ("\u001B[32m🌱 Harvested "
                     + pot.getPlantType()
                     + " - stored boost ready for next use!\u001B[0m");
         }
-        pot.setPlantType(null);
-        pot.setPlantedAt(null);
-        userRepository.save(user);
     }
 
     private void giveStoredBoost(User user, String plantType) {

@@ -345,7 +345,7 @@ public class QuestService {
             qd.getNameFA(), desc, rew, qd.getRewardType().toString());
     }
 
-    private List<QuestDefinition> filterByPage(String page) {
+    public List<QuestDefinition> filterByPage(String page) {
         return QUESTS.values().stream()
             .filter(qd -> {
                 switch (page.toLowerCase()) {
