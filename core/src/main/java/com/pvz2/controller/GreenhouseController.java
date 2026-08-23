@@ -26,20 +26,22 @@ public class GreenhouseController {
     public void showGreenhouse(AppState appState) {
         User user = appState.getCurrentUser();
         Greenhouse gh = greenhouseService.getOrCreateGreenhouse(user);
-        view.printHeader("🏡 Greenhouse (4×5)");
+        view.printHeader("🏡 Greenhouse (" + Greenhouse.ROWS + "×" + Greenhouse.COLS + ")");
         printGreenhouseGrid(gh);
         view.printRaw(ConsoleView.YELLOW
-            + "  Coins: " + user.getCoins()
-            + "  Gems: " + user.getGems() + ConsoleView.RESET);
+                + "  Coins: " + user.getCoins()
+                + "  Gems: " + user.getGems() + ConsoleView.RESET);
     }
 
     private void printGreenhouseGrid(Greenhouse gh) {
-        view.printRaw(ConsoleView.CYAN
-            + "     1          2          3          4          5"
-            + ConsoleView.RESET);
-        for (int row = 1; row <= 4; row++) {
+        StringBuilder header = new StringBuilder("    ");
+        for (int col = 1; col <= Greenhouse.COLS; col++) {
+            header.append(String.format("%-11d", col));
+        }
+        view.printRaw(ConsoleView.CYAN + header + ConsoleView.RESET);
+        for (int row = 1; row <= Greenhouse.ROWS; row++) {
             java.util.List<String> cells = new java.util.ArrayList<>();
-            for (int col = 1; col <= 5; col++) {
+            for (int col = 1; col <= Greenhouse.COLS; col++) {
                 cells.add(formatPot(gh.getPot(col, row)));
             }
             view.getGreenhouseView().printGreenhouseRow(row, cells);
@@ -58,12 +60,12 @@ public class GreenhouseController {
         }
         if (pot.isReady()) {
             return ConsoleView.GREEN + ConsoleView.BOLD
-                + "[  READY ]" + ConsoleView.RESET;
+                    + "[  READY ]" + ConsoleView.RESET;
         }
         String name = pot.getPlantType().length() > 7
-            ? pot.getPlantType().substring(0, 7) : pot.getPlantType();
+                ? pot.getPlantType().substring(0, 7) : pot.getPlantType();
         return ConsoleView.YELLOW + "[" + String.format("%-8s", name)
-            + "]" + ConsoleView.RESET;
+                + "]" + ConsoleView.RESET;
     }
 
     public void plantPot(Matcher m, AppState appState) {
@@ -91,17 +93,17 @@ public class GreenhouseController {
     public void showShopList() {
         view.printHeader("🛒 Shop — Permanent Items");
         view.printRaw(ConsoleView.CYAN + "  ID            Item"
-            + "                         Price" + ConsoleView.RESET);
+                + "                         Price" + ConsoleView.RESET);
         view.printRaw("  POT           Unlock a greenhouse pot       "
-            + ConsoleView.YELLOW + "2000 coins" + ConsoleView.RESET);
+                + ConsoleView.YELLOW + "2000 coins" + ConsoleView.RESET);
         view.printRaw("  PLANT_FOOD    Plant food (start of level)   "
-            + ConsoleView.MAGENTA + "3 gems" + ConsoleView.RESET);
+                + ConsoleView.MAGENTA + "3 gems" + ConsoleView.RESET);
         view.printRaw("  SEED_RANDOM   5 random seed packets         "
-            + ConsoleView.YELLOW + "1000 coins" + ConsoleView.RESET);
+                + ConsoleView.YELLOW + "1000 coins" + ConsoleView.RESET);
         view.printRaw("  SEED_CHOICE   10 seed packets (pick plant)  "
-            + ConsoleView.MAGENTA + "5 gems" + ConsoleView.RESET);
+                + ConsoleView.MAGENTA + "5 gems" + ConsoleView.RESET);
         view.printRaw("  CURRENCY      500 coins                     "
-            + ConsoleView.MAGENTA + "5 gems" + ConsoleView.RESET);
+                + ConsoleView.MAGENTA + "5 gems" + ConsoleView.RESET);
         view.printInfo("Usage: shop buy -i <ID> -n <count> [-t <plant>]");
     }
 
@@ -111,16 +113,16 @@ public class GreenhouseController {
         boolean purchased = today.equals(user.getLastDailyOfferDate());
         view.printHeader("🎁 Daily Offer");
         view.printRaw(ConsoleView.YELLOW
-            + "  10 Random Seed Packets" + ConsoleView.RESET);
+                + "  10 Random Seed Packets" + ConsoleView.RESET);
         view.printRaw(ConsoleView.GREEN
-            + "  Price: 1600 coins (20% off!)" + ConsoleView.RESET);
+                + "  Price: 1600 coins (20% off!)" + ConsoleView.RESET);
         if (purchased) {
             view.printRaw(ConsoleView.RED
-                + "  ✘ Already purchased today." + ConsoleView.RESET);
+                    + "  ✘ Already purchased today." + ConsoleView.RESET);
         } else {
             view.printRaw(ConsoleView.GREEN
-                + "  ✔ Available! Use: shop buy -i DAILY -n 1"
-                + ConsoleView.RESET);
+                    + "  ✔ Available! Use: shop buy -i DAILY -n 1"
+                    + ConsoleView.RESET);
         }
     }
 

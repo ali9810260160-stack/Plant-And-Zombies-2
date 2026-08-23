@@ -32,173 +32,173 @@ public final class PamPaths {
     static {
         // ─── تولیدکننده خورشید ──────────────────────────────────────────────
         reg(PLANTS, "sunflower",
-                P + "PLANT_SUNFLOWER/PLANT_SUNFLOWER.PAM");
+                P + "SUNFLOWER/SUNFLOWER.PAM");
         reg(PLANTS, "twin_sunflower",
-                P + "PLANT_TWINSUNFLOWER/PLANT_TWINSUNFLOWER.PAM");
+                P + "TWINSUNFLOWER/TWINSUNFLOWER.PAM");
         reg(PLANTS, "sun_shroom",
-                P + "PLANT_SUNSHROOM/PLANT_SUNSHROOM.PAM");
+                P + "SUNSHROOM/SUNSHROOM.PAM");
         reg(PLANTS, "power_lily",
                 // جستجو کنید: "POWER_LILY" یا "POWERLILY" در asset browser
-                "");
+                P + "POWERLILY/POWERLILY.PAM");
         reg(PLANTS, "sun_bean",
                 // جستجو کنید: "SUNBEAN" در asset browser
-                "");
+                P + "SUNBEAN/SUNBEAN.PAM");
 
         // ─── تیرانداز مستقیم (Pea family) ───────────────────────────────────
         reg(PLANTS, "peashooter",
-                P + "PLANT_PEASHOOTER/PLANT_PEASHOOTER.PAM");
+                P + "PEASHOOTER/PEASHOOTER.PAM");
         reg(PLANTS, "repeater",
-                P + "PLANT_REPEATER/PLANT_REPEATER.PAM");
+                P + "REPEATER/REPEATER.PAM");
         reg(PLANTS, "gatling_pea",
-                P + "PLANT_GATLINGPEA/PLANT_GATLINGPEA.PAM");
+                P + "GATLINGPEA/GATLINGPEA.PAM");
         reg(PLANTS, "snow_pea",
-                P + "PLANT_SNOWPEA/PLANT_SNOWPEA.PAM");
+                P + "SNOWPEA/SNOWPEA.PAM");
         reg(PLANTS, "fire_peashooter",
                 // جستجو کنید: "FIREPEASHOOTER" در asset browser
-                "");
+                P +  "FIREPEATER/FIREPEATER.PAM");
         reg(PLANTS, "pea_pod",
-                P + "PLANT_PEAPOD/PLANT_PEAPOD.PAM");
+                P + "PEAPOD/PEAPOD.PAM");
 
         // ─── تیرانداز — سایر ─────────────────────────────────────────────────
         reg(PLANTS, "cactus",
-                P + "PLANT_CACTUS/PLANT_CACTUS.PAM");
+                P + "CACTUS/CACTUS.PAM");
         reg(PLANTS, "lightning_reed",
-                P + "PLANT_LIGHTNINGREED/PLANT_LIGHTNINGREED.PAM");
+                P + "LIGHTNINGREED/LIGHTNINGREED.PAM");
         reg(PLANTS, "laser_bean",
-                P + "PLANT_LASERBEAN/PLANT_LASERBEAN.PAM");
+                P + "LASERBEAN/LASERBEAN.PAM");
         reg(PLANTS, "snapdragon",
                 // جستجو کنید: "SNAPDRAGON" در asset browser
-                "");
+                P + "SNAPDRAGON/SNAPDRAGON.PAM");
         reg(PLANTS, "cold_snapdragon",
                 // جستجو کنید: "COLDSNAPDRAGON" در asset browser
-                "");
+                P +  "COLDSNAPDRAGON/COLDSNAPDRAGON.PAM");
         reg(PLANTS, "citron",
-                P + "PLANT_CITRON/PLANT_CITRON.PAM");
+                P + "CITRON/CITRON.PAM");
         reg(PLANTS, "electric_blueberry",
                 // جستجو کنید: "ELECTRICBLUEBERRY" در asset browser
-                "");
+                P + "ELECTRICBLUEBERRY/ELECTRICBLUEBERRY.PAM");
         reg(PLANTS, "red_stinger",
                 // جستجو کنید: "REDSTINGER" در asset browser
-                "");
+                P + "REDSTINGER/REDSTINGER.PAM");
         reg(PLANTS, "homing_thistle",
                 // جستجو کنید: "HOMINGTHISTLE" در asset browser
-                "");
+                P + "HOMINGTHISTLE/HOMINGTHISTLE.PAM");
         reg(PLANTS, "magnifying_grass",
                 // جستجو کنید: "MAGNIFYINGGRASS" در asset browser
-                "");
+                P + "MAGNIFYING/MAGNIFYING.PAM");
         reg(PLANTS, "starfruit",
-                P + "PLANT_STARFRUIT/PLANT_STARFRUIT.PAM");
+                P + "STARFRUIT/STARFRUIT.PAM");
 
         // ─── لابر (پرتابه هوایی) ─────────────────────────────────────────────
         reg(PLANTS, "cabbage_pult",
-                P + "PLANT_CABBAGEPULT/PLANT_CABBAGEPULT.PAM");
+                P + "CABBAGEPULT/CABBAGEPULT.PAM");
         reg(PLANTS, "kernel_pult",
-                P + "PLANT_KERNELPULT/PLANT_KERNELPULT.PAM");
+                P + "KERNELPULT/KERNELPULT.PAM");
         reg(PLANTS, "melon_pult",
-                P + "PLANT_MELONPULT/PLANT_MELONPULT.PAM");
+                P + "MELONPULT/MELONPULT.PAM");
         reg(PLANTS, "winter_melon",
-                P + "PLANT_WINTERMELON/PLANT_WINTERMELON.PAM");
+                P + "WINTERMELON/WINTERMELON.PAM");
         reg(PLANTS, "pepper_pult",
                 // جستجو کنید: "PEPPERPULT" در asset browser
-                "");
+                P +  "PEPPERPULT/PEPPERPULT.PAM");
         reg(PLANTS, "pecanpult",
                 // جستجو کنید: "PECANPULT" در asset browser
-                "");
+                P + "PECANPULT/PECANPULT.PAM");
 
         // ─── دیوار (Wall-Nut family) ─────────────────────────────────────────
         reg(PLANTS, "wallnut",
-                P + "PLANT_WALLNUT/PLANT_WALLNUT.PAM");
+                P + "WALLNUT/WALLNUT.PAM");
         reg(PLANTS, "tall_nut",
-                P + "PLANT_TALLNUT/PLANT_TALLNUT.PAM");
+                P + "TALLNUT/TALLNUT.PAM");
         reg(PLANTS, "pumpkin",
-                P + "PLANT_PUMPKIN/PLANT_PUMPKIN.PAM");
+                P + "PUMPKIN/PUMPKIN.PAM");
         reg(PLANTS, "infi_nut",
                 // جستجو کنید: "INFINUT" در asset browser
-                "");
+                P + "INFINUT/INFINUT.PAM");
 
         // ─── انفجاری ────────────────────────────────────────────────────────
         reg(PLANTS, "cherry_bomb",
-                P + "PLANT_CHERRYBOMB/PLANT_CHERRYBOMB.PAM");
+                P + "CHERRYBOMB/CHERRYBOMB.PAM");
         reg(PLANTS, "jalapeno",
-                P + "PLANT_JALAPENO/PLANT_JALAPENO.PAM");
+                P + "JALAPENO/JALAPENO.PAM");
         reg(PLANTS, "potato_mine",
-                P + "PLANT_POTATOMINE/PLANT_POTATOMINE.PAM");
+                P + "POTATOMINE/POTATOMINE.PAM");
         reg(PLANTS, "primal_potato_mine",
                 // جستجو کنید: "PRIMALPOTATOMINE" در asset browser
-                "");
+                P + "PRIMAL_POTATOMINE/PRIMAL_POTATOMINE.PAM");
         reg(PLANTS, "spore_shroom",
                 // جستجو کنید: "SPORESHROOM" در asset browser
-                "");
+                P + "SPORE/SPORE.PAM");
 
         // ─── مبارز تن‌به‌تن ──────────────────────────────────────────────────
         reg(PLANTS, "chomper",
-                P + "PLANT_CHOMPER/PLANT_CHOMPER.PAM");
+                P + "CHOMPER/CHOMPER.PAM");
         reg(PLANTS, "squash",
-                P + "PLANT_SQUASH/PLANT_SQUASH.PAM");
+                P + "SQUASH/SQUASH.PAM");
 
         // ─── مدافع/تله ───────────────────────────────────────────────────────
         reg(PLANTS, "spikeweed",
-                P + "PLANT_SPIKEWEED/PLANT_SPIKEWEED.PAM");
+                P + "SPIKEWEED/SPIKEWEED.PAM");
         reg(PLANTS, "spikerock",
-                P + "PLANT_SPIKEROCK/PLANT_SPIKEROCK.PAM");
+                P + "SPIKEROCK/SPIKEROCK.PAM");
 
         // ─── پشتیبان (Modifier) ──────────────────────────────────────────────
         reg(PLANTS, "torchwood",
-                P + "PLANT_TORCHWOOD/PLANT_TORCHWOOD.PAM");
+                P + "TORCHWOOD/TORCHWOOD.PAM");
         reg(PLANTS, "garlic",
-                P + "PLANT_GARLIC/PLANT_GARLIC.PAM");
+                P + "GARLIC/GARLIC.PAM");
         reg(PLANTS, "sweet_potato",
-                P + "PLANT_SWEETPOTATO/PLANT_SWEETPOTATO.PAM");
+                P + "SWEETPOTATO/SWEETPOTATO.PAM");
         reg(PLANTS, "magnet_shroom",
-                P + "PLANT_MAGNETSHROOM/PLANT_MAGNETSHROOM.PAM");
+                P + "MAGNETSHROOM/MAGNETSHROOM.PAM");
         reg(PLANTS, "hypno_shroom",
-                P + "PLANT_HYPNOSHROOM/PLANT_HYPNOSHROOM.PAM");
+                P + "HYPNOSHROOM/HYPNOSHROOM.PAM");
         reg(PLANTS, "blover",
-                P + "PLANT_BLOVER/PLANT_BLOVER.PAM");
+                P + "BLOVER/BLOVER.PAM");
         reg(PLANTS, "grave_buster",
-                P + "PLANT_GRAVEBUSTER/PLANT_GRAVEBUSTER.PAM");
+                P + "GRAVEBUSTER/GRAVEBUSTER.PAM");
         reg(PLANTS, "iceberg_lettuce",
                 // جستجو کنید: "ICEBERGLETTUCE" در asset browser
                 "");
         reg(PLANTS, "umbrella_leaf",
                 // جستجو کنید: "UMBRELLALEAF" در asset browser
-                "");
+                P + "");
         reg(PLANTS, "perfume_shroom",
                 // جستجو کنید: "PERFUMESHROOM" در asset browser
-                "");
+                P + "PERFSHROOM/PERFSHROOM.PAM");
 
         // ─── آبی (Water) ─────────────────────────────────────────────────────
         reg(PLANTS, "lily_pad",
-                P + "PLANT_LILYPAD/PLANT_LILYPAD.PAM");
+                P + "LILYPAD/LILYPAD.PAM");
         reg(PLANTS, "tangle_kelp",
                 // جستجو کنید: "TANGLEKELP" در asset browser
-                "");
+                P + "TANGLEKELP/TANGLEKELP.PAM");
         reg(PLANTS, "guacodile",
                 // جستجو کنید: "GUACODILE" در asset browser
-                "");
+                P + "GUACODILE/GUACODILE.PAM");
 
         // ─── قارچ (Shroom) ───────────────────────────────────────────────────
         reg(PLANTS, "puff_shroom",
-                P + "PLANT_PUFFSHROOM/PLANT_PUFFSHROOM.PAM");
+                P + "PUFFSHROOM/PUFFSHROOM.PAM");
         reg(PLANTS, "fume_shroom",
-                P + "PLANT_FUMESHROOM/PLANT_FUMESHROOM.PAM");
+                P + "FUMESHROOM/FUMESHROOM.PAM");
         reg(PLANTS, "scaredy_shroom",
                 // جستجو کنید: "SCAREDYSHROOM" در asset browser
-                "");
+                P + "SCAREDYSHROOM/SCAREDYSHROOM.PAM");
 
         // ─── نعناع (Mint) ─────────────────────────────────────────────────────
         reg(PLANTS, "pepper_mint",
                 // جستجو کنید: "PEPPERMINT" در asset browser
-                "");
+                P + "PEPPERMINT/PEPPERMINT.PAM");
         reg(PLANTS, "cold_snapdragon_mint",
                 // جستجو کنید: "COLDSNAPDRAGONYMINT" در asset browser
-                "");
+                P + "");
         reg(PLANTS, "electric_mint",
                 // جستجو کنید: "ELECTRICMINT" در asset browser
-                "");
+                P + "");
         reg(PLANTS, "shadow_peashooter",
                 // جستجو کنید: "SHADOWPEASHOOTER" در asset browser
-                "");
+                P + "SHADOWPEASHOOTER/SHADOWPEASHOOTER.PAM");
         reg(PLANTS, "sun_mint",
                 // جستجو کنید: "SUNMINT" در asset browser
                 "");
@@ -206,18 +206,18 @@ public final class PamPaths {
         // ─── سایر ────────────────────────────────────────────────────────────
         reg(PLANTS, "bowling_bulb",
                 // جستجو کنید: "BOWLINGBULB" در asset browser
-                "");
+                P + "BOWLINGBULB/BOWLINGBULB.PAM");
         reg(PLANTS, "bamboo_shoot",
                 // جستجو کنید: "BAMBOOSHOOT" در asset browser
-                "");
+                P + "BAMBOOSPARTAN/BAMBOOSPARTAN.PAM");
         reg(PLANTS, "kiwibeast",
                 // جستجو کنید: "KIWIBEAST" در asset browser
-                "");
+                P + "KIWIBEAST/KIWIBEAST.PAM");
         reg(PLANTS, "marigold",
-                P + "PLANT_MARIGOLD/PLANT_MARIGOLD.PAM");
+                P + "MARIGOLD/MARIGOLD.PAM");
         reg(PLANTS, "aloe",
                 // جستجو کنید: "ALOE" در asset browser
-                "");
+                P + "ALOE/ALOE.PAM");
     }
 
     // =========================================================================
@@ -241,21 +241,21 @@ public final class PamPaths {
         reg(ZOMBIES, "all_star",       Z + "ZOMBIE_ALLSTAR/ZOMBIE_ALLSTAR.PAM");
         reg(ZOMBIES, "arcade",
                 // جستجو کنید: "ARCADE" در asset browser
-                "");
+                Z + "ZOMBIE_80S_ARCADE/ZOMBIE_80S_ARCADE.PAM");
         reg(ZOMBIES, "parasol",        Z + "ZOMBIE_PARASOL/ZOMBIE_PARASOL.PAM");
         reg(ZOMBIES, "turquoise",
                 // جستجو کنید: "TURQUOISE" در asset browser
-                "");
+                Z + "");
         reg(ZOMBIES, "prospector",
                 // جستجو کنید: "PROSPECTOR" در asset browser
-                "");
+                Z + "ZOMBIE_PROSPECTOR/ZOMBIE_PROSPECTOR.PAM");
         reg(ZOMBIES, "pianist",
                 // جستجو کنید: "PIANIST" در asset browser
                 "");
         reg(ZOMBIES, "newspaper",      Z + "ZOMBIE_NEWSPAPER/ZOMBIE_NEWSPAPER.PAM");
         reg(ZOMBIES, "barrel_roller",
                 // جستجو کنید: "BARRELROLLER" در asset browser
-                "");
+                Z + "ZOMBIE_PIANO/ZOMBIE_PIANO.PAM");
 
         // ─── مصر باستان ──────────────────────────────────────────────────────
         reg(ZOMBIES, "ra",
@@ -272,13 +272,13 @@ public final class PamPaths {
         // ─── غار یخی ─────────────────────────────────────────────────────────
         reg(ZOMBIES, "dodo_rider",
                 // جستجو کنید: "DODO" در asset browser
-                "");
+                Z + "ZOMBIE_ICEAGE_DODORIDER/ZOMBIE_ICEAGE_DODORIDER.PAM");
         reg(ZOMBIES, "hunter",
                 // جستجو کنید: "HUNTER" در asset browser
-                "");
+                Z + "ZOMBIE_ICEAGE_HUNTER/ZOMBIE_ICEAGE_HUNTER.PAM");
         reg(ZOMBIES, "troglobite",
                 // جستجو کنید: "TROGLOBITE" در asset browser
-                "");
+                Z + "ZOMBIE_DINO_TROGLOBITE/ZOMBIE_DINO_TROGLOBITE.PAM");
 
         // ─── ساحل ────────────────────────────────────────────────────────────
         reg(ZOMBIES, "fisherman",
@@ -287,7 +287,7 @@ public final class PamPaths {
                 Z + "ZOMBIE_BEACH_SNORKEL/ZOMBIE_BEACH_SNORKEL.PAM");
         reg(ZOMBIES, "octopus",
                 // جستجو کنید: "OCTOPUS" در asset browser
-                "");
+                Z + "ZOMBIE_BEACH_OCTOPUS/ZOMBIE_BEACH_OCTOPUS.PAM");
 
         // ─── قرون وسطی ───────────────────────────────────────────────────────
         reg(ZOMBIES, "jester",
@@ -298,13 +298,13 @@ public final class PamPaths {
                 Z + "ZOMBIE_DARK_KING/ZOMBIE_DARK_KING.PAM");
         reg(ZOMBIES, "dragon_imp",
                 // جستجو کنید: "DRAGON_IMP" در asset browser
-                "");
+                Z + "ZOMBIE_DARK_IMP_DRAGON/ZOMBIE_DARK_IMP_DRAGON.PAM");
 
         // ─── Zombotany (مینی‌گیم) ─────────────────────────────────────────────
-        reg(ZOMBIES, "zombotany_peashooter",   "");
-        reg(ZOMBIES, "zombotany_wallnut",       "");
-        reg(ZOMBIES, "zombotany_jalapeno",      "");
-        reg(ZOMBIES, "zombotany_squash",        "");
+        reg(ZOMBIES, "zombotany_peashooter",   Z + "PEASHOOTER/PEASHOOTER.PAM");
+        reg(ZOMBIES, "zombotany_wallnut",       Z + "WALLNUT/WALLNUT.PAM");
+        reg(ZOMBIES, "zombotany_jalapeno",      Z + "JALAPENO/JALAPENO.PAM");
+        reg(ZOMBIES, "zombotany_squash",        Z + "SQUASH/SQUASH.PAM");
 
         // ─── IZombie (sun producer zombie) ───────────────────────────────────
         reg(ZOMBIES, "sun_producer_zombie",

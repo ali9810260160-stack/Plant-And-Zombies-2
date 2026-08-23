@@ -19,7 +19,7 @@ public final class GameConfig {
 
     /** اگه HARDCODED_PATH خالی بمونه، از system property هم پشتیبانی می‌شه (اختیاری). */
     public static final String PVZ_ASSETS_PATH =
-            !HARDCODED_PATH.isEmpty() ? HARDCODED_PATH : System.getProperty("pvz.assets", "C:\\Users\\Asus\\Documents\\ap-project-plant-and-zombies\\assets");
+            !HARDCODED_PATH.isEmpty() ? HARDCODED_PATH : System.getProperty("pvz.assets", "D:\\AP-programing\\AP-Project-Spring2026\\Plant-And-Zombies-2\\assets");
 
     // ─── تنظیمات قابل‌تغییر در runtime ─────────────────────────────────────
     public static int     gameSpeed        = 0;     // 0=1x 1=1.5x 2=2x

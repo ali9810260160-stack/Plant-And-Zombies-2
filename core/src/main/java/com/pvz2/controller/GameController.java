@@ -118,7 +118,14 @@ public class GameController {
     // ════════════════════════════════════════════════════════
 
     public Level buildLevel(ChapterType chapter, int levelNumber) {
-        LevelType type = getLevelType(chapter, levelNumber);
+        return buildLevel(chapter, levelNumber, getLevelType(chapter, levelNumber));
+    }
+
+    /**
+     * ساخت مرحله با نوعِ اجباری (مثلاً برای راه‌اندازی مینی‌گیم‌ها از منو، که در
+     * جدول getLevelType ثبت نشده‌اند). سایر تنظیمات مثل حالت عادی اعمال می‌شود.
+     */
+    public Level buildLevel(ChapterType chapter, int levelNumber, LevelType type) {
         Level level = new Level(levelNumber, chapter, type);
 
         int baseDiff = 400 + (getChapterIndex(chapter) * 200)
@@ -187,6 +194,20 @@ public class GameController {
                 level.setInitialSunAmount(750);
                 // گیاهان Sun Producer قفل می‌شوند
                 level.setForcedLockedSlots(getSunProducerPlants());
+                break;
+
+            // ── مینی‌گیم: کوزه‌شکنی ────────────────────────────────
+            // بدون موج، بدون خورشید آسمانی؛ کوزه‌ها در GameService ساخته می‌شوند
+            case VASEBREAKER:
+                level.setWaveCount(0);
+                level.setInitialSunAmount(0);
+                break;
+
+            // ── سایر مینی‌گیم‌ها (فعلاً پیکربندی پایه) ──────────────
+            case WALLNUT_BOWLING:
+            case I_ZOMBIE:
+            case BEGHOULED:
+                level.setInitialSunAmount(0);
                 break;
 
             case NORMAL:

@@ -1,6 +1,15 @@
 package com.pvz2.graphics;
 
-/** ثابت‌های اصلی طراحی بصری — ۱۲۸۰×۷۲۰. */
+/**
+ * ثابت‌های اصلی طراحی بصری — ۱۲۸۰×۷۲۰.
+ *
+ * <p><b>هندسه گرید از {@link com.pvz2.map.MapLoader} می‌آید</b> — همان جایی که
+ * TILED_MAP_GUIDE.md بخش ۲ آن را تعریف کرده (HOUSE=160px | GRID=900px=9×100 |
+ * ZOMBIE_ENTRY=180px | RAIL=40px، جمعاً ۱۲۸۰px). این طراحی عمدی است تا مختصات
+ * محاسبه‌شده توسط {@link com.pvz2.graphics.util.GameCoords} دقیقاً روی همان
+ * خانه‌هایی بیفتد که نقشه Tiled (world.tmx) رسم می‌کند — یک منبع حقیقت، بدون
+ * احتمال drift بین دو لایه.
+ */
 public final class GameConstants {
     private GameConstants() {}
 
@@ -8,54 +17,66 @@ public final class GameConstants {
     public static final int   VIEWPORT_HEIGHT = 720;
 
     // ─── ابعاد شبکه بازی (فاز ۱: ستون ۱..۹ | ردیف ۱..۵) ───────────────────
-    public static final int   TILE_COLS  = 9;
-    public static final int   TILE_ROWS  = 5;
-    public static final float TILE_W     = 136f;
-    public static final float TILE_H     = 124f;
+    public static final int   TILE_COLS  = com.pvz2.map.MapLoader.GRID_COLS;   // 9
+    public static final int   TILE_ROWS  = com.pvz2.map.MapLoader.GRID_ROWS;   // 5
 
-    // ─── موقعیت شبکه روی صفحه ───────────────────────────────────────────────
-    /** فاصله از چپ — فضای چمن‌زن */
-    public static final float GRID_X     = 52f;
-    /** پایین شبکه — بالای نوار seed bank */
-    public static final float GRID_Y     = 120f;
-    public static final float GRID_W     = TILE_COLS * TILE_W;   // 1224px
-    public static final float GRID_H     = TILE_ROWS * TILE_H;   // 620px
+    // ─── موقعیت و اندازه شبکه روی صفحه ────────────────────────────────────
+    // ⚠️ این مقادیر دیگر ثابت نیستند: هنگام بارگذاری world.tmx توسط
+    // {@link com.pvz2.map.MapLoader}، از روی خودِ آبجکت‌های PLANT_SLOT نقشه
+    // (که به فضای صفحه ۱۲۸۰×۷۲۰ مقیاس شده‌اند) دوباره محاسبه می‌شوند تا گرید
+    // منطقی دقیقاً روی همان کاشی‌هایی بیفتد که نقشه رسم می‌کند — یک منبع حقیقت،
+    // بدون drift بین لایه نقشه و لایه موجودیت‌ها. اگر نقشه بارگذاری نشود،
+    // این مقادیر پیش‌فرض (طرح‌بندی راهنمای ۱۲۸۰×۷۲۰) باقی می‌مانند و رندر
+    // رویه‌ای (مستطیل رنگی) از آن‌ها استفاده می‌کند.
+    /** فاصله از چپ — شروع ناحیه گرید */
+    public static float G_X  = 160f;
+    /** پایین شبکه */
+    public static float G_Y  = 120f;
+    /** عرض هر کاشی */
+    public static float TW   = 100f;
+    /** ارتفاع هر کاشی */
+    public static float TH   = 100f;
 
-    // ─── نوار seed bank (پایین) ──────────────────────────────────────────────
-    public static final float SEED_BANK_Y = 0f;
-    public static final float SEED_BANK_H = 120f;
+    // ─── ناحیه خانه (چپ) و ورود زامبی (راست) — از نقشه محاسبه می‌شوند ───────
+    public static float HOUSE_ZONE_W   = 160f;
+    public static float ZOMBIE_ZONE_X  = 1060f;
+    public static float ZOMBIE_ZONE_W  = 180f;
+
+    /**
+     * به‌روزرسانی هندسه گرید از روی نقشه بارگذاری‌شده — توسط
+     * {@link com.pvz2.map.MapLoader#load} صدا زده می‌شود.
+     * نوارهای UI (seed bank / HUD) عمداً از این مقادیر مستقل‌اند و ثابت می‌مانند.
+     */
+    public static void applyGridGeometry(float gx, float gy, float tw, float th,
+                                         float houseW, float zombieX, float zombieW) {
+        if (tw <= 0 || th <= 0) return;   // داده نامعتبر — پیش‌فرض را نگه دار
+        G_X = gx; G_Y = gy; TW = tw; TH = th;
+        HOUSE_ZONE_W = houseW; ZOMBIE_ZONE_X = zombieX; ZOMBIE_ZONE_W = zombieW;
+    }
+
+    /** بازگرداندن هندسه گرید به پیش‌فرض ۱۲۸۰×۷۲۰ (وقتی نقشه‌ای بارگذاری نشده). */
+    public static void resetGridGeometry() {
+        G_X = 160f; G_Y = 120f; TW = 100f; TH = 100f;
+        HOUSE_ZONE_W = 160f; ZOMBIE_ZONE_X = 1060f; ZOMBIE_ZONE_W = 180f;
+    }
+
+    // ─── نوار seed bank (پایین صفحه) — ثابت، مستقل از هندسه گرید نقشه ───────
+    public static final float SB_H = 120f;   // فضای UI پایین صفحه
+
     public static final float CARD_W      = 82f;
     public static final float CARD_H      = 112f;
     public static final float CARD_PAD    = 3f;
 
-    // ─── HUD (بالا) ───────────────────────────────────────────────────────────
-    public static final float HUD_Y = GRID_Y + GRID_H;           // 740? → باید باشه 740
-    // اصلاح: چون GRID_Y=120 و GRID_H=620 → HUD_Y=740 > 720 → تنظیم
-    // بهتره: GRID_Y=100, SEED_BANK_H=100, HUD_H=80 → 100+620+... نه
-    // واقعی: top bar 80px | grid 540px | seed bank 100px = 720
-    public static final float TOP_BAR_Y  = 640f;
-    public static final float TOP_BAR_H  = 80f;
-
-    // ─── ابعاد نهایی با TOP_BAR=80, SEED_BANK=100 ────────────────────────────
-    // بازنویسی ثابت‌ها برای چیدمان صحیح:
-    // y=0..100 → seed bank
-    // y=100..640 → grid (5×108=540px)
-    // y=640..720 → HUD/top bar
-    public static final float GRID_Y_REAL     = 100f;
-    public static final float TILE_H_REAL     = 108f;   // 540/5
-    public static final float SEED_BANK_H_REAL= 100f;
-
-    // ─── مقادیر اصلی که در کد استفاده می‌شود ────────────────────────────────
-    // (اینها را جایگزین موارد بالا می‌کنیم)
-    public static final float G_X  = 52f;     // grid left x
-    public static final float G_Y  = 100f;    // grid bottom y
-    public static final float TW   = 136f;    // tile width
-    public static final float TH   = 108f;    // tile height
-    public static final float SB_H = 100f;    // seed bank height
+    // ─── HUD / نوار بالا — ثابت، مستقل از هندسه گرید نقشه ──────────────────
+    public static final float TOP_BAR_Y = VIEWPORT_HEIGHT - 100f;                  // 620
+    public static final float TOP_BAR_H = 100f;
 
     public static final int   MAX_PLANT_SLOTS = 8;
     public static final float CARD_ANIM_COOLDOWN_SPEED = 0.5f;
     public static final float TOAST_DURATION = 2.5f;
+
+    /** هزینه‌ی الماس برای boost کردن یک گیاه — صفحه‌ی انتخاب گیاه. */
+    public static final int PLANT_BOOST_COST_GEMS = 15;
 
     /** ضریب‌های سرعت بازی: 1× 1.5× 2× */
     public static final float[] SPEED_MULTIPLIERS = {1f, 1.5f, 2f};

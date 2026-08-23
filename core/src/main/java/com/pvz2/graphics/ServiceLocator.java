@@ -2,6 +2,8 @@ package com.pvz2.graphics;
 
 import com.pvz2.controller.GameController;
 import com.pvz2.model.AppState;
+import com.pvz2.model.GameSettings;
+import com.pvz2.model.User;
 import com.pvz2.repository.UserRepository;
 import com.pvz2.service.*;
 import com.pvz2.util.FileUtil;
@@ -81,10 +83,19 @@ public final class ServiceLocator {
         combatService.setScoredGameService(scoredGameService);
         combatService.setQuestService(questService);
         sunService.setCombatService(combatService);
+        levelProgressService.setNewsService(newsService);
+        questService.setNewsService(newsService);
 
         // GameController — برای buildLevel
         gameController = new GameController(
                 gameService, sunService, SILENT_VIEW, SILENT_MAP);
+
+        // ذخیره‌سازیِ per-user تنظیمات: هر بار GameSettings.save() صدا زده شود،
+        // تنظیمات روی کاربرِ لاگین‌شده هم نوشته و در users.json سیو می‌شود.
+        GameSettings.setPersister(s -> {
+            User u = AppState.getInstance().getCurrentUser();
+            if (u != null) { s.writeToUser(u); userRepository.save(u); }
+        });
     }
 
     // ─── Getters ──────────────────────────────────────────────────────────────
