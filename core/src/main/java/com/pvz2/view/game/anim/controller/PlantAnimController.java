@@ -1,0 +1,302 @@
+package com.pvz2.view.game.anim.controller;
+
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.pvz2.graphics.GameConstants;
+import com.pvz2.graphics.util.GameCoords;
+import com.pvz2.model.enums.AnimEvent;
+import com.pvz2.model.plants.Plant;
+import com.pvz2.view.game.anim.config.PlantAnimConfig;
+import com.pvz2.view.game.anim.config.StateConfig;
+import com.pvz2.view.game.anim.state.PlantAnimState;
+
+/**
+ * State Machine انیمیشن برای یک گیاه — نسخه ۲.
+ *
+ * ─── تغییرات نسخه ۲ ──────────────────────────────────────────────
+ *  ۱. رفع باگ مختصات: مثل ZombieAnimController، اکنون از
+ *     {@link GameCoords} استفاده می‌شود (نه فرمول محلی که محور row
+ *     را برعکس نمی‌کرد).
+ *  ۲. damageVariants: گیاهانی مثل Wall-nut واقعاً چند سطح آسیب فیزیکی
+ *     دارند (clip های "damage"، "damage2"، "damage3" — جدا از یخ‌زدگی).
+ *     بر اساس نسبت HP فعلی، یکی از این‌ها به‌جای IDLE پخش می‌شود.
+ */
+public class PlantAnimController {
+
+    public static final float CELL_W = 100f;
+    public static final float CELL_H = 100f;
+
+    private final Plant           plant;
+    private final PlantAnimConfig config;
+
+    private PlantAnimState current    = PlantAnimState.IDLE;
+    private PlantAnimState requested  = PlantAnimState.IDLE;
+    private float          stateTime  = 0f;
+    private boolean        stateDone  = false;
+
+    private int   lastFreezeLevel = 0;
+
+    private float flashTimer = 0f;
+    private static final float FLASH_DURATION = 0.12f;
+
+    private float plantFoodGlowTimer = 0f;
+    private static final float PF_GLOW_DURATION = 1.6f;
+
+    /** اگر غیر null باشد، این clip به‌جای clip حالت IDLE استفاده می‌شود (آسیب فیزیکی). */
+    private String damageClipOverride = null;
+
+    /** شمارنده‌ی زمانِ واقعیِ مرگ — تضمینِ حذفِ گیاهِ مرده حتی اگر یخ‌زده باشد
+     *  یا config مرحله‌ی DYING نداشته باشد. */
+    private float deathRealTime = 0f;
+    private static final float MAX_DEATH_TIME = 2.5f;
+
+    public PlantAnimController(Plant plant, PlantAnimConfig config) {
+        this.plant  = plant;
+        this.config = config;
+    }
+
+    // ════════════════════════════════════════════════════════════
+    //  مصرف رویداد از مدل
+    // ════════════════════════════════════════════════════════════
+
+    public void consumeEvent(AnimEvent event) {
+        if (event == null || event == AnimEvent.NONE) return;
+
+        switch (event) {
+            case ATTACK_TRIGGER:
+                requestState(PlantAnimState.ATTACK);
+                break;
+            case PLANT_FOOD_ACTIVATED:
+                plantFoodGlowTimer = PF_GLOW_DURATION;
+                forceTransition(PlantAnimState.PLANT_FOOD);
+                break;
+            case TOOK_DAMAGE:
+                flashTimer = FLASH_DURATION;
+                syncDamageVariant();
+                break;
+            case FREEZE_LEVEL_CHANGED:
+                syncFreezeState();
+                break;
+            case DIED:
+                forceTransition(PlantAnimState.DYING);
+                break;
+            default:
+                break;
+        }
+    }
+
+    // ════════════════════════════════════════════════════════════
+    //  Update
+    // ════════════════════════════════════════════════════════════
+
+    public void update(float delta) {
+        syncFreezeIfChanged();
+
+        if (requested.canOverride(current, stateDone)) {
+            transitionTo(requested);
+        }
+        requested = PlantAnimState.IDLE;
+
+        StateConfig sc = getStateConfig(current);
+        float speed = (sc != null) ? sc.speedMul : 1.0f;
+        if (current == PlantAnimState.FREEZE_3) speed = 0f;
+
+        stateTime += delta * speed;
+
+        if (sc != null && !sc.loop && !stateDone) {
+            float dur = estimateClipDuration(sc.clip);
+            if (stateTime >= dur) {
+                stateDone = true;
+                if (sc.returnTo != null) {
+                    transitionTo(PlantAnimState.valueOf(sc.returnTo));
+                    syncDamageVariant(); // بعد از بازگشت به IDLE، دوباره چک کن آسیب هنوز پابرجاست
+                }
+            }
+        }
+
+        if (current == PlantAnimState.DYING) deathRealTime += delta;
+
+        if (flashTimer         > 0) flashTimer         = Math.max(0, flashTimer - delta);
+        if (plantFoodGlowTimer > 0) plantFoodGlowTimer = Math.max(0, plantFoodGlowTimer - delta);
+    }
+
+    // ════════════════════════════════════════════════════════════
+    //  Render
+    // ════════════════════════════════════════════════════════════
+
+    public void render(SpriteBatch batch, Object pamPlayer) {
+        // ── مختصات world (از GameCoords — شامل معکوس‌سازی صحیح محور row).
+        //    اندازه/آفست بر مبنای اندازه‌ی واقعیِ خانه (GameConstants.TH) است،
+        //    نه CELL_H نامیِ ۱۰۰. گیاه کمی پایین‌تر از مرکز کشیده می‌شود تا
+        //    پایه‌اش نزدیکِ کفِ خانه بنشیند. ──
+        float worldX = GameCoords.toScreenX(plant.getX()) + config.offsetX;
+        float worldY = GameCoords.toScreenY(plant.getY()) - GameConstants.TH * 0.15f + config.offsetY;
+
+        String clip = resolveClip();
+        boolean loop = resolveLoop();
+
+        // ── حاله‌ی نورانیِ غذای گیاه: پشتِ گیاه (قبل از خودِ گیاه) کشیده می‌شود
+        //    و تا پایانِ اثر (plantFoodGlowTimer) نبض می‌زند. ──
+        if (plantFoodGlowTimer > 0) drawPlantFoodAura(batch, worldX, worldY);
+
+        Color saved = batch.getColor().cpy();
+        applyTint(batch);
+
+        if (flashTimer > 0) {
+            float flashIntensity = flashTimer / FLASH_DURATION;
+            batch.setColor(1f, 1f - flashIntensity * 0.5f, 1f - flashIntensity * 0.5f, 1f);
+        }
+
+        if (plantFoodGlowTimer > 0 && current != PlantAnimState.PLANT_FOOD) {
+            float t = (float) Math.sin((PF_GLOW_DURATION - plantFoodGlowTimer) / PF_GLOW_DURATION * Math.PI * 4);
+            batch.setColor(1f, 1f, 0.5f + t * 0.5f, 1f);
+        }
+
+        Color fallback = current == PlantAnimState.DYING
+                ? new Color(0.35f, 0.25f, 0.15f, 0.85f)
+                : new Color(0.25f, 0.65f, 0.25f, 0.95f);
+        PamDrawUtil.draw(pamPlayer, batch, config.pamPath, clip, stateTime,
+                worldX, worldY, loop, GameConstants.TW * 1.15f, GameConstants.TH * 1.7f, fallback);
+
+        batch.setColor(saved);
+    }
+
+    // ════════════════════════════════════════════════════════════
+    //  منطق داخلی
+    // ════════════════════════════════════════════════════════════
+
+    /** حاله‌ی نورانیِ طلاییِ نبض‌دار پشتِ گیاه، حین فعال بودنِ اثرِ غذای گیاه. */
+    private void drawPlantFoodAura(SpriteBatch batch, float worldX, float worldY) {
+        com.badlogic.gdx.graphics.g2d.TextureRegion disc =
+                com.pvz2.graphics.assets.GameAssets.getInstance().getDiscRegion();
+        if (disc == null) return;
+        float phase = (PF_GLOW_DURATION - plantFoodGlowTimer) / PF_GLOW_DURATION; // ۰..۱
+        float pulse = 0.55f + 0.30f * (float) Math.sin(phase * Math.PI * 6);
+        float fade  = Math.min(1f, plantFoodGlowTimer / 0.4f); // محوشدنِ نرمِ انتها
+        float size  = GameConstants.TW * 1.9f;
+        float cy    = worldY + GameConstants.TH * 0.35f;
+        Color saved = batch.getColor().cpy();
+        batch.setColor(1f, 0.95f, 0.35f, pulse * fade * 0.7f);
+        batch.draw(disc, worldX - size / 2f, cy - size / 2f, size, size);
+        batch.setColor(saved);
+    }
+
+    private String resolveClip() {
+        StateConfig sc = getStateConfig(current);
+        if (sc != null && !sc.clip.isEmpty()) return sc.clip;
+        StateConfig idle = getStateConfig(PlantAnimState.IDLE);
+        return idle != null ? idle.clip : null;
+    }
+
+    /** آیا کلیپِ فعلی حلقه بزند؟ (IDLE/FREEZE=true، ATTACK/PLANT_FOOD/DYING=false).
+     *  بدونِ این، انیمیشن روی فریمِ آخر فریز می‌شود. */
+    private boolean resolveLoop() {
+        StateConfig sc = getStateConfig(current);
+        if (sc != null) return sc.loop;
+        StateConfig idle = getStateConfig(PlantAnimState.IDLE);
+        return idle == null || idle.loop;
+    }
+
+    private void applyTint(SpriteBatch batch) {
+        StateConfig sc = getStateConfig(current);
+        if (sc == null || sc.tintColor == null || sc.tintColor.isEmpty()) return;
+        try {
+            Color tint = Color.valueOf(sc.tintColor + "FF");
+            Color cur  = batch.getColor();
+            float a = sc.tintAlpha;
+            batch.setColor(
+                cur.r * (1 - a) + tint.r * a,
+                cur.g * (1 - a) + tint.g * a,
+                cur.b * (1 - a) + tint.b * a,
+                cur.a
+            );
+        } catch (Exception ignored) { }
+    }
+
+    private void syncFreezeIfChanged() {
+        int freezeLevel = plant.getFreezeLevel();
+        if (freezeLevel != lastFreezeLevel) {
+            lastFreezeLevel = freezeLevel;
+            syncFreezeState();
+        }
+    }
+
+    private void syncFreezeState() {
+        int lvl = plant.getFreezeLevel();
+        switch (lvl) {
+            case 1: requestState(PlantAnimState.FREEZE_1); break;
+            case 2: requestState(PlantAnimState.FREEZE_2); break;
+            case 3: requestState(PlantAnimState.FREEZE_3); break;
+            default:
+                if (isFreezeState(current)) requestState(PlantAnimState.IDLE);
+                break;
+        }
+    }
+
+    private boolean isFreezeState(PlantAnimState s) {
+        return s == PlantAnimState.FREEZE_1 || s == PlantAnimState.FREEZE_2 || s == PlantAnimState.FREEZE_3;
+    }
+
+    /**
+     * اگر گیاه damageVariants دارد (مثل Wall-nut)، بر اساس HP فعلی
+     * نام clip آسیب مناسب را در damageClipOverride قرار می‌دهد.
+     * این override فقط وقتی current==IDLE اعمال می‌شود (resolveClip از
+     * طریق getStateConfig(IDLE) این را می‌خواند).
+     */
+    private void syncDamageVariant() {
+        if (!config.hasDamageVariants()) return;
+        float ratio = plant.getMaxHealth() > 0
+            ? (float) plant.getCurrentHealth() / plant.getMaxHealth() : 1f;
+        if (ratio >= 0.99f) { damageClipOverride = null; return; }
+        damageClipOverride = config.getDamageClipForRatio(ratio);
+    }
+
+    private void requestState(PlantAnimState newState) {
+        if (newState.priority > requested.priority) requested = newState;
+    }
+
+    private void forceTransition(PlantAnimState newState) {
+        if (newState == PlantAnimState.DYING || newState.priority > current.priority || stateDone) {
+            transitionTo(newState);
+        }
+    }
+
+    private void transitionTo(PlantAnimState newState) {
+        if (newState == current && !stateDone) return;
+        current   = newState;
+        stateTime = 0f;
+        stateDone = false;
+    }
+
+    private StateConfig getStateConfig(PlantAnimState state) {
+        if (state == PlantAnimState.IDLE && damageClipOverride != null) {
+            StateConfig override = new StateConfig();
+            override.clip = damageClipOverride;
+            override.loop = true;
+            return override;
+        }
+        return config.states.get(state.name());
+    }
+
+    private float estimateClipDuration(String clip) {
+        if (clip == null) return 1.0f;
+        if (clip.contains("death") || clip.contains("disappear") || clip.contains("detach")) return 2.0f;
+        if (clip.contains("plant_food") || clip.contains("plantfood")) return 3.0f;
+        if (clip.contains("shoot") || clip.contains("attack") || clip.equals("special")) return 0.6f;
+        return 1.2f;
+    }
+
+    // ════════════════════════════════════════════════════════════
+    //  Public Getters
+    // ════════════════════════════════════════════════════════════
+
+    public PlantAnimState getCurrentState() { return current; }
+    public float getStateTime()             { return stateTime; }
+
+    public boolean isDeadAndDone() {
+        return current == PlantAnimState.DYING
+                && (stateDone || deathRealTime > MAX_DEATH_TIME);
+    }
+
+    public Plant getPlant() { return plant; }
+}
