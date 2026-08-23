@@ -59,4 +59,12 @@ public class ToastActor extends Group {
         t.setColor(0.3f, 1f, 0.3f, 1f);
         return t;
     }
+
+    /** Toast آبی برای پیام اطلاع‌رسانی خنثی */
+    public static ToastActor info(String message) {
+        Skin skin = GameAssets.getInstance().getSkin();
+        ToastActor t = new ToastActor(message, skin);
+        t.setColor(0.45f, 0.7f, 1f, 1f);
+        return t;
+    }
 }

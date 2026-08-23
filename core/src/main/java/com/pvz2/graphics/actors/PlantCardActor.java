@@ -43,7 +43,7 @@ public class PlantCardActor extends Actor {
         this.plantType = type;
         this.sunCost   = sunCost;
         this.pamPath   = PamPaths.forPlant(type.name().toLowerCase());
-        this.font      = skin.getFont("default");
+        this.font      = GameAssets.getInstance().fontOf("default");
         setSize(GameConstants.CARD_W, GameConstants.CARD_H);
     }
 
@@ -104,11 +104,36 @@ public class PlantCardActor extends Actor {
 
     private void drawPlantImage(Batch batch, float x, float y, float w, float h, float alpha) {
         GameAssets assets = GameAssets.getInstance();
+        boolean drew = false;
         if (assets.hasPvzAssets() && pamPath != null && !pamPath.isEmpty()) {
-            batch.setColor(1, 1, 1, alpha);
-            assets.getPamPlayer().draw(batch, pamPath, "idle",
-                    stateTime, x + w * 0.5f, y + h * 0.58f, false);
-        } else {
+            try {
+                pvz.libpvz.pam.PamPlayer p = assets.getPamPlayer();
+                // getClip تا وقتی PAM هنوز bake نشده null است — در آن حالت
+                // مستطیلِ سبزِ جایگزین کشیده می‌شود تا کارت خالی نماند.
+                if (p != null && p.getClip(pamPath, "idle") != null) {
+                    batch.setColor(1, 1, 1, alpha);
+                    float cx = x + w * 0.5f, cy = y + h * 0.58f;
+                    // PamPlayer در اندازه‌ی نیتیوِ canvas می‌کشد؛ آن را با ماتریسِ
+                    // transform حولِ مرکزِ کارت به‌اندازه‌ی کارت کوچک می‌کنیم.
+                    float scale = 1f;
+                    try {
+                        com.badlogic.gdx.math.Rectangle b = p.bounds(pamPath);
+                        if (b != null && b.height > 1f) scale = Math.min(1f, (h * 0.78f) / b.height);
+                    } catch (Exception ignored) { }
+                    boolean scaled = Math.abs(scale - 1f) > 0.001f;
+                    com.badlogic.gdx.math.Matrix4 old = null;
+                    if (scaled) {
+                        old = batch.getTransformMatrix().cpy();
+                        batch.setTransformMatrix(old.cpy()
+                                .translate(cx, cy, 0f).scale(scale, scale, 1f).translate(-cx, -cy, 0f));
+                    }
+                    p.draw(batch, pamPath, "idle", stateTime, cx, cy, true);
+                    if (scaled) batch.setTransformMatrix(old);
+                    drew = true;
+                }
+            } catch (Exception ignored) { }
+        }
+        if (!drew) {
             batch.setColor(0.3f, 0.75f, 0.3f, alpha * 0.8f);
             TextureRegion white = assets.getWhiteRegion();
             batch.draw(white, x + 8, y + 18, w - 16, h - 28);
