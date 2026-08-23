@@ -14,6 +14,16 @@ import java.util.List;
 public class ZombieFactory {
 
     public static Zombie create(ZombieType type) {
+        // مینی‌گیم Zombotany: زامبی‌های گیاهی با رفتارِ اختصاصی (داک فاز ۱).
+        switch (type) {
+            case ZOMBOTANY_PEASHOOTER: return new ZombotanyPeashooter();
+            case ZOMBOTANY_JALAPENO:   return new ZombotanyJalapeno();
+            case ZOMBOTANY_SQUASH:     return new ZombotanySquash();
+            case ZOMBOTANY_WALLNUT:
+                // جانِ زیاد + سرعتِ کم (مثلِ گردو).
+                return new NormalZombie(ZombieType.ZOMBOTANY_WALLNUT, 3000, 80, 0.10, 150);
+            default: break;
+        }
         ZombieStats stats = ZombieDataRegistry.getInstance().getStats(type);
         if (stats == null) {
             return createDefault(type);
