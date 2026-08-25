@@ -22,6 +22,15 @@ public class UserRepository {
     private static final String FILE_PATH = "data/users.json";
     private List<User> cache;
 
+    /**
+     * Optional phase-3 hook: when set (online mode), invoked after every local
+     * {@link #save(User)} so the user's data can be pushed to the server too.
+     * Kept as a callback to avoid a repository→network layer dependency.
+     */
+    public interface RemoteSync { void push(User user); }
+    private RemoteSync remoteSync;
+    public void setRemoteSync(RemoteSync rs) { this.remoteSync = rs; }
+
     public UserRepository() {
         this.cache = new ArrayList<>();
         loadAll();
@@ -54,6 +63,9 @@ public class UserRepository {
             cache.add(user);
         }
         saveAll(cache);
+        if (remoteSync != null) {
+            try { remoteSync.push(user); } catch (Exception ignored) { }
+        }
     }
 
     public User findByUsername(String username) {
@@ -93,6 +105,25 @@ public class UserRepository {
     }
 
     // ----------------------------------------------------------------
+    //  PHASE 3 — network bridge (server user document ↔ User)
+    // ----------------------------------------------------------------
+
+    /**
+     * Flatten a {@link User} to the same {@code String→String} map the local
+     * JSON uses. The phase-3 network layer turns this into the JSON document it
+     * pushes to the server (so client and server agree on the schema).
+     */
+    public Map<String, String> toFlatMap(User u) { return userToMap(u); }
+
+    /**
+     * Rebuild a {@link User} from a flat {@code String→String} map (the server's
+     * user document, flattened by the network layer). Reuses the exact local
+     * deserializer so all fields (currencies, plants, greenhouse, settings, …)
+     * round-trip identically.
+     */
+    public User fromFlatMap(Map<String, String> m) { return mapToUser(m); }
+
+    // ----------------------------------------------------------------
     //  SERIALIZATION
     // ----------------------------------------------------------------
 
@@ -104,9 +135,9 @@ public class UserRepository {
         m.put("email", u.getEmail());
         m.put("gender", u.getGender() != null ? u.getGender().name() : "MALE");
         m.put("securityQuestion",
-              u.getSecurityQuestion() != null ? u.getSecurityQuestion().name() : "");
+                u.getSecurityQuestion() != null ? u.getSecurityQuestion().name() : "");
         m.put("securityAnswerHash",
-              u.getSecurityAnswerHash() != null ? u.getSecurityAnswerHash() : "");
+                u.getSecurityAnswerHash() != null ? u.getSecurityAnswerHash() : "");
         m.put("stayLoggedIn", String.valueOf(u.isStayLoggedIn()));
         m.put("coins", String.valueOf(u.getCoins()));
         m.put("gems", String.valueOf(u.getGems()));
@@ -120,16 +151,78 @@ public class UserRepository {
         m.put("dailyQuestsCompleted", String.valueOf(u.getDailyQuestsCompleted()));
         m.put("regularQuestsCompleted", String.valueOf(u.getRegularQuestsCompleted()));
         m.put("lastReachedLevel",
-              u.getLastReachedLevel() != null ? u.getLastReachedLevel() : "");
+                u.getLastReachedLevel() != null ? u.getLastReachedLevel() : "");
         m.put("lastDailyOfferDate",
-              u.getLastDailyOfferDate() != null ? u.getLastDailyOfferDate() : "");
+                u.getLastDailyOfferDate() != null ? u.getLastDailyOfferDate() : "");
         m.put("unlockedPlants", listToJsonArray(u.getUnlockedPlants()));
         m.put("seenZombies", listToJsonArray(u.getSeenZombies()));
         m.put("unlockedLevels", listToJsonArray(u.getUnlockedLevels()));
+        m.put("storedPlantBoosts", listToJsonArray(u.getBoostedPlants()));
+        m.put("completedQuests", listToJsonArray(u.getCompletedQuests()));
+        m.put("dailyOfferPlant", u.getDailyOfferPlant() != null ? u.getDailyOfferPlant() : "");
+        m.put("dailyOfferGeneratedDate",
+                u.getDailyOfferGeneratedDate() != null ? u.getDailyOfferGeneratedDate() : "");
         // ---- ارتقاهای گیاه و بسته‌بذر ----
         m.put("plantUpgradeLevels", mapToString(u.getPlantUpgradeLevels()));
         m.put("plantSeedPackets", mapToString(u.getPlantSeedPackets()));
+        // ---- گلخانه و تنظیماتِ صوت/گرافیکِ per-user (فاز ۲) ----
+        m.put("greenhouse", serializeGreenhouse(u.getGreenhouse()));
+        m.put("masterVolume", String.valueOf(u.getMasterVolume()));
+        m.put("musicEnabled", String.valueOf(u.isMusicEnabled()));
+        m.put("sfxEnabled", String.valueOf(u.isSfxEnabled()));
+        m.put("showGrid", String.valueOf(u.isShowGrid()));
+        m.put("gameSpeed", String.valueOf(u.getGameSpeed()));
         return m;
+    }
+
+    /**
+     * سریال‌سازیِ گلخانه در یک رشته‌ی فشرده. هر گلدان با ';' جدا و فیلدهایش
+     * با ':' — به‌شکلِ {@code x:y:locked:plantType:plantedAtEpochSec:growthHours}.
+     * plantedAt خالی → "0" و plantType خالی → "-".
+     */
+    private String serializeGreenhouse(com.pvz2.model.Greenhouse gh) {
+        if (gh == null) return "";
+        StringBuilder sb = new StringBuilder();
+        for (int y = 1; y <= com.pvz2.model.Greenhouse.ROWS; y++) {
+            for (int x = 1; x <= com.pvz2.model.Greenhouse.COLS; x++) {
+                com.pvz2.model.Pot p = gh.getPot(x, y);
+                if (p == null) continue;
+                if (sb.length() > 0) sb.append(';');
+                long epoch = 0L;
+                if (p.getPlantedAt() != null) {
+                    epoch = p.getPlantedAt().atZone(java.time.ZoneId.systemDefault()).toEpochSecond();
+                }
+                String type = p.getPlantType() != null ? p.getPlantType() : "-";
+                sb.append(p.getX()).append(':').append(p.getY()).append(':')
+                  .append(p.isLocked()).append(':').append(type).append(':')
+                  .append(epoch).append(':').append(p.getGrowthHours());
+            }
+        }
+        return sb.toString();
+    }
+
+    private com.pvz2.model.Greenhouse deserializeGreenhouse(String raw) {
+        com.pvz2.model.Greenhouse gh = new com.pvz2.model.Greenhouse();
+        if (raw == null || raw.trim().isEmpty()) return gh;
+        for (String potStr : raw.split(";")) {
+            String[] f = potStr.split(":");
+            if (f.length < 6) continue;
+            try {
+                int x = Integer.parseInt(f[0].trim());
+                int y = Integer.parseInt(f[1].trim());
+                com.pvz2.model.Pot p = gh.getPot(x, y);
+                if (p == null) continue;
+                p.setLocked(Boolean.parseBoolean(f[2].trim()));
+                String type = f[3].trim();
+                p.setPlantType("-".equals(type) || type.isEmpty() ? null : type);
+                long epoch = Long.parseLong(f[4].trim());
+                p.setPlantedAt(epoch <= 0 ? null
+                        : java.time.Instant.ofEpochSecond(epoch)
+                            .atZone(java.time.ZoneId.systemDefault()).toLocalDateTime());
+                p.setGrowthHours(Integer.parseInt(f[5].trim()));
+            } catch (Exception ignored) { }
+        }
+        return gh;
     }
 
     /**
@@ -209,6 +302,12 @@ public class UserRepository {
                     m.getOrDefault("unlockedPlants", "[]")));
             u.setSeenZombies(parseStringArray(
                     m.getOrDefault("seenZombies", "[]")));
+            u.setBoostedPlants(parseStringArray(
+                    m.getOrDefault("storedPlantBoosts", "[]")));
+            u.setCompletedQuests(parseStringArray(
+                    m.getOrDefault("completedQuests", "[]")));
+            u.setDailyOfferPlant(m.getOrDefault("dailyOfferPlant", ""));
+            u.setDailyOfferGeneratedDate(m.getOrDefault("dailyOfferGeneratedDate", ""));
 
             List<String> unlocked = parseStringArray(
                     m.getOrDefault("unlockedLevels", "[\"ANCIENT_EGYPT_1\"]"));
@@ -220,6 +319,14 @@ public class UserRepository {
                     m.getOrDefault("plantUpgradeLevels", "")));
             u.setPlantSeedPackets(parseIntMap(
                     m.getOrDefault("plantSeedPackets", "")));
+
+            // ---- گلخانه و تنظیماتِ per-user (فاز ۲) ----
+            u.setGreenhouse(deserializeGreenhouse(m.getOrDefault("greenhouse", "")));
+            u.setMasterVolume(parseFloat(m.getOrDefault("masterVolume", "0.8"), 0.8f));
+            u.setMusicEnabled(Boolean.parseBoolean(m.getOrDefault("musicEnabled", "true")));
+            u.setSfxEnabled(Boolean.parseBoolean(m.getOrDefault("sfxEnabled", "true")));
+            u.setShowGrid(Boolean.parseBoolean(m.getOrDefault("showGrid", "false")));
+            u.setGameSpeed(parseFloat(m.getOrDefault("gameSpeed", "1.0"), 1.0f));
 
             u.setUnreadNews(new ArrayList<>());
             return u;
@@ -265,5 +372,9 @@ public class UserRepository {
 
     private long parseLong(String s) {
         try { return Long.parseLong(s.trim()); } catch (Exception e) { return 0L; }
+    }
+
+    private float parseFloat(String s, float def) {
+        try { return Float.parseFloat(s.trim()); } catch (Exception e) { return def; }
     }
 }
