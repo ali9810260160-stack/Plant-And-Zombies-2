@@ -7,10 +7,13 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.utils.ObjectMap;
 import com.pvz2.graphics.util.GameConfig;
 import pvz.libpvz.pam.PamPlayer;
 import pvz.libpvz.textures.TextureBank;
 import pvz.skin.PvzSkin;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 
 /**
  * مدیریت مرکزی تمام asset های بازی.
@@ -30,6 +33,14 @@ public final class GameAssets {
     private PamPlayer pamPlayer;
     private Texture      whiteTexture;
     private TextureRegion whiteRegion;
+    /** دیسک نرم شعاعی (دایره با محو شدن آلفا) — برای پرتابه‌ها و خورشیدهای گرد و درخشان */
+    private Texture       discTexture;
+    private TextureRegion discRegion;
+    /** فونت fallback مشترک — فقط اگر یک style از skin پیدا نشود ساخته می‌شود */
+    private BitmapFont fallbackFont;
+
+    /** کش تکسچرهای لوکال (فایل‌های PNG خودمون داخل پوشه‌ی assets/، نه پک RTON). */
+    private final ObjectMap<String, Texture> localTextureCache = new ObjectMap<>();
 
     private GameAssets() {}
 
@@ -48,6 +59,7 @@ public final class GameAssets {
     private void load() {
         loadSkin();
         loadWhiteTexture();
+        loadDiscTexture();
         loadPvzAssets();
     }
 
@@ -63,6 +75,32 @@ public final class GameAssets {
         whiteTexture = new Texture(pm);
         pm.dispose();
         whiteRegion = new TextureRegion(whiteTexture);
+    }
+
+    /**
+     * می‌سازد یک دیسک نرمِ سفید (۶۴×۶۴) که آلفای آن از مرکز (۱) تا لبه (۰) کاهش می‌یابد.
+     * با tint کردن این region می‌توان پرتابه‌ها و خورشیدهای گرد و درخشان کشید
+     * بدون نیاز به ShapeRenderer (که در pass جاریِ SpriteBatch در دسترس نیست).
+     */
+    private void loadDiscTexture() {
+        int size = 64;
+        Pixmap pm = new Pixmap(size, size, Pixmap.Format.RGBA8888);
+        pm.setBlending(Pixmap.Blending.None);
+        float c = (size - 1) / 2f;
+        for (int yy = 0; yy < size; yy++) {
+            for (int xx = 0; xx < size; xx++) {
+                float dx = (xx - c) / c;
+                float dy = (yy - c) / c;
+                float d = (float) Math.sqrt(dx * dx + dy * dy); // ۰ مرکز، ۱ لبه
+                float a = d >= 1f ? 0f : 1f - (d * d); // محو نرم به سمت لبه
+                pm.setColor(1f, 1f, 1f, a);
+                pm.drawPixel(xx, yy);
+            }
+        }
+        discTexture = new Texture(pm);
+        discTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        pm.dispose();
+        discRegion = new TextureRegion(discTexture);
     }
 
     private void loadPvzAssets() {
@@ -99,6 +137,7 @@ public final class GameAssets {
     public PamPlayer     getPamPlayer()     { return pamPlayer; }
     public TextureBank   getTextureBank()   { return textureBank; }
     public TextureRegion getWhiteRegion()   { return whiteRegion; }
+    public TextureRegion getDiscRegion()    { return discRegion; }
     public boolean       hasPvzAssets()     { return pamPlayer != null; }
 
     /**
@@ -117,9 +156,69 @@ public final class GameAssets {
         }
     }
 
+    /**
+     * یک TextureRegion از فایل‌های PNG لوکال داخل پوشه‌ی {@code assets/} پروژه
+     * (مسیر نسبی، مثلاً {@code "adventure/card_egypt.png"}) — برخلاف
+     * {@link #region(String)} که از پک RTON اصلی بازی می‌خونه.
+     * <p>
+     * نتیجه کش می‌شود؛ اگر فایل پیدا نشه، {@code whiteRegion} برمی‌گرده و
+     * برنامه کرش نمی‌کنه.
+     *
+     * @param relativePath مسیر نسبی به ریشه‌ی پوشه‌ی assets
+     */
+    public TextureRegion local(String relativePath) {
+        if (relativePath == null || relativePath.isEmpty()) return whiteRegion;
+        Texture cached = localTextureCache.get(relativePath);
+        if (cached != null) return new TextureRegion(cached);
+        try {
+            FileHandle fh = Gdx.files.internal(relativePath);
+            if (!fh.exists()) {
+                Gdx.app.error("GameAssets", "Local asset not found: " + relativePath);
+                return whiteRegion;
+            }
+            Texture tex = new Texture(fh);
+            tex.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+            localTextureCache.put(relativePath, tex);
+            return new TextureRegion(tex);
+        } catch (Exception e) {
+            Gdx.app.error("GameAssets", "Failed to load local asset: " + relativePath, e);
+            return whiteRegion;
+        }
+    }
+
     public void dispose() {
         if (skin != null)         skin.dispose();
         if (whiteTexture != null) whiteTexture.dispose();
+        if (discTexture != null)  discTexture.dispose();
         if (textureBank != null)  textureBank.dispose();
+
+        if (fallbackFont != null) fallbackFont.dispose();
+    }
+
+    /**
+     * فونت مورد استفاده‌ی یک Label style را برمی‌گرداند — <b>نه</b> یک
+     * BitmapFont resource با همین نام. (باگ رایجی که در چند فایل پیدا شد:
+     * {@code Skin.getFont(name)} برای نام یک Label style نه null برمی‌گرداند
+     * نه آن را پیدا می‌کند — مستقیماً {@code GdxRuntimeException} پرتاب می‌کند،
+     * چون دنبال یک BitmapFont resource جدا با آن اسم می‌گردد، در حالی که
+     * "medium"/"default" و مشابه، در pvz-skin اسم Label style هستند نه فونت.)
+     *
+     * <p>اگر style یا فونتش پیدا نشود، فونت پیش‌فرض داخلی LibGDX (بدون نیاز
+     * به هیچ asset ای) برمی‌گردد — این متد هرگز throw نمی‌کند.
+     *
+     * @param labelStyleName مثلاً "medium", "default", "big"
+     */
+    public BitmapFont fontOf(String labelStyleName) {
+        try {
+            if (skin != null && labelStyleName != null
+                    && skin.has(labelStyleName, Label.LabelStyle.class)) {
+                BitmapFont f = skin.get(labelStyleName, Label.LabelStyle.class).font;
+                if (f != null) return f;
+            }
+        } catch (Exception ignored) {
+            // ادامه به fallback
+        }
+        if (fallbackFont == null) fallbackFont = new BitmapFont();
+        return fallbackFont;
     }
 }
