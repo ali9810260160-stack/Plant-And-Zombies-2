@@ -21,10 +21,16 @@ public class GreenhouseService {
     private final UserService userService;
     private final UserRepository userRepository;
     private final ConsoleView view;
-    private static final int MAX_POTS = 20;
+    private static final int MAX_POTS = 12;
     private static final int MARIGOLD_GROW_HOURS = 2;
     private static final int PLANT_GROW_HOURS = 8;
     private static final long MARIGOLD_REWARD_COINS = 500;
+    /** جایزه‌ی سکه هنگام برداشتِ گیاهِ غیرِ marigold وقتی plant food پُر است. */
+    private static final long GREENHOUSE_HARVEST_COINS = 250;
+    /** هزینه‌ی الماس برای کاشتن یک گیاه در جایگاه خالی (نشان داده‌شده روی diamond-ticket در UI). */
+    private static final int PLANT_COST_GEMS = 20;
+    /** هزینه‌ی سکه برای باز کردن یک جایگاه قفل. */
+    private static final long UNLOCK_POT_COST_COINS = 2000;
 
     public GreenhouseService(UserService userService,
                              UserRepository userRepository, ConsoleView view) {
@@ -41,6 +47,11 @@ public class GreenhouseService {
         return user.getGreenhouse();
     }
 
+    /** هزینه‌ی الماس کاشت — UI به‌جای هاردکد کردن عدد روی تیکت، از این می‌خونه. */
+    public int getPlantCostGems() {
+        return PLANT_COST_GEMS;
+    }
+
     public void plantPot(User user, int x, int y) {
         Greenhouse gh = getOrCreateGreenhouse(user);
         Pot pot = gh.getPot(x, y);
@@ -55,6 +66,10 @@ public class GreenhouseService {
         if (pot.getPlantType() != null) {
             throw new GameException(
                     "Pot at (" + x + ", " + y + ") is already occupied.");
+        }
+        if (!userService.spendGems(user, PLANT_COST_GEMS)) {
+            throw new GameException(
+                    "Need " + PLANT_COST_GEMS + " gems to plant.");
         }
         boolean isMarigold = RandomUtil.chance(0.5);
         if (isMarigold) {
@@ -111,13 +126,25 @@ public class GreenhouseService {
             return ("\u001B[32m🌸 Harvested marigold: +"
                     + MARIGOLD_REWARD_COINS + " coins!\u001B[0m");
         } else {
-            giveStoredBoost(user, pot.getPlantType());
+            String harvestedPlant = pot.getPlantType();
+            // جایزه واقعاً به user اضافه می‌شود (قبلاً giveStoredBoost فقط یک پیام
+            // کنسولی چاپ می‌کرد و چیزی به کاربر افزوده نمی‌شد): boost دائمی این
+            // گیاه + یک plant food (تا سقف ۳) وگرنه سکه.
+            user.setPlantBoosted(harvestedPlant, true);
+            String bonus;
+            if (user.getPlantFoodCount() < 3) {
+                user.setPlantFoodCount(user.getPlantFoodCount() + 1);
+                bonus = "+1 Plant Food";
+            } else {
+                userService.addCoins(user, GREENHOUSE_HARVEST_COINS);
+                bonus = "+" + GREENHOUSE_HARVEST_COINS + " coins";
+            }
             pot.setPlantType(null);
             pot.setPlantedAt(null);
             userRepository.save(user);
             return ("\u001B[32m🌱 Harvested "
-                    + pot.getPlantType()
-                    + " - stored boost ready for next use!\u001B[0m");
+                    + harvestedPlant
+                    + " — stored boost & " + bonus + "!\u001B[0m");
         }
     }
 
@@ -135,8 +162,7 @@ public class GreenhouseService {
         if (pot.isReady()) {
             throw new GameException("Plant is already ready to harvest!");
         }
-        double hoursLeft = getRemainingHours(pot);
-        int gemsNeeded = (int) Math.ceil(hoursLeft);
+        int gemsNeeded = getSpeedupCostGems(pot);
         if (user.getGems() < gemsNeeded) {
             throw new GameException(
                     "Need " + gemsNeeded + " gems, you have " + user.getGems() + ".");
@@ -146,6 +172,16 @@ public class GreenhouseService {
                 .minus(pot.getGrowthHours(), ChronoUnit.HOURS));
         userRepository.save(user);
         view.printRaw("\u001B[32m⚡ Growth accelerated! Plant is now ready.\u001B[0m");
+    }
+
+    /**
+     * هزینه‌ی الماس برای تسریع رشد یک گلدان — بدون هیچ تغییری در وضعیت
+     * (فقط محاسبه، برای نمایش عدد روی دکمه‌ی تسریع در UI هم استفاده می‌شه).
+     */
+    public int getSpeedupCostGems(Pot pot) {
+        if (pot == null || pot.getPlantType() == null) return 0;
+        double hoursLeft = getRemainingHours(pot);
+        return (int) Math.ceil(Math.max(0, hoursLeft));
     }
 
     private double getRemainingHours(Pot pot) {
@@ -168,15 +204,20 @@ public class GreenhouseService {
             throw new GameException("Pot at (" + x + ", " + y + ") is already unlocked.");
         }
         if (gh.getUnlockedCount() >= MAX_POTS) {
-            throw new GameException("Maximum pots reached (20).");
+            throw new GameException("Maximum pots reached (" + MAX_POTS + ").");
         }
-        if (!userService.spendCoins(user, 2000)) {
-            throw new GameException("Not enough coins. Need 2000.");
+        if (!userService.spendCoins(user, UNLOCK_POT_COST_COINS)) {
+            throw new GameException("Not enough coins. Need " + UNLOCK_POT_COST_COINS + ".");
         }
         pot.setLocked(false);
         userRepository.save(user);
         view.printRaw("\u001B[32m🏺 Pot unlocked at ("
                 + x + ", " + y + ")!\u001B[0m");
+    }
+
+    /** هزینه‌ی سکه برای باز کردن یک جایگاه قفل — UI به‌جای هاردکد از این می‌خونه. */
+    public long getUnlockCostCoins() {
+        return UNLOCK_POT_COST_COINS;
     }
 
     public void shopBuy(User user, String itemId, int count, String plantType) {
@@ -265,6 +306,7 @@ public class GreenhouseService {
     }
 
     private void buyDailyOffer(User user) {
+        ensureDailyOfferFresh(user);
         String today = java.time.LocalDate.now().toString();
         if (today.equals(user.getLastDailyOfferDate())) {
             throw new GameException("Daily offer already purchased today.");
@@ -272,8 +314,38 @@ public class GreenhouseService {
         if (!userService.spendCoins(user, 1600)) {
             throw new GameException("Need 1600 coins for daily offer.");
         }
+        // باگ قبلی: این متد هیچ بسته‌بذری واقعاً اضافه نمی‌کرد و مشخص نمی‌کرد
+        // پیشنهاد امروز برای کدام گیاه است — ۱۶۰۰ سکه کم می‌شد بدون هیچ جایزه‌ای.
+        String plant = user.getDailyOfferPlant();
+        user.addSeedPackets(plant, 10);
         user.setLastDailyOfferDate(today);
         userRepository.save(user);
-        view.printRaw("\u001B[32m🎁 Daily offer purchased! 10 seed packets added.\u001B[0m");
+        view.printRaw("\u001B[32m🎁 Daily offer purchased! 10 " + plant
+                + " seed packets added.\u001B[0m");
+    }
+
+    /**
+     * پیشنهاد روزانه امروز را (در صورت نیاز) تولید و ذخیره می‌کند — یک گیاه
+     * تصادفی از بین گیاهان آنلاک‌شده کاربر، فقط یک‌بار در روز عوض می‌شود.
+     */
+    private void ensureDailyOfferFresh(User user) {
+        String today = java.time.LocalDate.now().toString();
+        if (!today.equals(user.getDailyOfferGeneratedDate())) {
+            user.setDailyOfferPlant(pickRandomUnlockedPlant(user));
+            user.setDailyOfferGeneratedDate(today);
+            userRepository.save(user);
+        }
+    }
+
+    /** نام گیاه پیشنهاد روزانه امروز — برای نمایش در فروشگاه. */
+    public String getDailyOfferPlant(User user) {
+        ensureDailyOfferFresh(user);
+        return user.getDailyOfferPlant();
+    }
+
+    /** آیا پیشنهاد روزانه امروز قبلاً خریداری شده؟ */
+    public boolean isDailyOfferPurchased(User user) {
+        String today = java.time.LocalDate.now().toString();
+        return today.equals(user.getLastDailyOfferDate());
     }
 }

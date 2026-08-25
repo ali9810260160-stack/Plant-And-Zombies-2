@@ -34,11 +34,17 @@ public class LevelProgressService {
 
     private final UserRepository userRepository;
     private final ConsoleView view;
+    /** برای انتشارِ خبرِ «مرحله گذرانده شد / مرحله/فصلِ جدید باز شد» (فاز ۲). */
+    private NewsService newsService;
 
     public LevelProgressService(UserRepository userRepository,
                                 ConsoleView view) {
         this.userRepository = userRepository;
         this.view = view;
+    }
+
+    public void setNewsService(NewsService newsService) {
+        this.newsService = newsService;
     }
 
     /** آیا یک مرحله برای بازیکن باز شده است */
@@ -53,11 +59,15 @@ public class LevelProgressService {
         int totalLevels = LEVELS_PER_CHAPTER.getOrDefault(chapter, 4);
         updateLastReachedLevel(user, chapter, levelNumber);
 
+        // خبرِ «مرحله گذرانده شد».
+        news(n -> n.onLevelCompleted(user, chapter.name(), levelNumber));
+
         if (levelNumber < totalLevels) {
             user.unlockLevel(chapter.name(), levelNumber + 1);
             view.printRaw(ConsoleView.GREEN
                     + "  🔓 Level " + chapter.name() + " " + (levelNumber + 1)
                     + " unlocked!" + ConsoleView.RESET);
+            news(n -> n.onLevelUnlocked(user, chapter.name(), levelNumber + 1));
         } else {
             unlockNextChapter(user, chapter);
         }
@@ -107,6 +117,16 @@ public class LevelProgressService {
         view.printRaw(ConsoleView.GREEN + ConsoleView.BOLD
                 + "  🔓 New chapter unlocked: " + next.name() + "!"
                 + ConsoleView.RESET);
+        // خبرِ «فصلِ جدید (season) باز شد».
+        final ChapterType unlocked = next;
+        news(n -> n.onLevelUnlocked(user, unlocked.name(), 1));
+    }
+
+    /** helper: اگر NewsService تزریق شده بود، خبر را منتشر کن (بی‌خطر). */
+    private void news(java.util.function.Consumer<NewsService> action) {
+        if (newsService != null) {
+            try { action.accept(newsService); } catch (Exception ignored) { }
+        }
     }
 
     private ChapterType getNextChapter(ChapterType current) {
@@ -177,7 +197,8 @@ public class LevelProgressService {
         return count;
     }
 
-    private String getLevelTypeName(ChapterType chapter, int level) {
+    /** نام نوع مرحله (Normal/Boss/نوع خاص فصل) — برای نمایش در UI هم استفاده می‌شود. */
+    public String getLevelTypeName(ChapterType chapter, int level) {
         if (level == 4) {
             return "(BOSS)";
         }

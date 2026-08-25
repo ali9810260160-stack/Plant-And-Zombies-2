@@ -140,6 +140,8 @@ public class SunService {
         target.setCollected(true);
         int value = getSunValue(target);
         session.addSun(value);
+        // الگوی امتیازی: جمع‌آوریِ آیتم (۵ خورشید در ۱۰ ثانیه)
+        session.registerItemCollected();
         // ثبت برای Timed War (حالت خورشید)
         if (session.getLevel() != null
                 && session.getLevel().getLevelType() == LevelType.TIMED_WAR

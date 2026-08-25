@@ -101,6 +101,10 @@ public class QuestService {
     private final ConsoleView view;
     private Map<String, QuestProgress> activeProgress;
     private User currentUser;
+    /** صفِ رویدادِ تکمیلِ کوئست برای توستِ حین بازی (drain توسط GameFacade/GameScreen). */
+    private final List<String> completedEvents = new ArrayList<>();
+    /** برای انتشارِ خبرِ «کوئست انجام شد» (فاز ۲). */
+    private NewsService newsService;
 
     public QuestService(UserRepository userRepository,
                         UserService userService, ConsoleView view) {
@@ -110,12 +114,28 @@ public class QuestService {
         this.activeProgress = new LinkedHashMap<>();
     }
 
+    public void setNewsService(NewsService newsService) {
+        this.newsService = newsService;
+    }
+
     public void loadForUser(User user) {
         this.currentUser = user;
         this.activeProgress = new LinkedHashMap<>();
         // init all quests
         for (String id : QUESTS.keySet()) {
             activeProgress.put(id, new QuestProgress(id));
+        }
+        // بازیابیِ پرچمِ «انجام‌شده» از داده‌ی ذخیره‌شده‌ی کاربر — فقط برای کوئست‌های
+        // غیرروزانه (کوئست‌های روزانه هر روز ریست می‌شوند و نباید بازیابی شوند).
+        if (user != null && user.getCompletedQuests() != null) {
+            for (String id : user.getCompletedQuests()) {
+                QuestProgress qp = activeProgress.get(id);
+                QuestDefinition qd = QUESTS.get(id);
+                if (qp != null && qd != null && qd.getType() != QuestType.DAILY) {
+                    qp.setCompleted(true);
+                    qp.setCurrentValue(qd.getTargetForLevel(qp.getCurrentLevel()));
+                }
+            }
         }
         // Reset daily quests if new day
         String today = LocalDate.now().toString();
@@ -271,6 +291,15 @@ public class QuestService {
             .replace("{target}", String.valueOf(
                 qd.getTargetForLevel(qp.getCurrentLevel()))));
         giveReward(qd, qp);
+        // رویداد برای توستِ حین بازی (GUI آن را drain می‌کند).
+        completedEvents.add("Quest Complete!  " + questRewardText(qd, qp));
+        // خبرِ ماندگار «کوئست انجام شد».
+        if (newsService != null && currentUser != null) {
+            try {
+                newsService.addNews(currentUser, "Quest Completed",
+                        "You completed a quest and earned " + questRewardText(qd, qp) + ".");
+            } catch (Exception ignored) { }
+        }
         if (currentUser != null) {
             if (qd.getType() == QuestType.DAILY) {
                 currentUser.setDailyQuestsCompleted(
@@ -278,8 +307,33 @@ public class QuestService {
             } else {
                 currentUser.setRegularQuestsCompleted(
                     currentUser.getRegularQuestsCompleted() + 1);
+                // ذخیره‌ی پرچمِ «انجام‌شده» برای این کاربر (فقط کوئست‌های غیرروزانه).
+                if (!currentUser.getCompletedQuests().contains(qd.getId())) {
+                    currentUser.getCompletedQuests().add(qd.getId());
+                }
             }
             userRepository.save(currentUser);
+        }
+    }
+
+    /** رویدادهای تکمیلِ کوئست از آخرین فراخوانی — برای توستِ GUI. پس از خواندن پاک می‌شوند. */
+    public List<String> drainCompletedEvents() {
+        if (completedEvents.isEmpty()) return new ArrayList<>();
+        List<String> out = new ArrayList<>(completedEvents);
+        completedEvents.clear();
+        return out;
+    }
+
+    private String questRewardText(QuestDefinition qd, QuestProgress qp) {
+        int amount = qd.isRewardMultiplier()
+                     ? qd.getRewardBase() * qp.getCurrentLevel()
+                     : qd.getRewardBase();
+        switch (qd.getRewardType()) {
+            case COIN:         return "+" + amount + " Coins";
+            case GEM:          return "+" + amount + " Gems";
+            case SEED_PACKET:  return "+" + amount + " Seed Packets";
+            case RANDOM_PLANT: return "New Plant Unlocked!";
+            default:           return "";
         }
     }
 
@@ -367,36 +421,73 @@ public class QuestService {
         return activeProgress;
     }
 
+    /**
+     * دریافت جایزه‌ی یک کوئست تمام‌شده (استفاده در منوی گرافیکی Quest — فاز ۲).
+     * <p>
+     * جایزه (سکه/الماس) همان لحظه‌ای که کوئست در {@link #notifyQuestComplete}
+     * تکمیل می‌شود به‌صورت خودکار به کاربر داده می‌شود؛ این متد فقط پرچم
+     * {@code claimed} را ثبت می‌کند تا در UI ردیف از حالت «آماده‌ی دریافت»
+     * (دکمه‌ی CLAIM) به حالت عادی برود. طراحی به همین شکل انتخاب شد تا منطق
+     * اعطای جایزه — که از قلاب‌های CombatService/GameSession صدا زده می‌شود —
+     * دست‌نخورده بماند.
+     *
+     * @return {@code false} اگر کوئست پیدا نشد، هنوز تمام نشده یا قبلاً claim شده بود.
+     */
+    public boolean claimQuest(String questId) {
+        QuestProgress qp = activeProgress.get(questId);
+        if (qp == null || !qp.isCompleted() || qp.isClaimed()) {
+            return false;
+        }
+        qp.setClaimed(true);
+        return true;
+    }
+
     private static void loadBuiltinQuests() {
         QUESTS.put("DAILY_SUN_COLLECTOR",
-            new QuestDefinition("DAILY_SUN_COLLECTOR","آفتاب‌گیر روزانه",
-                QuestType.DAILY, Condition.COLLECT_SUN,
-                "جمع‌آوری {target} واحد خورشید",
-                RewardType.COIN, 100, true, Priority.MEDIUM,
-                new int[]{3000,4000,5000}));
+                new QuestDefinition("DAILY_SUN_COLLECTOR","آفتاب‌گیر روزانه",
+                        QuestType.DAILY, Condition.COLLECT_SUN,
+                        "جمع‌آوری {target} واحد خورشید",
+                        RewardType.COIN, 100, true, Priority.MEDIUM,
+                        new int[]{3000,4000,5000}));
+        // این دو مورد قبلاً فقط به‌عنوان hook در onGameWon/onExplosiveUsed صدا زده
+        // می‌شدند اما هیچ QuestDefinition متناظری در loadBuiltinQuests نداشتند
+        // (یعنی updateQuest بی‌اثر می‌ماند چون activeProgress.get(id) همیشه null
+        // بود). برای پر شدن تب Daily در منوی گرافیکی، تعریف‌شان اضافه شد.
+        QUESTS.put("DAILY_WIN_STREAK",
+                new QuestDefinition("DAILY_WIN_STREAK","پیروز روز",
+                        QuestType.DAILY, Condition.WIN_STREAK,
+                        "پیروزی در {target} مرحله‌ی ماجراجویی",
+                        RewardType.GEM, 4, false, Priority.MEDIUM,
+                        new int[]{5}));
+        QUESTS.put("DAILY_EXPLOSIVE_USER",
+                new QuestDefinition("DAILY_EXPLOSIVE_USER","اهل انفجار",
+                        QuestType.DAILY, Condition.USE_EXPLOSIVES,
+                        "استفاده از {target} گیاه انفجاری",
+                        RewardType.COIN, 150, false, Priority.LOW,
+                        new int[]{3}));
         QUESTS.put("CHAPTER_HUNTER",
-            new QuestDefinition("CHAPTER_HUNTER","شکارچی فصل",
-                QuestType.STORY, Condition.KILL_CHAPTER_ZOMBIES,
-                "شکست دادن 50 زامبی",
-                RewardType.SEED_PACKET, 10, false, Priority.HIGH,
-                new int[]{50}));
+                new QuestDefinition("CHAPTER_HUNTER","شکارچی فصل",
+                        QuestType.STORY, Condition.KILL_CHAPTER_ZOMBIES,
+                        "شکست دادن 50 زامبی",
+                        RewardType.SEED_PACKET, 10, false, Priority.HIGH,
+                        new int[]{50}));
         QUESTS.put("EPIC_ZERO_SUN",
-            new QuestDefinition("EPIC_ZERO_SUN","استاد دفاع",
-                QuestType.EPIC, Condition.WIN_WITH_ZERO_SUN,
-                "اتمام یک مرحله دقیقاً با صفر خورشید",
-                RewardType.GEM, 200, false, Priority.CRITICAL,
-                new int[]{1}));
+                new QuestDefinition("EPIC_ZERO_SUN","استاد دفاع",
+                        QuestType.EPIC, Condition.WIN_WITH_ZERO_SUN,
+                        "اتمام یک مرحله دقیقاً با صفر خورشید",
+                        RewardType.GEM, 200, false, Priority.CRITICAL,
+                        new int[]{1}));
         QUESTS.put("EPIC_LAWNMOWER",
-            new QuestDefinition("EPIC_LAWNMOWER","وقت چمن‌زنی",
-                QuestType.EPIC, Condition.LAWNMOWER_KILLS,
-                "حداقل {target} زامبی را با چمن‌زن بکش",
-                RewardType.GEM, 1, true, Priority.MEDIUM,
-                new int[]{10,20,30,40,50}));
+                new QuestDefinition("EPIC_LAWNMOWER","وقت چمن‌زنی",
+                        QuestType.EPIC, Condition.LAWNMOWER_KILLS,
+                        "حداقل {target} زامبی را با چمن‌زن بکش",
+                        RewardType.GEM, 1, true, Priority.MEDIUM,
+                        new int[]{10,20,30,40,50}));
         QUESTS.put("PLANT_SAVER",
-            new QuestDefinition("PLANT_SAVER","گیاه‌خوار اقتصادی",
-                QuestType.STORY, Condition.WIN_WITH_MAX_PLANT_LOSS,
-                "برد بدون از دست دادن بیش از {target} گیاه",
-                RewardType.SEED_PACKET, 20, true, Priority.HIGH,
-                new int[]{0,1,2,3,4,5}));
+                new QuestDefinition("PLANT_SAVER","گیاه‌خوار اقتصادی",
+                        QuestType.STORY, Condition.WIN_WITH_MAX_PLANT_LOSS,
+                        "برد بدون از دست دادن بیش از {target} گیاه",
+                        RewardType.SEED_PACKET, 20, true, Priority.HIGH,
+                        new int[]{0,1,2,3,4,5}));
     }
 }

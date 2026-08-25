@@ -20,6 +20,12 @@ public class WaveService {
 
     private final ConsoleView view;
 
+    /** استخر زامبی‌های هیبریدیِ مینی‌گیم «زامبی‌های گیاهی» (Zombotany). */
+    private static final ZombieType[] ZOMBOTANY_POOL = {
+        ZombieType.ZOMBOTANY_PEASHOOTER, ZombieType.ZOMBOTANY_WALLNUT,
+        ZombieType.ZOMBOTANY_SQUASH, ZombieType.ZOMBOTANY_JALAPENO
+    };
+
     public WaveService(ConsoleView view) {
         this.view = view;
     }
@@ -48,7 +54,10 @@ public class WaveService {
 
     public void spawnWave(Wave wave, GameSession session) {
         ChapterType chapter = session.getGameMap().getChapter();
-        ZombieType[] allowed = ZombieFactory.getAllowedZombiesForChapter(chapter);
+        ZombieType[] allowed =
+                session.getLevel().getLevelType() == com.pvz2.model.enums.LevelType.ZOMBOTANY
+                        ? ZOMBOTANY_POOL
+                        : ZombieFactory.getAllowedZombiesForChapter(chapter);
         int remaining = wave.getWaveDifficulty();
         List<Zombie> spawned = new ArrayList<>();
 
@@ -99,7 +108,10 @@ public class WaveService {
             return;
         }
         int advance = RandomUtil.between(1, 4);
-        zombie.setX(Math.max(1.0, zombie.getX() - advance));
+        double landX = Math.max(1.0, zombie.getX() - advance);
+        zombie.setX(landX);
+        // ثبتِ محلِ فرود تا لایه‌ی گرافیک انیمیشنِ گردباد (intro→loop→outro) را بزند.
+        session.addTornadoDrop((int) Math.round(landX), zombie.getY());
     }
 
     private void applyGlowingChance(Zombie zombie) {
