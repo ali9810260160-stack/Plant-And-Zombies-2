@@ -1,6 +1,7 @@
 package com.pvz2.model.plants;
 
 import com.pvz2.model.GameSession;
+import com.pvz2.model.enums.AnimEvent;
 import com.pvz2.model.enums.PlantEffect;
 import com.pvz2.model.enums.PlantFamily;
 import com.pvz2.model.enums.PlantTag;
@@ -38,6 +39,20 @@ public abstract class Plant {
     protected int currentAttackCooldown;
     protected boolean frozen;
     protected int freezeLevel;
+    /** تعدادِ ضرباتِ آتشِ خورده به بلاکِ یخ (۰=بلاکِ کامل/total، هر ضربه یک مرحله ذوب). */
+    protected int iceMeltHits;
+
+    /** مراحلِ بلاکِ یخِ گیاه: total + damage1..damage4 (assets/ice blocks/plant). */
+    public static final int ICE_MELT_STAGES = 5;
+
+    /**
+     * رویداد pending برای لایه انیمیشن (بخش سوم) — هر تیک توسط
+     * {@code PlantAnimController} خوانده و مصرف می‌شود. یک صف ساده تک‌ظرفیتی
+     * کافی است چون AnimationSystem هر فریم/تیک آن را poll می‌کند.
+     */
+    protected AnimEvent pendingAnimEvent;
+    /** لحظه‌ای که گیاه شلیک/حمله می‌کند — برای هماهنگی فریم شلیک با انیمیشن. */
+    protected boolean attackTrigger;
 
     protected Plant(PlantType type, PlantFamily family, int hp,
                     int sunCost, double rechargeTime) {
@@ -53,6 +68,7 @@ public abstract class Plant {
         this.activeEffects = new HashMap<>();
         this.frozen = false;
         this.freezeLevel = 0;
+        this.iceMeltHits = 0;
         this.seedPackets = 0;
     }
 
@@ -87,6 +103,43 @@ public abstract class Plant {
 
     public void takeDamage(int damage) {
         currentHealth = Math.max(0, currentHealth - damage);
+        if (currentHealth <= 0) {
+            fireAnimEvent(AnimEvent.DIED);
+        } else if (damage > 0) {
+            fireAnimEvent(AnimEvent.TOOK_DAMAGE);
+        }
+    }
+
+    // ─── لایه انیمیشن (بخش سوم) ─────────────────────────────────────────────
+
+    public AnimEvent getPendingAnimEvent() {
+        return pendingAnimEvent != null ? pendingAnimEvent : AnimEvent.NONE;
+    }
+
+    public void clearPendingAnimEvent() { this.pendingAnimEvent = null; }
+
+    /**
+     * رویداد را فقط اگر اولویت بالاتری از رویداد فعلیِ هنوز مصرف‌نشده داشته
+     * باشد جایگزین می‌کند (طبق طراحی AnimEvent.overrides — مثلاً DIED هرگز
+     * توسط یک TOOK_DAMAGE بعدی در همان تیک بازنویسی نمی‌شود).
+     */
+    public void fireAnimEvent(AnimEvent e) {
+        if (e == null) return;
+        if (pendingAnimEvent == null || e.overrides(pendingAnimEvent)) {
+            pendingAnimEvent = e;
+        }
+    }
+
+    /** فراخوانی هنگام شلیک/حمله واقعی (نه صرفاً cooldown) — انیمیشن حمله را trigger می‌کند. */
+    public void fireAttackTrigger() {
+        this.attackTrigger = true;
+        fireAnimEvent(AnimEvent.ATTACK_TRIGGER);
+    }
+
+    public boolean consumeAttackTrigger() {
+        boolean v = attackTrigger;
+        attackTrigger = false;
+        return v;
     }
 
     public boolean isAlive() {
@@ -141,15 +194,36 @@ public abstract class Plant {
     }
 
     public void incrementFreezeLevel() {
+        boolean wasFrozen = isFrozen();
         freezeLevel = Math.min(3, freezeLevel + 1);
         if (freezeLevel >= 3) {
             frozen = true;
         }
+        // با تشکیلِ یک بلاکِ یخِ تازه، شمارنده‌ی ذوب صفر می‌شود (بلاکِ کامل).
+        if (!wasFrozen && isFrozen()) iceMeltHits = 0;
+        fireAnimEvent(AnimEvent.FREEZE_LEVEL_CHANGED);
     }
 
     public void thaw() {
         frozen = false;
         freezeLevel = 0;
+        iceMeltHits = 0;
+        fireAnimEvent(AnimEvent.FREEZE_LEVEL_CHANGED);
+    }
+
+    /** تعدادِ ضرباتِ آتشِ خورده به بلاکِ یخ (۰=کامل). */
+    public int getIceMeltHits() { return iceMeltHits; }
+
+    /**
+     * یک ضربه‌ی تیرِ آتشین به بلاکِ یخ می‌خورد و آن را یک مرحله ذوب می‌کند؛
+     * با رسیدن به آخرین مرحله، یخ کاملاً آب می‌شود و گیاه آزاد می‌گردد.
+     */
+    public void meltIceBlock() {
+        if (!isFrozen()) return;
+        iceMeltHits++;
+        if (iceMeltHits >= ICE_MELT_STAGES) {
+            thaw();
+        }
     }
 
     public boolean hasTag(PlantTag tag) {

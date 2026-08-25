@@ -37,6 +37,7 @@ public class KernelPultPlant extends GenericPlant {
         if (spd > 0 && ++attackTimer >= (int)(10.0 / spd)) {
             attackTimer = 0;
             fireKernelOrButter(session);
+            fireAttackTrigger(); // برای انیمیشن
         }
     }
 

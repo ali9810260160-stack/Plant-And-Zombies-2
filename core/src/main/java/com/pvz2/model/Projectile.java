@@ -9,6 +9,8 @@ public class Projectile {
 
     private ProjectileType type;
     private double x;
+    /** موقعیت افقی شلیک — برای رسم مسیر سهموی پیوسته (پرتابه‌های هوایی). */
+    private final double startX;
     private int y;
     private double speed;
     private int damage;
@@ -30,6 +32,7 @@ public class Projectile {
     public Projectile(ProjectileType type, double x, int y, int damage) {
         this.type = type;
         this.x = x;
+        this.startX = x;
         this.y = y;
         this.damage = damage;
         this.speed = 3.0;
@@ -47,6 +50,7 @@ public class Projectile {
     public void setType(ProjectileType t) { this.type = t; }
     public double getX() { return x; }
     public void setX(double x) { this.x = x; }
+    public double getStartX() { return startX; }
     public int getY() { return y; }
     public void setY(int y) { this.y = y; }
     public double getSpeed() { return speed; }

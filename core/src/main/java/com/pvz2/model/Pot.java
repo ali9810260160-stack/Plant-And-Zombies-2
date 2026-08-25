@@ -26,8 +26,21 @@ public class Pot {
 
     public double getRemainingHours() {
         long elapsed = java.time.temporal.ChronoUnit.HOURS.between(
-            plantedAt, LocalDateTime.now());
+                plantedAt, LocalDateTime.now());
         return growthHours - elapsed;
+    }
+
+    /**
+     * ثانیه‌های باقی‌مانده تا آماده شدن گیاه — دقت بالاتر از
+     * {@link #getRemainingHours()} (که به ساعت گرد می‌کنه)، برای نمایش
+     * زنده‌ی «Xh Ym» در UI. هیچ‌وقت منفی برنمی‌گردونه.
+     */
+    public long getRemainingSeconds() {
+        if (plantedAt == null || plantType == null) return 0;
+        long totalSeconds = growthHours * 3600L;
+        long elapsedSeconds = java.time.temporal.ChronoUnit.SECONDS.between(
+                plantedAt, LocalDateTime.now());
+        return Math.max(0, totalSeconds - elapsedSeconds);
     }
 
     public int getX() { return x; }

@@ -39,9 +39,14 @@ public class ChomperPlant extends GenericPlant {
     @Override
     public boolean onZombieAttack(Zombie zombie, GameSession session) {
         if (!digesting) {
-            zombie.setCurrentHealth(0);   // بلعیدن = مرگ فوری
+            // باگ قبلی: setCurrentHealth(0) مستقیم صدا زده می‌شد که از
+            // takeDamage() (جایی که رویداد انیمیشن DYING_STARTED ست می‌شود) رد
+            // نمی‌شد — یعنی زامبی بلعیده‌شده هیچ‌وقت انیمیشن مرگ نمی‌گرفت.
+            zombie.setCurrentHealth(0);
+            zombie.fireAnimEvent(com.pvz2.model.enums.AnimEvent.DYING_STARTED);
             digesting = true;
             digestTimer = DIGEST_TICKS;
+            fireAttackTrigger(); // برای انیمیشن: لحظه بلعیدن
             return true;                  // آسیبی به Chomper نمی‌رسد
         }
         return false;   // در حال هضم → زامبی به طور عادی حمله می‌کند

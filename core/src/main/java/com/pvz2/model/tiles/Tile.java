@@ -21,6 +21,12 @@ public class Tile {
     private int tileHealth;
     private boolean hasSunPending;
     private int freezeLevel;
+    /** حفره (Beghouled): وقتی زامبی گیاهی را می‌خورد، آن خانه crater می‌شود و دیگر گیاه نمی‌گیرد. */
+    private boolean crater;
+
+    /** جایزه‌ی نهفته در سنگ‌قبر — با اتمامِ جانِ سنگ‌قبر آزاد می‌شود. */
+    public enum Reward { NONE, SUN, PLANT_FOOD }
+    private Reward reward = Reward.NONE;
 
     public Tile(int x, int y, TileType type) {
         this.x = x;
@@ -41,6 +47,9 @@ public class Tile {
     }
 
     public boolean isPlantable() {
+        if (crater) {
+            return false;
+        }
         if (type == TileType.TOMBSTONE || type == TileType.DARK_TOMBSTONE) {
             return false;
         }
@@ -122,4 +131,8 @@ public class Tile {
     public int getFreezeLevel() { return freezeLevel; }
     public void setFreezeLevel(int freezeLevel) { this.freezeLevel = freezeLevel; }
     public void incrementFreezeLevel() { this.freezeLevel = Math.min(3, this.freezeLevel + 1); }
+    public boolean isCrater() { return crater; }
+    public void setCrater(boolean crater) { this.crater = crater; }
+    public Reward getReward() { return reward; }
+    public void setReward(Reward reward) { this.reward = reward; }
 }

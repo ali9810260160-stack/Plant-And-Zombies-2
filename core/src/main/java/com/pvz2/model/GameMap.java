@@ -18,6 +18,8 @@ public class GameMap {
     private Tile[][] tiles;
     private ChapterType chapter;
     private boolean[] lawnMowers;
+    /** حداکثر تعداد ستونِ آبِ ساحل (منطقه‌ی جزرومد؛ ۰ = مرحله‌ی غیرساحلی). EK3. */
+    private int beachMaxWaterCols = 0;
 
     public GameMap(int rows, int cols, ChapterType chapter) {
         this.rows = rows;
@@ -114,6 +116,8 @@ public class GameMap {
     public Tile[][] getTiles() { return tiles; }
     public ChapterType getChapter() { return chapter; }
     public boolean[] getLawnMowers() { return lawnMowers; }
+    public int getBeachMaxWaterCols() { return beachMaxWaterCols; }
+    public void setBeachMaxWaterCols(int c) { this.beachMaxWaterCols = c; }
 
     public boolean isLawnMowerAvailable(int rowIndex) {
         return rowIndex >= 0 && rowIndex < rows && lawnMowers[rowIndex];

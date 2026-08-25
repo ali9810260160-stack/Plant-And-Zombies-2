@@ -49,6 +49,7 @@ public class PeaPodPlant extends GenericPlant {
                 p.setYOffset(0);
                 pendingProj.add(p);
             }
+            fireAttackTrigger(); // برای انیمیشن
         }
     }
 

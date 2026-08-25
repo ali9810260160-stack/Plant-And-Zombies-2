@@ -183,6 +183,7 @@ public class GenericPlant extends Plant {
                     z.addEffect(ZombieEffect.FROZEN,  100);
                     z.addEffect(ZombieEffect.CHILLED, 200);
                 }
+                session.pushScreenEffect("iceshroom"); // بادِ یخیِ تمام‌صفحه
                 break;
             case HOT_POTATO:
                 Tile hotTile = session.getGameMap().getTile(x, y);
@@ -282,6 +283,7 @@ public class GenericPlant extends Plant {
         if (++attackTimer >= (int)(10.0 / spd)) {
             attackTimer = 0;
             generateProjectilesForType(session);
+            fireAttackTrigger(); // برای انیمیشن: لحظه واقعی شلیک
         }
     }
 
@@ -294,6 +296,7 @@ public class GenericPlant extends Plant {
         } else {
             charged = false;
             fireChargedShot(session);
+            fireAttackTrigger(); // برای انیمیشن: لحظه واقعی شلیک شارژی
         }
     }
     private int getChargeResetTime() {
@@ -661,19 +664,30 @@ public class GenericPlant extends Plant {
     // ─────────────────────────────────────────────────────────────
     private void aoeExplosion(GameSession session, int cx, int cy, int radius, int dmg) {
         if (session == null) return;
+        session.addExplosion(cx, cy); // لرزشِ صفحه + جلوه‌ی انفجار
         for (Zombie z : session.getActiveZombies())
-            if (Math.abs(z.getX() - cx) <= radius && Math.abs(z.getY() - cy) <= radius)
+            if (Math.abs(z.getX() - cx) <= radius && Math.abs(z.getY() - cy) <= radius) {
                 z.takeDamage(dmg);
+                if (!z.isAlive()) z.setPulverized(true); // جلوه‌ی خاکسترِ انفجار
+            }
     }
 
     private void burnEntireRow(GameSession session, int row, int dmg) {
+        if (session != null) session.addExplosion(x, row); // جالاپینو: انفجارِ ردیف
         for (Zombie z : session.getActiveZombies())
-            if (z.getY() == row) z.takeDamage(dmg);
+            if (z.getY() == row) {
+                z.takeDamage(dmg);
+                if (!z.isAlive()) z.setPulverized(true);
+            }
     }
 
     private void doomExplosion(GameSession session) {
         int dmg = baseDamage > 0 ? baseDamage : 5000;
-        for (Zombie z : session.getActiveZombies()) z.takeDamage(dmg);
+        if (session != null) session.addExplosion(x, y); // دوم‌شروم: انفجارِ بزرگ
+        for (Zombie z : session.getActiveZombies()) {
+            z.takeDamage(dmg);
+            if (!z.isAlive()) z.setPulverized(true);
+        }
         // ایجاد گودال (تایل غیر قابل کشت)
         Tile t = session.getGameMap().getTile(x, y);
         if (t != null) t.setType(TileType.ICY_GROUND);
@@ -774,6 +788,8 @@ public class GenericPlant extends Plant {
 
     @Override
     public void activatePlantFood(GameSession session) {
+        // رویدادِ انیمیشن: کلیپِ plantfood + حاله‌ی نورانی (PlantAnimController).
+        fireAnimEvent(AnimEvent.PLANT_FOOD_ACTIVATED);
         switch (type) {
             // تولیدکنندگان خورشید: تولید فوری انبوه
             case SUNFLOWER: case TWIN_SUNFLOWER:
