@@ -1,0 +1,2021 @@
+{
+ "_comment": "تولید خودکار از animations.json واقعی توسط generate_animations_config.py",
+ "version": "2.0",
+ "plants": {
+  "SUNFLOWER": {
+   "pamPath": "768/INITIAL/PLANT/SUNFLOWER/SUNFLOWER.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "special",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "TWIN_SUNFLOWER": {
+   "pamPath": "768/INITIAL/PLANT/SUNFLOWER_TWIN/SUNFLOWER_TWIN.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "special",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "SUN_SHROOM": {
+   "pamPath": "768/FULL/PLANT/SUNSHROOM/SUNSHROOM.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle_stage1",
+     "loop": true
+    }
+   }
+  },
+  "PRIMAL_SUNFLOWER": {
+   "pamPath": "768/FULL/PLANT/PRIMAL_SUNFLOWER/PRIMAL_SUNFLOWER.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "special",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "GOLD_BLOOM": {
+   "pamPath": "768/INITIAL/PLANT/GOLDBLOOM/GOLDBLOOM.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "PEASHOOTER": {
+   "pamPath": "768/INITIAL/PLANT/PEASHOOTER/PEASHOOTER.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "REPEATER": {
+   "pamPath": "768/INITIAL/PLANT/REPEATER/REPEATER.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "THREEPEATER": {
+   "pamPath": "768/INITIAL/PLANT/THREEPEATER/THREEPEATER.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "SNOW_PEA": {
+   "pamPath": "768/INITIAL/PLANT/SNOWPEA/SNOWPEA.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "ROTOBAGA": {
+   "pamPath": "768/FULL/PLANT/ROTORUTABAGA/ROTORUTABAGA.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "PEA_POD": {
+   "pamPath": "768/FULL/PLANT/PEAPOD/PEAPOD.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "SPLIT_PEA": {
+   "pamPath": "768/FULL/PLANT/SPLITPEA/SPLITPEA.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "CITRON": {
+   "pamPath": "768/FULL/PLANT/CITRON/CITRON.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "CAULIPOWER": {
+   "pamPath": "768/INITIAL/PLANT/CAULIPOWER/CAULIPOWER.PAM",
+   "states": {
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "ELECTRIC_BLUEBERRY": {
+   "pamPath": "768/INITIAL/PLANT/ELECTRICBLUEBERRY/ELECTRICBLUEBERRY.PAM",
+   "states": {
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "BOWLING_BULB": {
+   "pamPath": "768/FULL/PLANT/BOWLINGBULB/BOWLINGBULB.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "special",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "CACTUS": {
+   "pamPath": "768/INITIAL/PLANT/CACTUS/CACTUS.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "FIRE_PEASHOOTER": {
+   "pamPath": "768/INITIAL/PLANT/FIREPEASHOOTER/FIREPEASHOOTER.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "STARFRUIT": {
+   "pamPath": "768/INITIAL/PLANT/STARFRUIT/STARFRUIT.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "GOO_PEASHOOTER": {
+   "pamPath": "768/INITIAL/PLANT/GOOPEASHOOTER/GOOPEASHOOTER.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "MEGA_GATLING_PEA": {
+   "pamPath": "768/INITIAL/PLANT/MEGAGATLING/MEGAGATLING.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "SEA_SHROOM": {
+   "pamPath": "768/FULL/PLANT/SEASHROOM/SEASHROOM.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "DYING": {
+     "clip": "death",
+     "loop": false
+    }
+   }
+  },
+  "PUFF_SHROOM": {
+   "pamPath": "768/INITIAL/PLANT/PUFFSHROOM/PUFFSHROOM.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle_stage1",
+     "loop": true
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "FUME_SHROOM": {
+   "pamPath": "768/INITIAL/PLANT/FUMESHROOM/FUMESHROOM.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "special",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "CABBAGE_PULT": {
+   "pamPath": "768/INITIAL/PLANT/CABBAGEPULT/CABBAGEPULT.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "KERNEL_PULT": {
+   "pamPath": "768/INITIAL/PLANT/KERNALPULT/KERNALPULT.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "MELON_PULT": {
+   "pamPath": "768/INITIAL/PLANT/MELONPULT/MELONPULT.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "WINTER_MELON": {
+   "pamPath": "768/FULL/PLANT/WINTERMELON/WINTERMELON.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "PEPPER_PULT": {
+   "pamPath": "768/FULL/PLANT/PEPPERPULT/PEPPERPULT.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "POTATO_MINE": {
+   "pamPath": "768/INITIAL/PLANT/POTATOMINE/POTATOMINE.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "PRIMAL_POTATO_MINE": {
+   "pamPath": "768/FULL/PLANT/PRIMAL_POTATOMINE/PRIMAL_POTATOMINE.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "CHERRY_BOMB": {
+   "pamPath": "768/FULL/PLANT/CHERRYBOMB/CHERRYBOMB.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "SQUASH": {
+   "pamPath": "768/INITIAL/PLANT/SQUASH/SQUASH.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    }
+   }
+  },
+  "GRAPESHOT": {
+   "pamPath": "768/INITIAL/PLANT/GRAPESHOT/GRAPESHOT.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "JALAPENO": {
+   "pamPath": "768/INITIAL/PLANT/JALAPENO/JALAPENO.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "DOOM_SHROOM": {
+   "pamPath": "768/FULL/PLANT/DOOMSHROOM/DOOMSHROOM.PAM",
+   "states": {}
+  },
+  "TANGLE_KELP": {
+   "pamPath": "768/FULL/PLANT/TANGLEKELP/TANGLEKELP.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "ICEBERG_LETTUCE": {
+   "pamPath": "768/INITIAL/PLANT/ICEBURG/ICEBURG.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "BONK_CHOY": {
+   "pamPath": "768/INITIAL/PLANT/BONKCHOY/BONKCHOY.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "PHAT_BEET": {
+   "pamPath": "768/FULL/PLANT/PHATBEETS/PHATBEETS.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "CHOMPER": {
+   "pamPath": "768/INITIAL/PLANT/CHOMPER/CHOMPER.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "special",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "WASABI_WHIP": {
+   "pamPath": "768/INITIAL/PLANT/WASABIWHIP/WASABIWHIP.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "KIWIBEAST": {
+   "pamPath": "768/INITIAL/PLANT/KIWIBEAST/KIWIBEAST.PAM",
+   "states": {}
+  },
+  "WALL_NUT": {
+   "pamPath": "768/INITIAL/PLANT/WALLNUT/WALLNUT.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   },
+   "damageVariants": [
+    "damage",
+    "damage2",
+    "damage3"
+   ]
+  },
+  "TALL_NUT": {
+   "pamPath": "768/FULL/PLANT/TALLNUT/TALLNUT.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    }
+   },
+   "damageVariants": [
+    "damage",
+    "damage2"
+   ]
+  },
+  "ENDURIAN": {
+   "pamPath": "768/FULL/PLANT/ENDURIAN/ENDURIAN.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    }
+   },
+   "damageVariants": [
+    "damage",
+    "damage2",
+    "damage3"
+   ]
+  },
+  "GARLIC": {
+   "pamPath": "768/FULL/PLANT/GARLIC/GARLIC.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "SWEET_POTATO": {
+   "pamPath": "768/INITIAL/PLANT/SWEETPOTATO/SWEETPOTATO.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "EXPLODE_O_NUT": {
+   "pamPath": "768/INITIAL/PLANT/EXPLODEONUT/EXPLODEONUT.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   },
+   "damageVariants": [
+    "damage",
+    "damage2",
+    "damage3"
+   ]
+  },
+  "PUMPKIN": {
+   "pamPath": "768/INITIAL/PLANT/PUMPKIN/PUMPKIN.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    }
+   }
+  },
+  "SUN_BEAN": {
+   "pamPath": "768/FULL/PLANT/SUNBEAN/SUNBEAN.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "TORCHWOOD": {
+   "pamPath": "768/INITIAL/PLANT/TORCHWOOD/TORCHWOOD.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "MAGNET_SHROOM": {
+   "pamPath": "768/FULL/PLANT/MAGNETSHROOM/MAGNETSHROOM.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "special",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "HYPNO_SHROOM": {
+   "pamPath": "768/INITIAL/PLANT/HYPNOSHROOM/HYPNOSHROOM.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "IMITATER": {
+   "pamPath": "768/INITIAL/PLANT/IMITATER/IMITATER.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "ICE_SHROOM": {
+   "pamPath": "768/FULL/PLANT/ICESHROOM/ICESHROOM.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "LILY_PAD": {
+   "pamPath": "768/FULL/PLANT/LILYPAD/LILYPAD.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "HOT_POTATO": {
+   "pamPath": "768/FULL/PLANT/HOTPOTATO/HOTPOTATO.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "GRAVE_BUSTER": {
+   "pamPath": "768/INITIAL/PLANT/GRAVEBUSTER/GRAVEBUSTER.PAM",
+   "states": {
+    "ATTACK": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   }
+  },
+  "ENLIGHTEN_MINT": {
+   "pamPath": "768/INITIAL/EMPOWERMINTS/PLANT/ENLIGHTENMINT/ENLIGHTENMINT.PAM",
+   "states": {}
+  },
+  "APPEASE_MINT": {
+   "pamPath": "768/INITIAL/EMPOWERMINTS/PLANT/APPEASEMINT/APPEASEMINT.PAM",
+   "states": {}
+  },
+  "ARMA_MINT": {
+   "pamPath": "768/INITIAL/EMPOWERMINTS/PLANT/ARMAMINT/ARMAMINT.PAM",
+   "states": {}
+  },
+  "BOMBARD_MINT": {
+   "pamPath": "768/INITIAL/EMPOWERMINTS/PLANT/BOMBARDMINT/BOMBARDMINT.PAM",
+   "states": {}
+  },
+  "ENFORCE_MINT": {
+   "pamPath": "768/INITIAL/EMPOWERMINTS/PLANT/ENFORCEMINT/ENFORCEMINT.PAM",
+   "states": {}
+  },
+  "REINFORCE_MINT": {
+   "pamPath": "768/INITIAL/EMPOWERMINTS/PLANT/REINFORCEMINT/REINFORCEMINT.PAM",
+   "states": {}
+  },
+  "ENCHANT_MINT": {
+   "pamPath": "768/INITIAL/EMPOWERMINTS/PLANT/ENCHANTMINT/ENCHANTMINT.PAM",
+   "states": {}
+  },
+  "WALLNUT_BOWLING": {
+   "pamPath": "768/INITIAL/PLANT/WALLNUT/WALLNUT.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   },
+   "damageVariants": [
+    "damage",
+    "damage2",
+    "damage3"
+   ]
+  },
+  "EXPLODE_O_NUT_BOWLING": {
+   "pamPath": "768/INITIAL/PLANT/EXPLODEONUT/EXPLODEONUT.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   },
+   "damageVariants": [
+    "damage",
+    "damage2",
+    "damage3"
+   ]
+  },
+  "BIG_WALLNUT": {
+   "pamPath": "768/INITIAL/PLANT/WALLNUT/WALLNUT.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "PLANT_FOOD": {
+     "clip": "plantfood",
+     "loop": false,
+     "returnTo": "IDLE"
+    }
+   },
+   "damageVariants": [
+    "damage",
+    "damage2",
+    "damage3"
+   ],
+   "scaleX": 1.6,
+   "scaleY": 1.6
+  }
+ },
+ "zombies": {
+  "ZOMBOTANY_PEASHOOTER": {
+   "pamPath": "768/INITIAL/PLANT/PEASHOOTER/PEASHOOTER.PAM",
+   "states": {
+    "IDLE":  { "clip": "idle", "loop": true },
+    "WALK":  { "clip": "idle", "loop": true },
+    "EAT":   { "clip": "attack", "loop": true },
+    "DYING": { "clip": "idle", "loop": false }
+   }
+  },
+  "ZOMBOTANY_WALLNUT": {
+   "pamPath": "768/INITIAL/PLANT/WALLNUT/WALLNUT.PAM",
+   "states": {
+    "IDLE":  { "clip": "idle", "loop": true },
+    "WALK":  { "clip": "idle", "loop": true },
+    "EAT":   { "clip": "idle", "loop": true },
+    "DYING": { "clip": "idle", "loop": false }
+   }
+  },
+  "ZOMBOTANY_JALAPENO": {
+   "pamPath": "768/INITIAL/PLANT/JALAPENO/JALAPENO.PAM",
+   "states": {
+    "IDLE":  { "clip": "idle", "loop": true },
+    "WALK":  { "clip": "idle", "loop": true },
+    "EAT":   { "clip": "attack", "loop": true },
+    "DYING": { "clip": "idle", "loop": false }
+   }
+  },
+  "ZOMBOTANY_SQUASH": {
+   "pamPath": "768/INITIAL/PLANT/SQUASH/SQUASH.PAM",
+   "states": {
+    "IDLE":  { "clip": "idle", "loop": true },
+    "WALK":  { "clip": "idle", "loop": true },
+    "EAT":   { "clip": "idle", "loop": true },
+    "DYING": { "clip": "idle", "loop": false }
+   }
+  },
+  "NORMAL__ANCIENT_EGYPT": {
+   "pamPath": "768/INITIAL/ZOMBIE/ZOMBIE_EGYPT_BASIC/ZOMBIE_EGYPT_BASIC.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    }
+   }
+  },
+  "NORMAL__FROSTBITE_CAVES": {
+   "pamPath": "768/FULL/ZOMBIE/ZOMBIE_ICEAGE_BASIC/ZOMBIE_ICEAGE_BASIC.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    }
+   }
+  },
+  "NORMAL__BIG_WAVE_BEACH": {
+   "pamPath": "768/FULL/ZOMBIE/ZOMBIE_BEACH_BASIC/ZOMBIE_BEACH_BASIC.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    }
+   }
+  },
+  "NORMAL__DARK_AGES": {
+   "pamPath": "768/FULL/ZOMBIE/ZOMBIE_DARK_BASIC/ZOMBIE_DARK_BASIC.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    }
+   }
+  },
+  "GARGANTUAR__ANCIENT_EGYPT": {
+   "pamPath": "768/INITIAL/ZOMBIE/EGYPT_GARGANTUAR/EGYPT_GARGANTUAR.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    },
+    "SPECIAL": {
+     "clip": "fire",
+     "loop": false,
+     "returnTo": "WALK"
+    }
+   },
+   "specialAbilities": [
+    {
+     "id": "THROW_IMP",
+     "trigger": "HP_BELOW",
+     "triggerParam": 0.5,
+     "once": true,
+     "animState": "SPECIAL",
+     "action": "SPAWN_IMP",
+     "actionParams": {
+      "x_offset": "-3"
+     }
+    }
+   ]
+  },
+  "GARGANTUAR__FROSTBITE_CAVES": {
+   "pamPath": "768/FULL/ZOMBIE/ZOMBIE_ICEAGE_GARGANTUAR/ZOMBIE_ICEAGE_GARGANTUAR.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    },
+    "SPECIAL": {
+     "clip": "fire",
+     "loop": false,
+     "returnTo": "WALK"
+    }
+   },
+   "specialAbilities": [
+    {
+     "id": "THROW_IMP",
+     "trigger": "HP_BELOW",
+     "triggerParam": 0.5,
+     "once": true,
+     "animState": "SPECIAL",
+     "action": "SPAWN_IMP",
+     "actionParams": {
+      "x_offset": "-3"
+     }
+    }
+   ]
+  },
+  "GARGANTUAR__BIG_WAVE_BEACH": {
+   "pamPath": "768/FULL/ZOMBIE/BEACH_GARGANTUAR/BEACH_GARGANTUAR.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    },
+    "SPECIAL": {
+     "clip": "fire",
+     "loop": false,
+     "returnTo": "WALK"
+    }
+   },
+   "specialAbilities": [
+    {
+     "id": "THROW_IMP",
+     "trigger": "HP_BELOW",
+     "triggerParam": 0.5,
+     "once": true,
+     "animState": "SPECIAL",
+     "action": "SPAWN_IMP",
+     "actionParams": {
+      "x_offset": "-3"
+     }
+    }
+   ]
+  },
+  "GARGANTUAR__DARK_AGES": {
+   "pamPath": "768/FULL/ZOMBIE/DARK_GARGANTUAR/DARK_GARGANTUAR.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    },
+    "SPECIAL": {
+     "clip": "fire",
+     "loop": false,
+     "returnTo": "WALK"
+    }
+   },
+   "specialAbilities": [
+    {
+     "id": "THROW_IMP",
+     "trigger": "HP_BELOW",
+     "triggerParam": 0.5,
+     "once": true,
+     "animState": "SPECIAL",
+     "action": "SPAWN_IMP",
+     "actionParams": {
+      "x_offset": "-3"
+     }
+    }
+   ]
+  },
+  "IMP__ANCIENT_EGYPT": {
+   "pamPath": "768/INITIAL/ZOMBIE/ZOMBIE_EGYPT_IMP/ZOMBIE_EGYPT_IMP.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    },
+    "FLYING": {
+     "clip": "fly",
+     "loop": true
+    },
+    "LANDING": {
+     "clip": "land",
+     "loop": false,
+     "returnTo": "WALK"
+    }
+   }
+  },
+  "IMP__FROSTBITE_CAVES": {
+   "pamPath": "768/FULL/ZOMBIE/ZOMBIE_ICEAGE_IMP/ZOMBIE_ICEAGE_IMP.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    },
+    "FLYING": {
+     "clip": "fly",
+     "loop": true
+    },
+    "LANDING": {
+     "clip": "land",
+     "loop": false,
+     "returnTo": "WALK"
+    }
+   }
+  },
+  "IMP__BIG_WAVE_BEACH": {
+   "pamPath": "768/FULL/ZOMBIE/ZOMBIE_BEACH_IMP_MERMAID/ZOMBIE_BEACH_IMP_MERMAID.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    },
+    "FLYING": {
+     "clip": "fly",
+     "loop": true
+    },
+    "LANDING": {
+     "clip": "land",
+     "loop": false,
+     "returnTo": "WALK"
+    }
+   }
+  },
+  "IMP__DARK_AGES": {
+   "pamPath": "768/FULL/ZOMBIE/ZOMBIE_DARK_IMP_MONK/ZOMBIE_DARK_IMP_MONK.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    },
+    "FLYING": {
+     "clip": "fly",
+     "loop": true
+    },
+    "LANDING": {
+     "clip": "land",
+     "loop": false,
+     "returnTo": "WALK"
+    }
+   }
+  },
+  "CONEHEAD__ANCIENT_EGYPT": {
+   "baseZombieType": "NORMAL__ANCIENT_EGYPT",
+   "forcedArmor": "CONE"
+  },
+  "CONEHEAD__FROSTBITE_CAVES": {
+   "baseZombieType": "NORMAL__FROSTBITE_CAVES",
+   "forcedArmor": "CONE"
+  },
+  "CONEHEAD__BIG_WAVE_BEACH": {
+   "baseZombieType": "NORMAL__BIG_WAVE_BEACH",
+   "forcedArmor": "CONE"
+  },
+  "CONEHEAD__DARK_AGES": {
+   "baseZombieType": "NORMAL__DARK_AGES",
+   "forcedArmor": "CONE"
+  },
+  "BUCKETHEAD__ANCIENT_EGYPT": {
+   "baseZombieType": "NORMAL__ANCIENT_EGYPT",
+   "forcedArmor": "BUCKET"
+  },
+  "BUCKETHEAD__FROSTBITE_CAVES": {
+   "baseZombieType": "NORMAL__FROSTBITE_CAVES",
+   "forcedArmor": "BUCKET"
+  },
+  "BUCKETHEAD__BIG_WAVE_BEACH": {
+   "baseZombieType": "NORMAL__BIG_WAVE_BEACH",
+   "forcedArmor": "BUCKET"
+  },
+  "BUCKETHEAD__DARK_AGES": {
+   "baseZombieType": "NORMAL__DARK_AGES",
+   "forcedArmor": "BUCKET"
+  },
+  "KNIGHT__ANCIENT_EGYPT": {
+   "baseZombieType": "NORMAL__ANCIENT_EGYPT",
+   "forcedArmor": "HELMET+SHOULDER_ARMOR"
+  },
+  "KNIGHT__FROSTBITE_CAVES": {
+   "baseZombieType": "NORMAL__FROSTBITE_CAVES",
+   "forcedArmor": "HELMET+SHOULDER_ARMOR"
+  },
+  "KNIGHT__BIG_WAVE_BEACH": {
+   "baseZombieType": "NORMAL__BIG_WAVE_BEACH",
+   "forcedArmor": "HELMET+SHOULDER_ARMOR"
+  },
+  "KNIGHT__DARK_AGES": {
+   "baseZombieType": "NORMAL__DARK_AGES",
+   "forcedArmor": "HELMET+SHOULDER_ARMOR"
+  },
+  "BLOCKHEAD__ANCIENT_EGYPT": {
+   "baseZombieType": "NORMAL__ANCIENT_EGYPT",
+   "forcedArmor": "BLOCK"
+  },
+  "BLOCKHEAD__FROSTBITE_CAVES": {
+   "baseZombieType": "NORMAL__FROSTBITE_CAVES",
+   "forcedArmor": "BLOCK"
+  },
+  "BLOCKHEAD__BIG_WAVE_BEACH": {
+   "baseZombieType": "NORMAL__BIG_WAVE_BEACH",
+   "forcedArmor": "BLOCK"
+  },
+  "BLOCKHEAD__DARK_AGES": {
+   "baseZombieType": "NORMAL__DARK_AGES",
+   "forcedArmor": "BLOCK"
+  },
+  "RA_ZOMBIE": {
+   "pamPath": "768/INITIAL/ZOMBIE/ZOMBIE_EGYPT_RA/ZOMBIE_EGYPT_RA.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    },
+    "SPECIAL": {
+     "clip": "power",
+     "loop": false,
+     "returnTo": "WALK"
+    }
+   },
+   "specialAbilities": [
+    {
+     "id": "STEAL_SUN",
+     "trigger": "PERIODIC",
+     "triggerParam": 4.0,
+     "once": false,
+     "animState": "SPECIAL",
+     "action": "COLLECT_SUN",
+     "actionParams": {
+      "range": "3.0"
+     }
+    }
+   ]
+  },
+  "EXPLORER_ZOMBIE": {
+   "pamPath": "768/INITIAL/ZOMBIE/ZOMBIE_EXPLORER/ZOMBIE_EXPLORER.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    }
+   }
+  },
+  "TOMB_RAISER": {
+   "pamPath": "768/INITIAL/ZOMBIE/ZOMBIE_EGYPT_TOMBRAISER/ZOMBIE_EGYPT_TOMBRAISER.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    },
+    "SPECIAL": {
+     "clip": "power",
+     "loop": false,
+     "returnTo": "WALK"
+    }
+   },
+   "specialAbilities": [
+    {
+     "id": "RAISE_GRAVE",
+     "trigger": "PERIODIC",
+     "triggerParam": 6.0,
+     "once": false,
+     "animState": "SPECIAL",
+     "action": "SUMMON_GRAVE",
+     "actionParams": {
+      "x_offset": "-2"
+     }
+    }
+   ]
+  },
+  "DODO_RIDER": {
+   "pamPath": "768/FULL/ZOMBIE/ZOMBIE_ICEAGE_DODORIDER/ZOMBIE_ICEAGE_DODORIDER.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    }
+   }
+  },
+  "HUNTER_ZOMBIE": {
+   "pamPath": "768/FULL/ZOMBIE/ZOMBIE_ICEAGE_HUNTER/ZOMBIE_ICEAGE_HUNTER.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    },
+    "SPECIAL": {
+     "clip": "throw",
+     "loop": false,
+     "returnTo": "WALK"
+    }
+   },
+   "specialAbilities": [
+    {
+     "id": "THROW_ICE",
+     "trigger": "PERIODIC",
+     "triggerParam": 3.0,
+     "once": false,
+     "animState": "SPECIAL",
+     "action": "THROW_ICE_PROJECTILE",
+     "actionParams": {}
+    }
+   ]
+  },
+  "TROGLOBITE": {
+   "pamPath": "768/FULL/ZOMBIE/ZOMBIE_ICEAGE_TROGLOBITE/ZOMBIE_ICEAGE_TROGLOBITE.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    },
+    "SPECIAL": {
+     "clip": "push",
+     "loop": false,
+     "returnTo": "WALK"
+    }
+   },
+   "specialAbilities": [
+    {
+     "id": "PUSH_PLANT",
+     "trigger": "ON_EAT",
+     "triggerParam": 0,
+     "once": false,
+     "animState": "SPECIAL",
+     "action": "PUSH_BACK_PLANT",
+     "actionParams": {}
+    }
+   ]
+  },
+  "FISHERMAN_ZOMBIE": {
+   "pamPath": "768/FULL/ZOMBIE/ZOMBIE_BEACH_FISHERMAN/ZOMBIE_BEACH_FISHERMAN.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    },
+    "SPECIAL": {
+     "clip": "cast",
+     "loop": false,
+     "returnTo": "WALK"
+    }
+   },
+   "specialAbilities": [
+    {
+     "id": "CAST_HOOK",
+     "trigger": "PERIODIC",
+     "triggerParam": 5.0,
+     "once": false,
+     "animState": "SPECIAL",
+     "action": "HOOK_NEAREST_PLANT",
+     "actionParams": {
+      "range": "4.0"
+     }
+    }
+   ]
+  },
+  "SNORKEL_ZOMBIE": {
+   "pamPath": "768/FULL/ZOMBIE/ZOMBIE_BEACH_SNORKELER/ZOMBIE_BEACH_SNORKELER.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    }
+   }
+  },
+  "OCTOPUS_ZOMBIE": {
+   "pamPath": "768/FULL/ZOMBIE/ZOMBIE_BEACH_OCTOPUS/ZOMBIE_BEACH_OCTOPUS.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    },
+    "SPECIAL": {
+     "clip": "toss",
+     "loop": false,
+     "returnTo": "WALK"
+    }
+   },
+   "specialAbilities": [
+    {
+     "id": "TOSS_PLANT",
+     "trigger": "ON_ENTER",
+     "triggerParam": 0,
+     "once": true,
+     "animState": "SPECIAL",
+     "action": "TOSS_PLANT_BEHIND",
+     "actionParams": {}
+    }
+   ]
+  },
+  "JESTER_ZOMBIE": {
+   "pamPath": "768/FULL/ZOMBIE/ZOMBIE_DARK_JESTER/ZOMBIE_DARK_JESTER.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    }
+   }
+  },
+  "WIZARD_ZOMBIE": {
+   "pamPath": "768/FULL/ZOMBIE/ZOMBIE_DARK_WIZARD/ZOMBIE_DARK_WIZARD.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    },
+    "SPECIAL": {
+     "clip": "sheep",
+     "loop": false,
+     "returnTo": "WALK"
+    }
+   },
+   "specialAbilities": [
+    {
+     "id": "TRANSFORM_SHEEP",
+     "trigger": "PERIODIC",
+     "triggerParam": 8.0,
+     "once": false,
+     "animState": "SPECIAL",
+     "action": "TRANSFORM_PLANT_TO_SHEEP",
+     "actionParams": {}
+    }
+   ]
+  },
+  "KING_ZOMBIE": {
+   "pamPath": "768/FULL/ZOMBIE/ZOMBIE_DARK_KING/ZOMBIE_DARK_KING.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    },
+    "SPECIAL": {
+     "clip": "special",
+     "loop": false,
+     "returnTo": "WALK"
+    }
+   },
+   "specialAbilities": [
+    {
+     "id": "BUFF_ZOMBIES",
+     "trigger": "PERIODIC",
+     "triggerParam": 10.0,
+     "once": false,
+     "animState": "SPECIAL",
+     "action": "BUFF_NEARBY_ZOMBIES",
+     "actionParams": {
+      "range": "3.0"
+     }
+    }
+   ]
+  },
+  "DRAGON_IMP": {
+   "pamPath": "768/FULL/ZOMBIE/ZOMBIE_DARK_IMP_DRAGON/ZOMBIE_DARK_IMP_DRAGON.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    }
+   }
+  },
+  "ALL_STAR": {
+   "pamPath": "768/FULL/ZOMBIE/ZOMBIE_MODERN_ALLSTAR/ZOMBIE_MODERN_ALLSTAR.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "kick",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    }
+   }
+  },
+  "ARCADE_ZOMBIE": {
+   "pamPath": "768/FULL/ZOMBIE/ZOMBIE_80S_ARCADE/ZOMBIE_80S_ARCADE.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    }
+   }
+  },
+  "PROSPECTOR_ZOMBIE": {
+   "pamPath": "768/FULL/ZOMBIE/ZOMBIE_PROSPECTOR/ZOMBIE_PROSPECTOR.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    }
+   }
+  },
+  "PIANIST_ZOMBIE": {
+   "pamPath": "768/FULL/ZOMBIE/ZOMBIE_PIANO/ZOMBIE_PIANO.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    }
+   }
+  },
+  "NEWSPAPER_ZOMBIE": {
+   "pamPath": "768/FULL/ZOMBIE/ZOMBIE_MODERN_NEWSPAPER/ZOMBIE_MODERN_NEWSPAPER.PAM",
+   "states": {
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    }
+   },
+   "armors": {
+    "NEWSPAPER": {
+     "clipSuffixPresent": "_newspaper",
+     "clipSuffixBroken": "",
+     "breakEventClip": "newspaper_defeat"
+    }
+   }
+  },
+  "BARREL_ROLLER": {
+   "pamPath": "768/FULL/ZOMBIE/ZOMBIE_PIRATE_BARREL_PUSHER/ZOMBIE_PIRATE_BARREL_PUSHER.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    }
+   }
+  }
+ }
+}

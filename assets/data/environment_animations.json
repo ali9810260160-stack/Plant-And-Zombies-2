@@ -1,0 +1,194 @@
+{
+  "_comment": "تولید خودکار — انیمیشن‌های محیطی (سنگ‌قبر، مورر، آب، گردباد، بلوک یخ)",
+  "version": "1.0",
+  "gravestones": {
+    "ANCIENT_EGYPT": {
+      "pamPath": "768/INITIAL/GRAVESTONES/EGYPT_HIEROGLYPH/EGYPT_HIEROGLYPH.PAM",
+      "clips": [
+        "undamaged",
+        "damage1",
+        "damage2",
+        "damage3",
+        "damage4"
+      ]
+    },
+    "DARK_AGES_NORMAL": {
+      "pamPath": "768/FULL/GRAVESTONES/DARK_NOOP/DARK_NOOP.PAM",
+      "clips": [
+        "undamaged",
+        "damage1",
+        "damage2",
+        "damage3",
+        "damage4"
+      ]
+    },
+    "DARK_AGES_PLANTFOOD": {
+      "pamPath": "768/FULL/GRAVESTONES/DARK_PLANTFOOD/DARK_PLANTFOOD.PAM",
+      "clips": [
+        "undamaged",
+        "damage1",
+        "damage2",
+        "damage3",
+        "damage4"
+      ]
+    },
+    "DARK_AGES_SUN": {
+      "pamPath": "768/FULL/GRAVESTONES/DARK_SUN/DARK_SUN.PAM",
+      "clips": [
+        "undamaged",
+        "damage1",
+        "damage2",
+        "damage3",
+        "damage4"
+      ]
+    }
+  },
+  "mowers": {
+    "ANCIENT_EGYPT": {
+      "pamPath": "768/INITIAL/MOWERS/MOWER_EGYPT/MOWER_EGYPT.PAM",
+      "clips": [
+        "idle",
+        "transition",
+        "attack"
+      ]
+    },
+    "FROSTBITE_CAVES": {
+      "pamPath": "768/FULL/MOWERS/MOWER_ICEAGE/MOWER_ICEAGE.PAM",
+      "clips": [
+        "idle",
+        "idle2",
+        "idle3",
+        "transition",
+        "attack"
+      ]
+    },
+    "BIG_WAVE_BEACH": {
+      "pamPath": "768/FULL/MOWERS/MOWER_BEACH/MOWER_BEACH.PAM",
+      "clips": [
+        "idle",
+        "transition",
+        "attack",
+        "attack2"
+      ]
+    },
+    "DARK_AGES": {
+      "pamPath": "768/FULL/MOWERS/MOWER_DARK/MOWER_DARK.PAM",
+      "clips": [
+        "idle",
+        "transition",
+        "attack"
+      ]
+    }
+  },
+  "misc": {
+    "SANDSTORM_REAR": {
+      "pamPath": "768/INITIAL/EFFECTS/SANDSTORM_REAR/SANDSTORM_REAR.PAM",
+      "clips": [
+        "intro",
+        "loop",
+        "outro"
+      ]
+    },
+    "SANDSTORM_TOP": {
+      "pamPath": "768/INITIAL/EFFECTS/SANDSTORM_TOP/SANDSTORM_TOP.PAM",
+      "clips": [
+        "intro",
+        "loop",
+        "outro"
+      ]
+    },
+    "TOMBTANGLER_FOG": {
+      "pamPath": "768/INITIAL/EFFECTS/TOMBTANGLER_FOG/TOMBTANGLER_FOG.PAM",
+      "clips": [
+        "start",
+        "loop",
+        "end"
+      ]
+    },
+    "FROSTBITE_ICE_BLOCK_ZOMBIE": {
+      "pamPath": "768/FULL/EFFECTS/FROSTBITE_ICE_BLOCK_ZOMBIE/FROSTBITE_ICE_BLOCK_ZOMBIE.PAM",
+      "clips": [
+        "idle"
+      ]
+    },
+    "FROSTBITE_ICE_BLOCK_ZOMBIE_BEHIND": {
+      "pamPath": "768/FULL/EFFECTS/FROSTBITE_ICE_BLOCK_ZOMBIE_BEHIND/FROSTBITE_ICE_BLOCK_ZOMBIE_BEHIND.PAM",
+      "clips": [
+        "idle"
+      ]
+    },
+    "FROSTBITE_ICE_BLOCK_PLANT": {
+      "pamPath": "768/FULL/EFFECTS/FROSTBITE_ICE_BLOCK_PLANT/FROSTBITE_ICE_BLOCK_PLANT.PAM",
+      "clips": [
+        "freeze_start",
+        "freeze_idle"
+      ]
+    },
+    "FROSTBITE_ICE_BLOCK_PLANT_BEHIND": {
+      "pamPath": "768/FULL/EFFECTS/FROSTBITE_ICE_BLOCK_PLANT_BEHIND/FROSTBITE_ICE_BLOCK_PLANT_BEHIND.PAM",
+      "clips": [
+        "idle"
+      ]
+    },
+    "ARMOR_BREAK_EFFECT": {
+      "pamPath": "768/FULL/EFFECTS/ARMOR_BREAK_EFFECT/ARMOR_BREAK_EFFECT.PAM",
+      "clips": [
+        "animation"
+      ]
+    },
+    "WATER_SQUARE": {
+      "pamPath": "768/FULL/BACKGROUNDS/WATER_SQUARE/WATER_SQUARE.PAM",
+      "clips": [
+        "Water"
+      ]
+    },
+    "WATER_TIDE_LINE": {
+      "pamPath": "768/FULL/BACKGROUNDS/WATER_TIDE_LINE/WATER_TIDE_LINE.PAM",
+      "clips": [
+        "idle"
+      ]
+    },
+    "WAVE_BIG": {
+      "pamPath": "768/FULL/BACKGROUNDS/WAVE_BIG/WAVE_BIG.PAM",
+      "clips": [
+        "wave",
+        "wave_crash"
+      ]
+    },
+    "TILE_PLANTFOOD": {
+      "pamPath": "768/FULL/BACKGROUNDS/TILE_PLANTFOOD/TILE_PLANTFOOD.PAM",
+      "clips": [
+        "inactive_unused",
+        "inactive_used",
+        "active_idle",
+        "active"
+      ]
+    },
+    "PLANTFOOD_FX": {
+      "pamPath": "768/INITIAL/EFFECTS/PLANTFOOD_FX/PLANTFOOD_FX.PAM",
+      "clips": [
+        "plantfood_on",
+        "plantfood",
+        "plantfood_off"
+      ]
+    },
+    "PLANTFOOD_PICKUP": {
+      "pamPath": "768/INITIAL/EFFECTS/PLANTFOOD_PICKUP/PLANTFOOD_PICKUP.PAM",
+      "clips": [
+        "idle",
+        "animation",
+        "animation2"
+      ]
+    },
+    "SUN_PAM": {
+      "pamPath": "768/INITIAL/EFFECTS/SUN/SUN.PAM",
+      "clips": [
+        "animation",
+        "transition_red",
+        "red",
+        "transition_blue",
+        "blue"
+      ]
+    }
+  }
+}
