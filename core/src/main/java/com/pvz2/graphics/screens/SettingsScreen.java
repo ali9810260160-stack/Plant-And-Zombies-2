@@ -1,9 +1,11 @@
 package com.pvz2.graphics.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -46,17 +48,29 @@ public class SettingsScreen extends BaseScreen {
 
         addDifficultyRow(panel, skin);
         addSpeedRow(panel, skin);
+        addVolumeRow(panel, skin);
         addToggle(panel, skin, "Show grid lines (red overlay in-game)",
                 GameConfig.showGrid, val -> GameConfig.showGrid = val);
         addToggle(panel, skin, "Debug mode (cheat buttons in-game)",
                 GameConfig.debugMode, val -> GameConfig.debugMode = val);
+        com.pvz2.model.GameSettings gs = com.pvz2.model.GameSettings.getInstance();
+        addToggle(panel, skin, "Music", gs.isMusicEnabled(), val -> {
+            gs.setMusicEnabled(val);
+            com.pvz2.graphics.audio.SoundManager.get().applySettings();
+            if (val) com.pvz2.graphics.audio.SoundManager.get()
+                    .playMusic(com.pvz2.graphics.audio.SoundManager.MUSIC_MENU);
+        });
+        addToggle(panel, skin, "Sound effects", gs.isSfxEnabled(), gs::setSfxEnabled);
         addSaveButton(panel, skin);
 
         root.add(panel).padBottom(20).row();
 
         TextButton back = new TextButton("Back", skin, "brown");
         back.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent e, float x, float y) { goTo(ScreenId.MAIN_MENU); }
+            @Override public void clicked(InputEvent e, float x, float y) {
+                // اگر کاربر لاگین نیست (ورود از صفحه‌ی Welcome) به Welcome برگرد، نه منوی اصلی.
+                goTo(facade().getCurrentUser() != null ? ScreenId.MAIN_MENU : ScreenId.WELCOME);
+            }
         });
         root.add(back).size(140, 60);
         stage.addActor(root);
@@ -114,6 +128,57 @@ public class SettingsScreen extends BaseScreen {
         root.add(btns).left().padBottom(16).row();
     }
 
+    /**
+     * اسلایدرِ کنترلِ میزانِ صدا (بلوک ۵). زنده روی {@link com.pvz2.model.GameSettings}
+     * و SoundManager اعمال می‌شود و با دکمه‌ی Save به‌ازای هر user سیو می‌شود.
+     * اگر اسکین سبکِ Slider نداشت، به دکمه‌های پیش‌تنظیم برمی‌گردد.
+     */
+    private void addVolumeRow(Table root, Skin skin) {
+        root.add(new Label("Sound Volume:", skin, "default")).right().padRight(16).padBottom(16);
+        final com.pvz2.model.GameSettings gs = com.pvz2.model.GameSettings.getInstance();
+
+        Table row = new Table();
+        if (skin.has("default-horizontal", Slider.SliderStyle.class)) {
+            final Slider slider = new Slider(0f, 1f, 0.05f, false, skin, "default-horizontal");
+            slider.setValue(gs.getMasterVolume());
+            final Label pct = new Label(pct(gs.getMasterVolume()), skin, "default");
+            slider.addListener(new ChangeListener() {
+                @Override public void changed(ChangeEvent e, Actor a) {
+                    applyVolume(slider.getValue());
+                    pct.setText(pct(slider.getValue()));
+                }
+            });
+            row.add(slider).width(230).padRight(10);
+            row.add(pct).width(54);
+        } else {
+            // fallback: دکمه‌های پیش‌تنظیم اگر اسکین Slider نداشت.
+            int[] presets = {0, 25, 50, 75, 100};
+            for (int p : presets) {
+                final float v = p / 100f;
+                boolean active = Math.round(gs.getMasterVolume() * 100) == p;
+                TextButton b = new TextButton(p + "%", skin, active ? "green" : "brown");
+                b.addListener(new ClickListener() {
+                    @Override public void clicked(InputEvent e, float x, float y) {
+                        applyVolume(v);
+                        stage.clear();
+                        buildUi();
+                    }
+                });
+                row.add(b).size(58, 40).padRight(4);
+            }
+        }
+        root.add(row).left().padBottom(16).row();
+    }
+
+    private String pct(float v) { return Math.round(v * 100) + "%"; }
+
+    /** اعمالِ زنده‌ی میزانِ صدا روی GameSettings + GameConfig + SoundManager. */
+    private void applyVolume(float v) {
+        com.pvz2.model.GameSettings.getInstance().setMasterVolume(v);
+        GameConfig.musicVolume = v;
+        com.pvz2.graphics.audio.SoundManager.get().applySettings();
+    }
+
     private void addToggle(Table root, Skin skin, String label, boolean current, BoolSetter setter) {
         root.add(new Label(label + ":", skin, "default")).right().padRight(16).padBottom(14);
         CheckBox cb = new CheckBox("", skin);
@@ -128,10 +193,27 @@ public class SettingsScreen extends BaseScreen {
         TextButton save = new TextButton("Save Settings", skin, "green");
         save.addListener(new ClickListener() {
             @Override public void clicked(InputEvent e, float x, float y) {
+                persistSettings();
                 showToast(ToastActor.success("Settings saved"));
             }
         });
         root.add(save).colspan(2).width(240).height(50).padTop(20);
+    }
+
+    /**
+     * تنظیمات را از GameConfig به GameSettings آینه می‌کند و ذخیره می‌کند —
+     * {@code GameSettings.save()} علاوه بر فایلِ سراسری، از طریق persister روی
+     * کاربرِ لاگین‌شده هم سیو می‌کند (per-user، رفعِ TODO فاز ۲).
+     */
+    private void persistSettings() {
+        com.pvz2.model.GameSettings gs = com.pvz2.model.GameSettings.getInstance();
+        gs.setShowGrid(GameConfig.showGrid);
+        // ایندکسِ سرعت (0/1/2) به ضریبِ float نگاشت می‌شود.
+        float[] speeds = {1.0f, 1.5f, 2.0f};
+        int idx = Math.max(0, Math.min(speeds.length - 1, GameConfig.gameSpeed));
+        gs.setGameSpeed(speeds[idx]);
+        gs.setMasterVolume(GameConfig.musicVolume);
+        gs.save();
     }
 
     private void showToast(ToastActor t) {

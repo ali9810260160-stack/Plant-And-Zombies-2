@@ -18,6 +18,8 @@ import com.pvz2.graphics.assets.AssetIds;
 import com.pvz2.graphics.assets.GameAssets;
 import com.pvz2.model.User;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,23 +55,28 @@ public class ShopScreen extends BaseScreen {
     private static final List<Entry> CATALOG = buildCatalog();
 
     private static List<Entry> buildCatalog() {
+        // آیکون‌ها از تصاویرِ محلیِ فروشگاه (assets/shop/) خوانده می‌شوند.
         List<Entry> list = new ArrayList<>();
         list.add(new Entry("POT", "Greenhouse Pot", "Unlocks an extra pot in your Greenhouse.",
-                AssetIds.ICON_SHOP_POT, 2000, true, 1));
+                "shop/shop-pot.png", 2000, true, 1));
         list.add(new Entry("PLANT_FOOD", "Plant Food", "Instantly powers up a plant on the lawn.",
-                AssetIds.ICON_SHOP_PLANT_FOOD, 3, false, 1));
+                "shop/plant-food.png", 3, false, 1));
         list.add(new Entry("SEED_RANDOM", "Random Seed Packet", "5 seed packets for a random unlocked plant.",
-                AssetIds.ICON_SHOP_SEED_RANDOM, 1000, true, 5));
+                "shop/seed-random.png", 1000, true, 5));
         list.add(new Entry("SEED_CHOICE", "Chosen Seed Packet", "10 seed packets for a plant you pick.",
-                AssetIds.ICON_SHOP_SEED_CHOICE, 5, false, 10));
+                "shop/seed-choice.png", 5, false, 10));
         list.add(new Entry("CURRENCY", "Currency Exchange", "Trade 5 gems for 500 coins.",
-                AssetIds.ICON_SHOP_CURRENCY, 5, false, 1));
+                "shop/currency-exchange.png", 5, false, 1));
         list.add(new Entry("DAILY", "Daily Offer", "Refreshes every 24 hours.",
-                AssetIds.ICON_SHOP_DAILY, 0, true, 1));
+                "shop/shop-daily.png", 0, true, 1));
         return list;
     }
 
     private Stage stage;
+
+    /** لیبلِ شمارش‌معکوسِ کالای روزانه (AL3) — هر دقیقه در render به‌روز می‌شود. */
+    private Label dailyCountdownLabel;
+    private float dailyAccum = 0f;
 
     public ShopScreen(PVZApplication game) { super(game); }
 
@@ -83,55 +90,101 @@ public class ShopScreen extends BaseScreen {
     private void buildUi() {
         Skin skin = GameAssets.getInstance().getSkin();
 
+        // ── پس‌زمینه‌ی تمام‌صفحه ──
+        Image bg = new Image(GameAssets.getInstance().local(AssetIds.SHOP_BACKGROUND));
+        bg.setScaling(com.badlogic.gdx.utils.Scaling.stretch);
+        bg.setFillParent(true);
+        bg.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.disabled);
+        stage.addActor(bg);
+
         Table root = new Table();
         root.setFillParent(true);
+        root.top();
         stage.addActor(root);
 
-        root.add(new Label("Shop", skin, "big_outline")).padTop(20).padBottom(10).row();
+        root.add(buildTopBar(skin)).growX().padTop(8).row();
 
         Table itemsTable = new Table();
         itemsTable.defaults().pad(10).top();
         int column = 0;
         for (Entry entry : CATALOG) {
-            itemsTable.add(buildItemCard(skin, entry)).width(220).height(280);
+            itemsTable.add(buildItemCard(skin, entry)).width(224).height(300);
             column++;
             if (column % COLUMNS == 0) itemsTable.row();
         }
 
         ScrollPane scroll = new ScrollPane(itemsTable, skin);
         scroll.setFadeScrollBars(false);
-        root.add(scroll).width(760).height(480).padBottom(10).row();
+        root.add(scroll).width(780).height(500).expand().top().padTop(6);
+    }
 
-        TextButton back = new TextButton("Back", skin, "brown");
-        back.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent e, float x, float y) {
-                goTo(ScreenId.MAIN_MENU);
-            }
+    /** نوارِ بالا: ارز (سکه/الماس) در چپ + دکمه‌ی بستن (X) در راست. */
+    private Table buildTopBar(Skin skin) {
+        User user = facade().getCurrentUser();
+        long coins = user != null ? user.getCoins() : 0;
+        int  gems  = user != null ? user.getGems()  : 0;
+
+        Table bar = new Table();
+        bar.pad(4, 18, 4, 14);
+
+        Table currency = new Table();
+        if (!AssetIds.ICON_COIN.isEmpty()) {
+            currency.add(new Image(GameAssets.getInstance().region(AssetIds.ICON_COIN))).size(30).padRight(5);
+        }
+        Label coinLbl = new Label(String.valueOf(coins), skin, "medium");
+        coinLbl.setColor(Color.GOLD);
+        currency.add(coinLbl).padRight(22);
+        if (!AssetIds.ICON_GEM.isEmpty()) {
+            currency.add(new Image(GameAssets.getInstance().region(AssetIds.ICON_GEM))).size(30).padRight(5);
+        }
+        Label gemLbl = new Label(String.valueOf(gems), skin, "medium");
+        gemLbl.setColor(Color.CYAN);
+        currency.add(gemLbl);
+        bar.add(currency).left().expandX();
+
+        Image close = new Image(GameAssets.getInstance().local("auth/icon_exit.png"));
+        close.setScaling(com.badlogic.gdx.utils.Scaling.fit);
+        close.addListener(new ClickListener() {
+            @Override public void clicked(InputEvent e, float x, float y) { goTo(ScreenId.MAIN_MENU); }
         });
-        root.add(back).size(140, 60).padBottom(20);
+        bar.add(close).size(48, 44).right();
+        return bar;
     }
 
     /** کارت عمودی PvZ2: تصویر کالا (اگه ست شده باشه)، عنوان، توضیح، قیمت، دکمه خرید. */
     private Table buildItemCard(Skin skin, Entry entry) {
         Table card = new Table(skin);
-        card.setBackground("image_ui_cards_almanac_plant_card_10");
-        card.top().pad(10);
-
-        if (!entry.iconResourceId.isEmpty()) {
-            TextureRegion icon = GameAssets.getInstance().region(entry.iconResourceId);
-            card.add(new Image(icon)).size(96).padBottom(8).row();
+        TextureRegion cardBg = GameAssets.getInstance().local(AssetIds.SHOP_PRODUCT_CARD);
+        if (cardBg != null && cardBg != GameAssets.getInstance().getWhiteRegion()) {
+            card.setBackground(new com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable(cardBg));
         } else {
-            card.add().height(96).padBottom(8).row();
+            card.setBackground("image_ui_cards_almanac_plant_card_10");
         }
+        card.top().pad(14, 16, 14, 16);
 
         Label nameLabel = new Label(entry.displayName, skin, "default");
         nameLabel.setWrap(true);
-        card.add(nameLabel).width(180).padBottom(6).row();
+        nameLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
+        card.add(nameLabel).width(186).padBottom(6).row();
 
-        Label descLabel = new Label(entry.description, skin, "default");
+        if (!entry.iconResourceId.isEmpty()) {
+            TextureRegion icon = GameAssets.getInstance().local(entry.iconResourceId);
+            Image iconImg = new Image(icon);
+            iconImg.setScaling(com.badlogic.gdx.utils.Scaling.fit);
+            card.add(iconImg).size(100).padBottom(8).row();
+        } else {
+            card.add().height(100).padBottom(8).row();
+        }
+
+        // AL3: کالای روزانه به‌جای متنِ ثابت، شمارش‌معکوسِ زنده تا ریستِ بعدی دارد.
+        boolean isDaily = entry.itemId.equals("DAILY");
+        Label descLabel = new Label(isDaily ? dailyCountdownText() : entry.description, skin, "default");
         descLabel.setWrap(true);
         descLabel.setFontScale(0.8f);
+        if (isDaily) {
+            descLabel.setColor(1f, 0.82f, 0.35f, 1f);
+            dailyCountdownLabel = descLabel;
+        }
         card.add(descLabel).width(180).padBottom(10).row();
 
         String priceText = entry.itemId.equals("DAILY")
@@ -231,10 +284,29 @@ public class ShopScreen extends BaseScreen {
         stage.addActor(t);
     }
 
+    /** زمانِ باقی‌مانده تا نیمه‌شبِ بعدی — کالای روزانه در آن لحظه ریست می‌شود (AL3). */
+    private String dailyCountdownText() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime nextMidnight = now.toLocalDate().plusDays(1).atStartOfDay();
+        long secs = Math.max(0, Duration.between(now, nextMidnight).getSeconds());
+        long h = secs / 3600, m = (secs % 3600) / 60;
+        return "New offer in " + h + "h " + m + "m";
+    }
+
     @Override
     public void render(float delta) {
         GameAssets.getInstance().update();
         ScreenUtils.clear(0.04f, 0.06f, 0.1f, 1);
+
+        // شمارش‌معکوسِ کالای روزانه هر ~۳۰ ثانیه به‌روز می‌شود (نه هر فریم).
+        if (dailyCountdownLabel != null) {
+            dailyAccum += delta;
+            if (dailyAccum >= 30f) {
+                dailyAccum = 0f;
+                dailyCountdownLabel.setText(dailyCountdownText());
+            }
+        }
+
         stage.act(delta);
         stage.draw();
     }

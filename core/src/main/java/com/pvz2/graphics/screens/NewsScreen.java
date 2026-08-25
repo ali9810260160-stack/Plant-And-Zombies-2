@@ -42,6 +42,16 @@ public class NewsScreen extends BaseScreen {
     private void buildUi() {
         Skin skin = GameAssets.getInstance().getSkin();
 
+        // پس‌زمینه‌ی فضاییِ منوی اصلی (مطابق مرجع: پنلِ خبر روی همان زمینه)
+        if (!com.pvz2.graphics.assets.AssetIds.MAIN_MENU_BACKGROUND.isEmpty()) {
+            Image sky = new Image(GameAssets.getInstance().region(
+                    com.pvz2.graphics.assets.AssetIds.MAIN_MENU_BACKGROUND));
+            sky.setScaling(com.badlogic.gdx.utils.Scaling.fill);
+            sky.setFillParent(true);
+            sky.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.disabled);
+            stage.addActor(sky);
+        }
+
         BorderedTable panel = new BorderedTable();
         panel.top();
 
@@ -52,7 +62,8 @@ public class NewsScreen extends BaseScreen {
         });
         titleBar.add(backBtn).size(44).padRight(10);
 
-        Label title = new Label("News and Updates", skin, "medium");
+        Label title = new Label("News and Updates", skin, "big");
+        title.setColor(Color.valueOf("ffe36e"));
         titleBar.add(title).expandX().center();
 
         int unread = getUnreadCount();
