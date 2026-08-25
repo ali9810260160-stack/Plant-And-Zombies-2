@@ -1,5 +1,6 @@
 package com.pvz2.service;
 
+import com.pvz2.model.Boss;
 import com.pvz2.model.GameSession;
 import com.pvz2.model.Level;
 import com.pvz2.model.Projectile;
@@ -140,6 +141,11 @@ public class CombatService {
     private void checkProjectileHits(GameSession session) {
         List<Projectile> toRemove = new ArrayList<>();
         for (Projectile proj : session.getActiveProjectiles()) {
+            // پرتابه‌ای که به لِینِ رئیس رسیده، به او آسیب می‌زند (مکانیکِ بردِ boss).
+            if (hitBoss(proj, session)) {
+                toRemove.add(proj);
+                continue;
+            }
             if (isOutOfBounds(proj, session)) {
                 toRemove.add(proj);
                 continue;
@@ -167,16 +173,60 @@ public class CombatService {
         return x < 0 || x > session.getGameMap().getCols() + 1;
     }
 
+    /**
+     * برخوردِ پرتابه با رئیس (Zomboss): اگر پرتابه در لِینِ فعلیِ رئیس باشد و به
+     * ستونِ او رسیده باشد، به رئیس آسیب می‌زند. این تنها راهِ آسیب‌زدن به رئیس است
+     * (بازیکن باید شوتر را در لِینِ رئیس بچیند). پرتابه‌های هدف‌گیرِ گیاه (منفی)
+     * روی رئیس اثر ندارند.
+     */
+    private boolean hitBoss(Projectile proj, GameSession session) {
+        Boss boss = session.getBoss();
+        if (boss == null || !boss.isVulnerable()) return false;
+        if (proj.isHitsPlants()) return false;
+        if (!proj.isMovingRight()) return false;
+        // رئیس چند سطر را اشغال می‌کند — پرتابه در هر یک از سطرهای اشغالی به او می‌خورد.
+        int rows = session.getGameMap().getRows();
+        if (!boss.coversRow(proj.getY(), rows)) return false;
+        if (proj.getX() >= boss.getX() - 0.6) {
+            boss.takeDamage(proj.getDamage());
+            return true;
+        }
+        return false;
+    }
+
     private boolean isTombstoneBlocking(Projectile proj, GameSession session) {
         if (proj.isArc()) return false;
         int col = (int) proj.getX();
         int row = proj.getY();
         Tile tile = session.getGameMap().getTile(col, row);
         if (tile != null && tile.isTombstone()) {
+            Tile.Reward reward = tile.getReward();
             tile.takeDamage(proj.getDamage());
+            // با اتمامِ جانِ سنگ‌قبر (تبدیل به خانه‌ی معمولی)، جایزه‌اش آزاد می‌شود.
+            if (!tile.isTombstone() && reward != Tile.Reward.NONE) {
+                releaseGravestoneReward(tile, reward, session);
+                tile.setReward(Tile.Reward.NONE);
+            }
             return true;
         }
         return false;
+    }
+
+    /** آزادسازیِ خورشید یا غذای گیاهِ نهفته در سنگ‌قبرِ نابودشده + توستِ جمع‌آوری. */
+    private void releaseGravestoneReward(Tile tile, Tile.Reward reward,
+                                         GameSession session) {
+        if (reward == Tile.Reward.SUN) {
+            com.pvz2.model.Sun sun = new com.pvz2.model.Sun(
+                    com.pvz2.model.enums.SunType.NORMAL,
+                    tile.getX(), tile.getY(), session.getCurrentTick());
+            sun.setLanded(true);
+            sun.setFallProgress(1.0);
+            session.getActiveSuns().add(sun);
+            session.pushCollectEvent("☀ Sun from gravestone!");
+        } else if (reward == Tile.Reward.PLANT_FOOD) {
+            if (session.addPlantFood())
+                session.pushCollectEvent("🌱 Plant Food from gravestone!");
+        }
     }
 
     private boolean hitPlants(Projectile proj, GameSession session) {
@@ -185,6 +235,8 @@ public class CombatService {
         if (tile == null || tile.getPlant() == null) return false;
         Plant plant = tile.getPlant();
         if (proj.getType() == ProjectileType.ICE) plant.incrementFreezeLevel();
+        // تیرِ آتشین یک بلاکِ یخِ گیاه را ذوب می‌کند (به‌جایِ آسیب) تا آزاد شود.
+        else if (proj.getType() == ProjectileType.FIRE && plant.isFrozen()) plant.meltIceBlock();
         else plant.takeDamage(proj.getDamage());
         return true;
     }
@@ -219,6 +271,8 @@ public class CombatService {
         if (proj.getType() == ProjectileType.FIRE) {
             dmg *= 2;
             zombie.removeEffect(ZombieEffect.CHILLED);
+            // اگر زامبی داخلِ بلاکِ یخ است، تیرِ آتشین یک مرحله آن را ذوب می‌کند.
+            zombie.meltIceBlock();
             zombie.addEffect(ZombieEffect.BURNING, 30);
         }
         if (proj.getType() == ProjectileType.POISON)
@@ -316,6 +370,11 @@ public class CombatService {
         } else {
             tile.setPlant(null);
         }
+        // Beghouled: خانه‌ی گیاهِ خورده‌شده به crater تبدیل می‌شود (دیگر گیاه نمی‌گیرد).
+        if (session.getLevel() != null
+                && session.getLevel().getLevelType() == LevelType.BEGHOULED) {
+            tile.setCrater(true);
+        }
         zombie.setAttacking(false);
         session.setPlantsLost(session.getPlantsLost() + 1);
 
@@ -407,31 +466,67 @@ public class CombatService {
     }
 
     private void handleZombieReachedEnd(Zombie zombie, GameSession session) {
+        // من‌زامبی + VERSUS: زامبیِ رسیده به چپ، مغزِ آن ردیف را می‌خورد.
+        if (session.getLevel() != null
+                && (session.getLevel().getLevelType() == LevelType.I_ZOMBIE
+                    || session.getLevel().getLevelType() == LevelType.VERSUS)) {
+            Object ms = session.getMinigameState();
+            if (ms instanceof com.pvz2.model.IZombieState) {
+                ((com.pvz2.model.IZombieState) ms).eatBrain(zombie.getY());
+            }
+            zombie.setCurrentHealth(0); // زامبی پس از خوردن مغز محو می‌شود
+            return;
+        }
         int rowIndex = zombie.getY() - 1;
         if (session.getGameMap().isLawnMowerAvailable(rowIndex)) {
-            triggerLawnMower(rowIndex, session);
+            triggerLawnMower(zombie, rowIndex, session);
         } else {
             session.setResult(GameResult.LOSE);
             view.printGameOver();
         }
     }
 
-    private void triggerLawnMower(int rowIndex, GameSession session) {
+    /** سرعتِ حرکتِ چمن‌زن (ستون در هر تیک). */
+    private static final double MOWER_SPEED = 0.35;
+
+    private void triggerLawnMower(Zombie trigger, int rowIndex, GameSession session) {
         session.getGameMap().setLawnMowerUsed(rowIndex);
-        List<String> killed = new ArrayList<>();
-        List<Zombie> toKill = new ArrayList<>();
-        for (Zombie z : session.getActiveZombies()) {
-            if (z.getY() - 1 == rowIndex && !(z instanceof Gargantuar)) {
-                killed.add(z.getType().name());
-                toKill.add(z);
-            }
-        }
-        toKill.forEach(z -> {
-            z.setCurrentHealth(0);
+        // چمن‌زنِ متحرک از سرِ لاین به راه می‌افتد؛ بقیه‌ی زامبی‌های لاین را یکی‌یکی
+        // (نه همه با هم) در tickMowers می‌کشد. زامبیِ رسیده به خانه فوراً کشته می‌شود.
+        session.launchMower(rowIndex + 1);
+        if (trigger != null && trigger.isAlive()) {
+            trigger.setCurrentHealth(0);
             session.setZombiesKilled(session.getZombiesKilled() + 1);
-        });
-        view.printLawnMowerTriggered(rowIndex + 1, killed);
-        onLawnmowerKill(killed.size());
+        }
+        view.printLawnMowerTriggered(rowIndex + 1,
+                trigger != null ? java.util.Arrays.asList(trigger.getType().name())
+                                : new ArrayList<>());
+        onLawnmowerKill(1);
+    }
+
+    /**
+     * چمن‌زن‌های متحرک را هر تیک جلو می‌برد و هر زامبیِ لاین که به آن می‌رسد را
+     * می‌کشد؛ با رسیدن به انتهای لاین حذف می‌شود. باید هر تیک صدا زده شود.
+     */
+    public void tickMowers(GameSession session) {
+        java.util.List<com.pvz2.model.GameSession.ActiveMower> mowers =
+                session.getActiveMowers();
+        if (mowers.isEmpty()) return;
+        int cols = session.getGameMap().getCols();
+        java.util.Iterator<com.pvz2.model.GameSession.ActiveMower> it = mowers.iterator();
+        while (it.hasNext()) {
+            com.pvz2.model.GameSession.ActiveMower m = it.next();
+            m.x += MOWER_SPEED;
+            for (Zombie z : session.getActiveZombies()) {
+                if (z.isAlive() && z.getY() == m.row
+                        && Math.abs(z.getX() - m.x) < 0.6) {
+                    z.setCurrentHealth(0);
+                    session.setZombiesKilled(session.getZombiesKilled() + 1);
+                    onLawnmowerKill(1);
+                }
+            }
+            if (m.x > cols + 1) it.remove();
+        }
     }
 
     // ════════════════════════════════════════════════════════
@@ -508,6 +603,11 @@ public class CombatService {
                 toRemove.add(z);
             }
         }
+        // الگوی امتیازی: کشتنِ همزمانِ ۳+ زامبی (انفجار)
+        if (toRemove.size() >= 3) {
+            session.pushMeoEvent("💥 AoE x" + toRemove.size() + " SIMULTANEOUS!",
+                    750L * toRemove.size());
+        }
         session.getActiveZombies().removeAll(toRemove);
         session.getActiveProjectiles().removeIf(
                 p -> p.getX() < 0 || p.getX() > session.getGameMap().getCols() + 2);
@@ -534,7 +634,10 @@ public class CombatService {
         handleDrops(zombie, session);
         if (zombie.isGlowing()) {
             boolean added = session.addPlantFood();
-            if (added) view.printGlowingZombieDroppedFood(session.getPlantFoodCount());
+            if (added) {
+                view.printGlowingZombieDroppedFood(session.getPlantFoodCount());
+                session.pushCollectEvent("🌱 Plant Food collected!");
+            }
         }
         Wave wave = session.getCurrentWave();
         if (wave != null) wave.registerHealthLost(zombie.getMaxHealth());
@@ -550,6 +653,10 @@ public class CombatService {
         session.setLastKillTick(now);
         long points = 10L * session.getConsecutiveKills();
         session.setMeoPoints(session.getMeoPoints() + points);
+        // الگوی امتیازی: کمبوی کشتنِ سریع (اعلان یک‌بار در هر رگبار)
+        if (session.getConsecutiveKills() == 3) {
+            session.pushMeoEvent("⚡ SPEED-KILL COMBO!", 300L * 3);
+        }
     }
 
     private void handleDrops(Zombie zombie, GameSession session) {
@@ -560,12 +667,15 @@ public class CombatService {
         if (roll < 0.33) {
             user.setCoins(user.getCoins() + 50);
             view.printZombieDropped("coin", (int) user.getCoins());
+            session.pushCollectEvent("🪙 +50 Coins collected!");
         } else if (roll < 0.66) {
             user.setGems(user.getGems() + 1);
             view.printZombieDropped("diamond", user.getGems());
+            session.pushCollectEvent("💎 +1 Diamond collected!");
         } else {
             user.setPots(user.getPots() + 1);
             view.printZombieDropped("pot", user.getPots());
+            session.pushCollectEvent("🏺 +1 Pot collected!");
         }
     }
 
@@ -604,12 +714,137 @@ public class CombatService {
 
     public void checkWinCondition(GameSession session) {
         if (!session.isInProgress()) return;
+        if (checkVasebreakerWin(session)) return;
+        if (checkIZombieEnd(session)) return;
+        if (checkVersusEnd(session)) return;
+        if (checkBeghouledEnd(session)) return;
+        if (checkBossDefeated(session)) return;
         if (session.allWavesFinished()) {
             session.setResult(GameResult.WIN);
             view.printGameWon();
             notifyLevelComplete(session);
             if (questService != null) questService.onGameWon(session);
         }
+    }
+
+    /**
+     * برد کوزه‌شکنی: وقتی همه‌ی کوزه‌ها شکسته و همه‌ی زامبی‌ها نابود شده‌اند.
+     * برخلاف مراحل عادی، پیشرویِ فصل ماجراجویی را باز نمی‌کند (مینی‌گیم مستقل است)؛
+     * فقط شمارنده‌ی مینی‌گیم‌های کاربر افزایش می‌یابد.
+     */
+    private boolean checkVasebreakerWin(GameSession session) {
+        Level level = session.getLevel();
+        if (level == null || level.getLevelType() != LevelType.VASEBREAKER) return false;
+        Object ms = session.getMinigameState();
+        if (!(ms instanceof com.pvz2.model.VasebreakerState)) return false;
+        com.pvz2.model.VasebreakerState vb = (com.pvz2.model.VasebreakerState) ms;
+        if (!vb.allBroken()) return false;
+        for (Zombie z : session.getActiveZombies()) {
+            if (z.isAlive()) return false;
+        }
+        session.setResult(GameResult.WIN);
+        view.printGameWon();
+        com.pvz2.model.User user = com.pvz2.model.AppState.getInstance().getCurrentUser();
+        if (user != null) {
+            user.setMinigamesCompleted(user.getMinigamesCompleted() + 1);
+        }
+        return true;
+    }
+
+    /**
+     * برد/باختِ من‌زامبی. برد: خوردنِ همه‌ی مغزها. باخت: نبودِ زامبیِ زنده و
+     * نبودِ خورشیدِ کافی برای کاشتِ ارزان‌ترین زامبی. مثل کوزه‌شکنی، پیشرویِ
+     * فصلِ ماجراجویی را باز نمی‌کند.
+     */
+    private boolean checkIZombieEnd(GameSession session) {
+        Level level = session.getLevel();
+        if (level == null || level.getLevelType() != LevelType.I_ZOMBIE) return false;
+        Object ms = session.getMinigameState();
+        if (!(ms instanceof com.pvz2.model.IZombieState)) return false;
+        com.pvz2.model.IZombieState st = (com.pvz2.model.IZombieState) ms;
+        if (st.allBrainsEaten()) {
+            session.setResult(GameResult.WIN);
+            view.printGameWon();
+            com.pvz2.model.User user = com.pvz2.model.AppState.getInstance().getCurrentUser();
+            if (user != null) user.setMinigamesCompleted(user.getMinigamesCompleted() + 1);
+            return true;
+        }
+        boolean anyZombie = false;
+        for (Zombie z : session.getActiveZombies()) {
+            if (z.isAlive()) { anyZombie = true; break; }
+        }
+        if (!anyZombie && session.getSunAmount() < st.minCost()) {
+            session.setResult(GameResult.LOSE);
+            view.printGameOver();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * برد/باختِ Beghouled. برد: ساختِ هدفِ تعیین‌شده ترکیب → تمام زامبی‌ها نابود.
+     * باخت: از قواعدِ عادی می‌آید (زامبی به خانه برسد). همیشه true برمی‌گرداند تا
+     * بردِ موج‌محور (allWavesFinished روی موجِ خالی) فعال نشود.
+     */
+    /**
+     * برد/باختِ VERSUS (دونفره): اگر همه‌ی مغزها خورده شوند بازیکنِ زامبی می‌برد؛
+     * اگر تایمرِ ۲ دقیقه تمام شود بازیکنِ گیاه می‌برد. برنده در
+     * {@link GameSession#getVersusWinnerRole()} ("PLANT"/"ZOMBIE") ثبت می‌شود تا
+     * لایه‌ی شبکه نتیجه را به سرور گزارش دهد. همیشه در حالتِ پایان true برمی‌گرداند
+     * تا بردِ موج‌محور فعال نشود.
+     */
+    private boolean checkVersusEnd(GameSession session) {
+        Level level = session.getLevel();
+        if (level == null || level.getLevelType() != LevelType.VERSUS) return false;
+        if (session.getVersusWinnerRole() != null) return true; // قبلاً تمام شده
+        Object ms = session.getMinigameState();
+        if (ms instanceof com.pvz2.model.IZombieState
+                && ((com.pvz2.model.IZombieState) ms).allBrainsEaten()) {
+            session.setVersusWinnerRole("ZOMBIE");
+            session.setResult(GameResult.LOSE); // از دیدِ میزبان (گیاه‌کار)
+            return true;
+        }
+        if (session.getVersusTicksLeft() <= 0) {
+            session.setVersusWinnerRole("PLANT");
+            session.setResult(GameResult.WIN);  // از دیدِ میزبان (گیاه‌کار)
+            return true;
+        }
+        return false;
+    }
+
+    private boolean checkBeghouledEnd(GameSession session) {
+        Level level = session.getLevel();
+        if (level == null || level.getLevelType() != LevelType.BEGHOULED) return false;
+        Object ms = session.getMinigameState();
+        if (!(ms instanceof com.pvz2.model.BeghouledState)) return true;
+        com.pvz2.model.BeghouledState st = (com.pvz2.model.BeghouledState) ms;
+        if (st.isComplete()) {
+            // برد: تمام زامبی‌های موجود در باغ از بین می‌روند (طبق داک).
+            for (Zombie z : session.getActiveZombies()) z.setCurrentHealth(0);
+            session.setResult(GameResult.WIN);
+            view.printGameWon();
+            com.pvz2.model.User user = com.pvz2.model.AppState.getInstance().getCurrentUser();
+            if (user != null) user.setMinigamesCompleted(user.getMinigamesCompleted() + 1);
+        }
+        return true;   // بردِ موج‌محور را مسدود کن (Beghouled موجِ استاندارد ندارد)
+    }
+
+    /**
+     * بردِ مرحله‌ی رئیس: وقتی هر ۳ بخشِ سلامتیِ Zomboss تخلیه شد و انیمیشنِ مرگش
+     * تمام شد ({@link Boss#isDefeated()}). مثلِ مراحلِ عادی، پیشرویِ فصلِ ماجراجویی
+     * را باز می‌کند (رئیس مرحله‌ی ۴ی هر فصل است → {@link #notifyLevelComplete}).
+     */
+    private boolean checkBossDefeated(GameSession session) {
+        Boss boss = session.getBoss();
+        if (boss == null) return false;
+        if (boss.isDefeated()) {
+            session.setResult(GameResult.WIN);
+            view.printGameWon();
+            notifyLevelComplete(session);
+            if (questService != null) questService.onGameWon(session);
+            return true;
+        }
+        return false;
     }
 
     private void notifyLevelComplete(GameSession session) {
