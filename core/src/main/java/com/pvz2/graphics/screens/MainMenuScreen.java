@@ -4,10 +4,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import pvz.skin.BorderedTable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -16,6 +20,7 @@ import com.pvz2.PVZApplication;
 import com.pvz2.graphics.*;
 import com.pvz2.graphics.assets.AssetIds;
 import com.pvz2.graphics.assets.GameAssets;
+import com.pvz2.graphics.util.GameConfig;
 import com.pvz2.model.User;
 
 /**
@@ -60,7 +65,8 @@ public class MainMenuScreen extends BaseScreen {
         stage.addActor(root);
 
         root.add(buildTopBar(skin, user)).fillX().top().row();
-        root.add(buildLogo(skin)).padTop(30).padBottom(30).row();
+        root.add(buildLogo(skin)).padTop(24).padBottom(10).row();
+        root.add(buildSlideShow()).padBottom(16).row();
         root.add(buildAdventureButton(skin)).size(260, 90).padBottom(20).row();
         root.add(buildNavGrid(skin)).padBottom(10).row();
 
@@ -79,30 +85,94 @@ public class MainMenuScreen extends BaseScreen {
         long coins = user != null ? user.getCoins() : 0;
         int gems = user != null ? user.getGems() : 0;
 
-        if (!AssetIds.ICON_COIN.isEmpty()) {
-            bar.add(new Image(GameAssets.getInstance().region(AssetIds.ICON_COIN))).size(26).padRight(4);
-        }
-        Label coinLbl = new Label(String.valueOf(coins), skin);
-        coinLbl.setColor(Color.GOLD);
-        bar.add(coinLbl).padRight(20);
-
-        if (!AssetIds.ICON_GEM.isEmpty()) {
-            bar.add(new Image(GameAssets.getInstance().region(AssetIds.ICON_GEM))).size(26).padRight(4);
-        }
-        Label gemLbl = new Label(String.valueOf(gems), skin);
-        gemLbl.setColor(Color.CYAN);
-        bar.add(gemLbl).padRight(20);
+        // F3: در حالتِ دیباگ، کلیک روی سکه/الماس یک پاپ‌آپِ افزودن باز می‌کند.
+        bar.add(currencyChip(skin, AssetIds.ICON_COIN, String.valueOf(coins), Color.GOLD, false)).padRight(20);
+        bar.add(currencyChip(skin, AssetIds.ICON_GEM, String.valueOf(gems), Color.CYAN, true)).padRight(20);
 
         TextButton logout = new TextButton("Log Out", skin, "brown");
         logout.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent e, float x, float y) {
                 facade().logout();
-                goTo(ScreenId.REGISTER);
+                goTo(ScreenId.WELCOME);
             }
         });
         bar.add(logout);
         return bar;
+    }
+
+    /** چیپِ سکه/الماس (آیکون + مقدار)؛ در حالتِ دیباگ قابلِ کلیک برای افزودن (F3). */
+    private Table currencyChip(Skin skin, String iconId, String value, Color color, boolean isDiamond) {
+        Table chip = new Table(skin);
+        if (iconId != null && !iconId.isEmpty()) {
+            chip.add(new Image(GameAssets.getInstance().region(iconId))).size(26).padRight(4);
+        }
+        Label lbl = new Label(value, skin);
+        lbl.setColor(color);
+        chip.add(lbl);
+        if (GameConfig.debugMode) {
+            chip.addListener(new ClickListener() {
+                @Override public void clicked(InputEvent e, float x, float y) {
+                    showAddCurrencyDialog(skin, isDiamond);
+                }
+            });
+        }
+        return chip;
+    }
+
+    /**
+     * پاپ‌آپِ افزودنِ سکه/الماس (فقط حالتِ دیباگ). روی {@link BorderedTable} در یک
+     * overlayِ مودالِ دستی ساخته شده — چون اسکینِ pvz-skin استایلِ Window ندارد و
+     * scene2d {@code Dialog} با «No WindowStyle ... default» کرش می‌کند.
+     */
+    private void showAddCurrencyDialog(Skin skin, boolean isDiamond) {
+        final Group overlay = new Group();
+        overlay.setSize(GameConstants.VIEWPORT_WIDTH, GameConstants.VIEWPORT_HEIGHT);
+
+        Image dim = new Image(new TextureRegionDrawable(GameAssets.getInstance().getWhiteRegion()));
+        dim.setColor(0f, 0f, 0f, 0.55f);
+        dim.setSize(overlay.getWidth(), overlay.getHeight());
+        dim.addListener(new InputListener() {
+            @Override public boolean touchDown(InputEvent e, float x, float y, int p, int b) { return true; }
+        });
+        overlay.addActor(dim);
+
+        final TextField amountField = new TextField(isDiamond ? "100" : "1000", skin);
+        amountField.setTextFieldFilter((tf, c) -> Character.isDigit(c));
+
+        BorderedTable panel = new BorderedTable();
+        panel.pad(18);
+        panel.add(new Label(isDiamond ? "Add Gems" : "Add Coins", skin, "medium")).colspan(2).padBottom(12).row();
+        panel.add(new Label("Amount:", skin)).padRight(10);
+        panel.add(amountField).width(180f).height(44f).row();
+
+        Table buttons = new Table();
+        TextButton cancel = new TextButton("Cancel", skin, "brown");
+        cancel.addListener(new ClickListener() {
+            @Override public void clicked(InputEvent e, float x, float y) { overlay.remove(); }
+        });
+        TextButton add = new TextButton("Add", skin, "green");
+        add.addListener(new ClickListener() {
+            @Override public void clicked(InputEvent e, float x, float y) {
+                int amount = 0;
+                try { amount = Integer.parseInt(amountField.getText().trim()); } catch (Exception ignored) { }
+                overlay.remove();
+                if (amount > 0) {
+                    facade().cheatAddCurrency(amount, isDiamond);
+                    stage.clear();
+                    buildUi();   // بازسازی تا مقدارِ جدید نمایش داده شود
+                }
+            }
+        });
+        buttons.add(cancel).width(120f).height(46f).padRight(10);
+        buttons.add(add).width(120f).height(46f);
+        panel.add(buttons).colspan(2).padTop(16);
+
+        panel.pack();
+        panel.setPosition((overlay.getWidth() - panel.getWidth()) / 2f,
+                          (overlay.getHeight() - panel.getHeight()) / 2f);
+        overlay.addActor(panel);
+        stage.addActor(overlay);
     }
 
     private Actor buildLogo(Skin skin) {
@@ -114,6 +184,17 @@ public class MainMenuScreen extends BaseScreen {
             return c;
         }
         return new Label("Plants vs. Zombies 2", skin, "big_outline");
+    }
+
+    /** اسلایدشوی رویدادها زیرِ لوگو (assets/backgrounds/slid show) با دایره‌های ناوبری. */
+    private Actor buildSlideShow() {
+        String[] slides = {
+            "backgrounds/slid show/calendar_card_7day_birthdayz.png",
+            "backgrounds/slid show/calendar_card_7day_blackfriday.png",
+            "backgrounds/slid show/calendar_card_7day_harvestfestival_2023.png",
+            "backgrounds/slid show/calendar_card_7day_seashroom.png",
+        };
+        return new com.pvz2.graphics.actors.SlideShowActor(slides, 340f, 150f);
     }
 
     private TextButton buildAdventureButton(Skin skin) {
@@ -139,6 +220,10 @@ public class MainMenuScreen extends BaseScreen {
         t.add(textNavButton(skin, "Leaderboard", "purple", ScreenId.LEADERBOARD)).size(150, 60);
         t.add(textNavButton(skin, "Profile", "brown", ScreenId.PROFILE)).size(150, 60);
         t.add(iconNavButton(skin, "settings", ScreenId.SETTINGS)).size(64);
+        t.row();
+        // فاز ۳: دکمه‌ی مالتی‌پلیرِ آنلاین (I, Zombie دونفره).
+        t.add(textNavButton(skin, "2-Player Online", "green", ScreenId.MULTIPLAYER))
+                .colspan(7).size(320, 58).padTop(4);
         return t;
     }
 
