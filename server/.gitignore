@@ -1,0 +1,6 @@
+# Server build output and runtime state (not source).
+out/
+sources.txt
+data/
+smoke-data/
+ban-data/
