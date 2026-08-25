@@ -177,9 +177,11 @@ public class EffectsRenderer {
             float p   = progress();
             float yOff= p * 60f;
             float alp = p < 0.7f ? 1f : 1f - (p - 0.7f) / 0.3f;
+            // GameAssets.fontOf(...) هرگز throw/null نمی‌کند — قبلاً اینجا
+            // skin.getFont("medium") بود که چون "medium" اسم Label style است نه
+            // فونت resource، هر بار popup متن (مثلاً امتیاز میوپوینت) throw می‌کرد.
             com.badlogic.gdx.graphics.g2d.BitmapFont f =
-                    GameAssets.getInstance().getSkin().getFont("medium");
-            if (f == null) return;
+                    GameAssets.getInstance().fontOf("medium");
             f.setColor(color.r, color.g, color.b, alp);
             f.draw(batch, text, cx - 40, cy + yOff);
             f.setColor(Color.WHITE);

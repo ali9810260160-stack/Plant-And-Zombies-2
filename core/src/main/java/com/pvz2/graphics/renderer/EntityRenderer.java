@@ -3,6 +3,7 @@ package com.pvz2.graphics.renderer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.pvz2.graphics.GameConstants;
 import com.pvz2.graphics.GameStateSnapshot;
 import com.pvz2.graphics.GameStateSnapshot.*;
 import com.pvz2.graphics.assets.GameAssets;
@@ -143,7 +144,7 @@ public class EntityRenderer {
         float hpRatio = armor.maxHp > 0 ? armor.hp / armor.maxHp : 0;
         // تغییر رنگ زره با کاهش HP (زیبایی)
         Color col = new Color(0.8f * hpRatio + 0.2f,
-                              0.8f * hpRatio + 0.2f, 0.9f, 1f);
+                0.8f * hpRatio + 0.2f, 0.9f, 1f);
         float offsetY = armorOffsetY(armor.type);
         // جستجو کنید: "IMAGE_ZOMBIE_{ARMOR_TYPE}_LEVEL" در asset browser
         drawFallback(batch, cx, cy + offsetY, col, 30, 22);
@@ -171,6 +172,11 @@ public class EntityRenderer {
     //  Projectiles
     // ─────────────────────────────────────────────────────────────────────────
 
+    /** ارتفاع ثابتِ اوجِ مسیر سهموی (پیکسل) — طبق CI5 برای همه پرتابه‌ها یکسان. */
+    private static final float ARC_PEAK = 74f;
+    /** طولِ افقیِ فرضیِ پرتاب هوایی وقتی هدفِ مشخصی ثبت نشده (بر حسب ستون). */
+    private static final float ARC_FALLBACK_SPAN = 4.5f;
+
     private void drawProjectiles(Batch batch, GameStateSnapshot snap) {
         for (ProjectileInfo pr : snap.projectiles) {
             drawProjectile(batch, pr);
@@ -180,43 +186,83 @@ public class EntityRenderer {
     private void drawProjectile(Batch batch, ProjectileInfo pr) {
         float sx = GameCoords.toScreenX(pr.phase1X) + shakeX;
         float sy = GameCoords.toScreenY(pr.phase1Y) + shakeY;
-        Color col = projectileColor(pr.type);
-        float sz  = isLargeProjectile(pr.type) ? 20f : 11f;
 
-        // برای لابرها: رسم با مسیر قوسی (زیبایی — بصری)
+        // ─── مسیر سهموی پیوسته برای پرتابه‌های هوایی (lobbed) ───
+        // ارتفاع اوج ثابت است و معادله بر مبنای فاصله‌ی شلیک→هدف محاسبه می‌شود
+        // (CI5): h = PEAK · 4·t·(1−t)، که t نسبتِ پیشرفتِ افقی است.
         if (pr.isArc) {
-            drawArcProjectile(batch, pr, col, sz);
-            return;
+            float end = (pr.targetPhase1X > pr.startPhase1X)
+                    ? pr.targetPhase1X : (float) pr.startPhase1X + ARC_FALLBACK_SPAN;
+            float span = Math.max(0.5f, end - (float) pr.startPhase1X);
+            float t = ((float) pr.phase1X - (float) pr.startPhase1X) / span;
+            t = Math.max(0f, Math.min(1f, t));
+            sy += ARC_PEAK * 4f * t * (1f - t);
         }
-        drawFallback(batch, sx, sy, col, sz, sz);
+
+        drawProjectileSprite(batch, pr.type, sx, sy);
     }
 
-    private void drawArcProjectile(Batch batch, ProjectileInfo pr, Color col, float sz) {
-        // موقعیت واقعی همان phase1X/Y است (فاز ۱ این را مدیریت می‌کند)
-        float sx = GameCoords.toScreenX(pr.phase1X) + shakeX;
-        float sy = GameCoords.toScreenY(pr.phase1Y) + shakeY;
-        drawFallback(batch, sx, sy + 20, col, sz, sz); // کمی بالاتر = حس هوایی
+    /** رسمِ ظاهرِ متمایزِ هر نوع پرتابه (CJ3/CJ5) با هسته‌ی درخشان و هاله. */
+    private void drawProjectileSprite(Batch batch, String type, float sx, float sy) {
+        String t = type == null ? "normal" : type;
+        switch (t) {
+            case "fire": {
+                glow(batch, sx, sy, 20f, 1f, 0.45f, 0.05f, 0.55f);
+                disc(batch, sx, sy, 13f, 1f, 0.62f, 0.10f, 1f);
+                disc(batch, sx, sy, 6f, 1f, 0.95f, 0.55f, 1f); // مغز روشن
+                break;
+            }
+            case "ice": {
+                glow(batch, sx, sy, 19f, 0.55f, 0.85f, 1f, 0.5f);
+                disc(batch, sx, sy, 12f, 0.65f, 0.90f, 1f, 1f);
+                disc(batch, sx, sy, 5f, 0.95f, 0.99f, 1f, 1f);
+                break;
+            }
+            case "poison": {
+                glow(batch, sx, sy, 19f, 0.55f, 0.20f, 0.75f, 0.5f);
+                disc(batch, sx, sy, 12f, 0.55f, 0.18f, 0.78f, 1f);
+                disc(batch, sx, sy, 5f, 0.75f, 1f, 0.35f, 1f); // درخششِ سبزِ سمی
+                break;
+            }
+            case "lobbed": {
+                // هندوانه/کلم پرتابی — بزرگ‌تر و متمایز
+                glow(batch, sx, sy, 26f, 0.9f, 0.35f, 0.30f, 0.4f);
+                disc(batch, sx, sy, 18f, 0.80f, 0.24f, 0.28f, 1f);
+                disc(batch, sx, sy, 8f, 1f, 0.55f, 0.55f, 1f);
+                break;
+            }
+            case "strike": {
+                // نفوذکننده — ستاره‌ایِ زرد-سفیدِ کشیده
+                glow(batch, sx, sy, 20f, 1f, 0.95f, 0.4f, 0.5f);
+                disc(batch, sx, sy, 8f, 1f, 1f, 0.7f, 1f);
+                // دو بازوی افقی برای حسِ «سوزنی/نفوذی»
+                batch.setColor(1f, 1f, 0.8f, 0.9f);
+                batch.draw(GameAssets.getInstance().getWhiteRegion(), sx - 16, sy - 2.5f, 32, 5);
+                batch.setColor(Color.WHITE);
+                break;
+            }
+            default: { // normal — نخودِ سبز
+                glow(batch, sx, sy, 16f, 0.4f, 0.9f, 0.25f, 0.4f);
+                disc(batch, sx, sy, 11f, 0.30f, 0.80f, 0.22f, 1f);
+                disc(batch, sx, sy, 4.5f, 0.75f, 1f, 0.55f, 1f); // برجستگیِ روشن
+                break;
+            }
+        }
+        batch.setColor(Color.WHITE);
     }
 
-    private Color projectileColor(String type) {
-        if (type == null) return Color.GREEN;
-        if (type.contains("fire"))        return Color.ORANGE;
-        if (type.contains("snow") || type.contains("ice") || type.contains("cold"))
-                                          return Color.CYAN;
-        if (type.contains("poison"))      return new Color(0.6f, 0.2f, 0.8f, 1f);
-        if (type.contains("frozen_melon"))return new Color(0.4f, 0.8f, 1f, 1f);
-        if (type.contains("melon"))       return new Color(0.8f, 0.3f, 0.4f, 1f);
-        if (type.contains("butter"))      return Color.YELLOW;
-        if (type.contains("kernel"))      return new Color(1f, 0.9f, 0.5f, 1f);
-        if (type.contains("lightning") || type.contains("electric"))
-                                          return new Color(1f, 1f, 0.2f, 1f);
-        if (type.contains("star"))        return new Color(1f, 0.6f, 0.0f, 1f);
-        return new Color(0.3f, 0.8f, 0.2f, 1f); // نخود سبز پیش‌فرض
+    /** دیسکِ توپُر با شعاعِ r و رنگِ داده‌شده (از discRegion). */
+    private void disc(Batch batch, float cx, float cy, float r,
+                      float rr, float gg, float bb, float aa) {
+        batch.setColor(rr, gg, bb, aa);
+        TextureRegion d = GameAssets.getInstance().getDiscRegion();
+        batch.draw(d, cx - r, cy - r, r * 2f, r * 2f);
     }
 
-    private boolean isLargeProjectile(String type) {
-        if (type == null) return false;
-        return type.contains("melon") || type.contains("bomb") || type.contains("pult");
+    /** هاله‌ی نرمِ محیطی (شعاعِ بزرگ‌تر، آلفای کم). */
+    private void glow(Batch batch, float cx, float cy, float r,
+                      float rr, float gg, float bb, float aa) {
+        disc(batch, cx, cy, r, rr, gg, bb, aa * 0.5f);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -232,23 +278,60 @@ public class EntityRenderer {
         float sy;
         if (!sun.isLanded) {
             // در حال سقوط
-            float topY  = GameCoords.toScreenX(sun.phase1Y) + 600;
+            // باگ قبلی: toScreenX(sun.phase1Y) صدا زده می‌شد — تابع محور X با
+            // یک مقدار Y! چون toScreenX/toScreenY فرمول‌های کاملاً متفاوتی دارند
+            // (X بر اساس ستون، Y بر اساس ردیف)، این باعث می‌شد خورشید از یک
+            // ارتفاع نامربوط و متغیر (بسته به phase1Y) شروع به سقوط کند، نه از
+            // بالای ثابت صفحه.
+            float topY  = GameConstants.VIEWPORT_HEIGHT + 60f;
             float landY = GameCoords.toScreenY(sun.phase1Y);
             sy = topY + (landY - topY) * sun.fallProgress + shakeY;
         } else {
             sy = GameCoords.toScreenY(sun.phase1Y) + shakeY;
         }
 
-        Color col = sunColor(sun.sunType);
-        float sz  = "special".equals(sun.sunType) ? 30f : "radioactive".equals(sun.sunType) ? 28f : 22f;
-        // جستجو کنید: "IMAGE_SUN", "IMAGE_SUNSUN" در asset browser
-        drawFallback(batch, sx, sy, col, sz, sz);
+        // شعاع: معمولی < ویژه (CO3 — فقط در اندازه فرق دارند). رادیواکتیو بنفش.
+        boolean radioactive = "radioactive".equals(sun.sunType);
+        float r = "special".equals(sun.sunType) ? 20f : radioactive ? 18f : 15f;
+        Color body = radioactive ? new Color(0.72f, 0.28f, 0.95f, 1f)
+                                 : new Color(1f, 0.85f, 0.12f, 1f);
+        Color edge = radioactive ? new Color(0.45f, 0.10f, 0.65f, 1f)
+                                 : new Color(1f, 0.62f, 0.05f, 1f);
+
+        float pulse = 1f + 0.06f * (float) Math.sin(stateTime * 4f + sun.phase1X);
+
+        drawSunSprite(batch, sx, sy, r * pulse, body, edge);
     }
 
-    private Color sunColor(String type) {
-        if ("special".equals(type))     return new Color(1f, 0.95f, 0.3f, 1f);
-        if ("radioactive".equals(type)) return new Color(0.8f, 0.3f, 1f, 1f);
-        return new Color(1f, 0.85f, 0.1f, 1f);
+    /** خورشیدِ درخشان با هاله، پرتوهای چرخان و مغزِ روشن. */
+    private void drawSunSprite(Batch batch, float cx, float cy, float r,
+                               Color body, Color edge) {
+        TextureRegion disc = GameAssets.getInstance().getDiscRegion();
+
+        // هاله‌ی بیرونی
+        batch.setColor(body.r, body.g, body.b, 0.30f);
+        batch.draw(disc, cx - r * 2f, cy - r * 2f, r * 4f, r * 4f);
+
+        // پرتوها (۸ پره‌ی چرخان)
+        float rot = stateTime * 30f;
+        batch.setColor(body.r, body.g, body.b, 0.55f);
+        float rw = r * 0.5f, rh = r * 1.9f;
+        for (int i = 0; i < 8; i++) {
+            float deg = rot + i * 45f;
+            batch.draw(disc, cx - rw * 0.5f, cy - rh * 0.5f, rw * 0.5f, rh * 0.5f,
+                    rw, rh, 1f, 1f, deg);
+        }
+
+        // بدنه‌ی حلقوی: لبه‌ی تیره‌تر سپس مرکزِ روشن
+        batch.setColor(edge);
+        batch.draw(disc, cx - r, cy - r, r * 2f, r * 2f);
+        batch.setColor(body);
+        batch.draw(disc, cx - r * 0.82f, cy - r * 0.82f, r * 1.64f, r * 1.64f);
+        // برجستگیِ روشنِ بالا-چپ
+        batch.setColor(1f, 1f, 1f, 0.55f);
+        batch.draw(disc, cx - r * 0.5f, cy + r * 0.05f, r * 0.55f, r * 0.55f);
+
+        batch.setColor(Color.WHITE);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -256,8 +339,8 @@ public class EntityRenderer {
     // ─────────────────────────────────────────────────────────────────────────
 
     private void drawPamOrFallback(Batch batch, String type, boolean isZombie,
-                                    String clip, float cx, float cy,
-                                    boolean flipX, Color tint) {
+                                   String clip, float cx, float cy,
+                                   boolean flipX, Color tint) {
         GameAssets assets = GameAssets.getInstance();
         String path = isZombie ? PamPaths.forZombie(type) : PamPaths.forPlant(type);
 
@@ -267,7 +350,7 @@ public class EntityRenderer {
             batch.setColor(Color.WHITE);
         } else {
             Color fb = isZombie ? new Color(0.7f, 0.3f, 0.3f, 1f)
-                                : new Color(0.25f, 0.7f, 0.25f, 1f);
+                    : new Color(0.25f, 0.7f, 0.25f, 1f);
             if (tint != null) fb = tint;
             drawFallback(batch, cx, cy, fb, isZombie ? 46f : 42f, isZombie ? 76f : 68f);
         }
