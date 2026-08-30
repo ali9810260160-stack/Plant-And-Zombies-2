@@ -35,6 +35,28 @@ public class GenericPlant extends Plant {
     private boolean armed;
     private int armTimer;
     private boolean instantActivated;
+    /** پرتابه‌ی صف‌شده که منتظرِ رسیدنِ کلیپِ حمله به نقطه‌ی شلیک (~۵۳٪) است. */
+    private boolean shotPending;
+    /** فیوزِ گیاهانِ آنی (HP=۰): چند تیک روی زمین دیده می‌شوند سپس اثرشان اجرا می‌شود.
+     *  −۱ = هنوز مقداردهی نشده (در اولین tick تنظیم می‌شود). */
+    private int instantFuseTicks = -1;
+    /** طولِ فیوزِ گیاهانِ آنی (≈۱ ثانیه) تا قبل از انفجار روی زمین دیده شوند. */
+    private static final int INSTANT_FUSE_TICKS = 10;
+
+    /**
+     * گیاهانِ «آنی» (یک‌بارمصرف): پس از یک فیوزِ کوتاه اثرشان اجرا و خودشان حذف
+     * می‌شوند. تشخیص بر اساسِ نوع است (نه {@code maxHealth==0})، چون این گیاهان در
+     * رجیستری HP دارند (مثلاً Cherry Bomb = ۳۰۰) و بدونِ HP اصلاً tick/رندر نمی‌شدند.
+     * فهرست باید با switchِ {@link #activateInstantAbility} هم‌خوان بماند.
+     */
+    private static final java.util.EnumSet<PlantType> INSTANT_TYPES = java.util.EnumSet.of(
+            PlantType.GOLD_BLOOM, PlantType.CHERRY_BOMB, PlantType.GRAPESHOT, PlantType.JALAPENO,
+            PlantType.DOOM_SHROOM, PlantType.ICE_SHROOM, PlantType.HOT_POTATO, PlantType.GRAVE_BUSTER,
+            PlantType.ENLIGHTEN_MINT, PlantType.APPEASE_MINT, PlantType.ARMA_MINT, PlantType.BOMBARD_MINT,
+            PlantType.ENFORCE_MINT, PlantType.REINFORCE_MINT, PlantType.ENCHANT_MINT, PlantType.PIERCE_MINT,
+            PlantType.CATTAIL_MINT);
+
+    public boolean isInstantPlant() { return INSTANT_TYPES.contains(type); }
     private boolean charged;
     private int shroomStage;   // Sun-shroom: 1/2/3
     private int kiwiStage;     // Kiwibeast: 1/2/3
@@ -98,6 +120,14 @@ public class GenericPlant extends Plant {
             this.armed = false;
             this.armTimer = 140; // 14 ثانیه
         }
+
+        // گیاهانِ آنی باید HP داشته باشند تا tick و رندر شوند؛ وگرنه isAlive()=false
+        // می‌شود و موتورِ مبارزه onTick را صدا نمی‌زند و گیاه قبل از اجرای اثرش (انفجار)
+        // حذف می‌شود. مثلاً Cherry Bomb در plants.json با baseHp=0 آمده.
+        if (isInstantPlant() && maxHealth <= 0) {
+            maxHealth = 300;
+            currentHealth = 300;
+        }
     }
     // ─────────────────────────────────────────────────────────────
     //  مقداردهی اولیه بر اساس نوع گیاه
@@ -131,14 +161,22 @@ public class GenericPlant extends Plant {
 
     @Override
     public void onTick(int tickCount, GameSession session) {
-        // گیاهان آنی (HP=0): یک‌بار فعال شده و از بین می‌روند
-        if (!instantActivated && maxHealth == 0) {
+        // گیاهانِ آنی: فیوزِ کوتاه (روی زمین دیده می‌شوند) سپس اثرشان اجرا و از بین
+        // می‌روند. تشخیص با نوع (نه maxHealth==0)، وگرنه Cherry Bomb (HP=۳۰۰) هرگز
+        // منفجر نمی‌شد.
+        if (!instantActivated && (isInstantPlant() || maxHealth == 0)) {
+            if (instantFuseTicks < 0) instantFuseTicks = INSTANT_FUSE_TICKS;
+            if (instantFuseTicks > 0) {
+                instantFuseTicks--;
+                if (currentHealth <= 0) currentHealth = 1; // زنده بماند تا رندر شود
+                return;
+            }
             instantActivated = true;
             activateInstantAbility(session);
             currentHealth = 0;
             return;
         }
-        if (isFrozen()) {
+        if (isDisabled()) {   // یخ‌زده یا اختاپوس‌زده → غیرفعال
             tickEffects();
             return;
         }
@@ -282,9 +320,22 @@ public class GenericPlant extends Plant {
 
         if (++attackTimer >= (int)(10.0 / spd)) {
             attackTimer = 0;
-            generateProjectilesForType(session);
-            fireAttackTrigger(); // برای انیمیشن: لحظه واقعی شلیک
+            fireAttackTrigger();  // انیمیشنِ حمله شروع می‌شود
+            shotPending = true;   // پرتابه در ~۵۳٪ کلیپِ حمله رها می‌شود (توسطِ AnimationSystem)
         }
+    }
+
+    /** آیا پرتابه‌ای منتظرِ رهاشدن در نقطه‌ی شلیکِ انیمیشن است؟ */
+    public boolean isShotPending() { return shotPending; }
+
+    /**
+     * رهاسازیِ پرتابه‌ی منتظر — از {@code AnimationSystem} وقتی کلیپِ حمله به نقطه‌ی
+     * شلیک (~۵۳٪) می‌رسد صدا زده می‌شود تا شلیک با انیمیشن هماهنگ و طبیعی‌تر شود.
+     */
+    public void releaseShot(GameSession session) {
+        if (!shotPending) return;
+        shotPending = false;
+        generateProjectilesForType(session);
     }
 
     private void handleChargeAttack(GameSession session) {

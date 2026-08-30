@@ -21,5 +21,10 @@ public enum LevelType {
     VASEBREAKER,        // کوزه‌شکنی
     WALLNUT_BOWLING,    // بولینگ گردویی
     I_ZOMBIE,           // من زامبی
-    BEGHOULED           // ترکیب سه‌تایی
+    BEGHOULED,          // ترکیب سه‌تایی
+    ZOMBOTANY,          // زامبی‌های گیاهی (مینی‌گیم امتیازی)
+    SCORED,             // بازی امتیازی (الگوهای میوپوینت)
+
+    // فاز ۳ — مالتی‌پلیر
+    VERSUS              // I, Zombie دونفره‌ی تحت شبکه (گیاه‌کار در برابر زامبی‌گذار)
 }

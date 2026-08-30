@@ -2,6 +2,7 @@ package com.pvz2.model.zombies;
 
 import com.pvz2.model.GameMap;
 import com.pvz2.model.GameSession;
+import com.pvz2.model.enums.AnimEvent;
 import com.pvz2.model.enums.ArmorType;
 import com.pvz2.model.enums.ZombieEffect;
 import com.pvz2.model.enums.ZombieType;
@@ -36,6 +37,19 @@ public abstract class Zombie {
     protected boolean attacking;
     protected int damageTimer;
 
+    /** رویداد pending برای لایه انیمیشن (بخش سوم) — نگاه کنید Plant.pendingAnimEvent. */
+    protected AnimEvent pendingAnimEvent;
+
+    /**
+     * شناسه‌ی یکتای شبکه (فاز ۳) — برای همگام‌سازیِ مالتی‌پلیر: مهمان زامبی‌های
+     * آینه‌ای را با همین id تطبیق می‌دهد تا انیمیشنِ راه‌رفتن بین فریم‌ها پیوسته بماند.
+     */
+    private static final java.util.concurrent.atomic.AtomicInteger NET_SEQ =
+            new java.util.concurrent.atomic.AtomicInteger(1);
+    private int netId = NET_SEQ.getAndIncrement();
+    public int getNetId() { return netId; }
+    public void setNetId(int id) { this.netId = id; }
+
     protected Zombie(ZombieType type, int hp, int dps,
                      double speed, int waveCost) {
         this.type = type;
@@ -63,19 +77,51 @@ public abstract class Zombie {
         if (!isAlive()) {
             return;
         }
-        if (!armors.isEmpty()) {
+        boolean hadArmor = !armors.isEmpty();
+        if (hadArmor) {
             int remain = applyDamageToArmor(damage);
+            if (!armors.isEmpty()) {
+                // زره هنوز باقی است — رویداد آسیبِ عمومی برای جلوه بصری (رنگ/تکان)
+                fireAnimEvent(AnimEvent.TOOK_DAMAGE_ZOMBIE);
+            } else {
+                // آخرین لایه زره همین حالا شکست — جلوه پرتاب‌شدن زره
+                fireAnimEvent(AnimEvent.ARMOR_BROKEN);
+            }
             if (remain > 0) {
                 currentHealth = Math.max(0, currentHealth - remain);
             }
         } else {
             currentHealth = Math.max(0, currentHealth - damage);
+            if (damage > 0) fireAnimEvent(AnimEvent.TOOK_DAMAGE_ZOMBIE);
+        }
+        if (currentHealth <= 0) {
+            fireAnimEvent(AnimEvent.DYING_STARTED);
         }
     }
 
     public void takePoisonDamage(int damage) {
         currentHealth = Math.max(0, currentHealth - damage);
+        if (currentHealth <= 0) fireAnimEvent(AnimEvent.DYING_STARTED);
     }
+
+    // ─── لایه انیمیشن (بخش سوم) ─────────────────────────────────────────────
+
+    public AnimEvent getPendingAnimEvent() {
+        return pendingAnimEvent != null ? pendingAnimEvent : AnimEvent.NONE;
+    }
+
+    public void clearPendingAnimEvent() { this.pendingAnimEvent = null; }
+
+    /** فقط اگر اولویت بالاتری از رویداد فعلیِ مصرف‌نشده داشته باشد جایگزین می‌شود. */
+    public void fireAnimEvent(AnimEvent e) {
+        if (e == null) return;
+        if (pendingAnimEvent == null || e.overrides(pendingAnimEvent)) {
+            pendingAnimEvent = e;
+        }
+    }
+
+    /** برای سازگاری با کدهای قدیمی که مستقیم ست می‌کردند — از fireAnimEvent عبور می‌کند. */
+    public void setPendingAnimEvent(AnimEvent e) { fireAnimEvent(e); }
 
     private int applyDamageToArmor(int damage) {
         ArmorType[] priority = {
@@ -104,12 +150,48 @@ public abstract class Zombie {
         return currentHealth > 0;
     }
 
+    /** تعدادِ ضرباتِ آتشِ خورده به بلاکِ یخِ زامبی (۰=بلاکِ کامل). */
+    private int iceMeltHits = 0;
+
+    /** کشته‌شده با انفجار — هنگامِ مرگ جلوه‌ی خاکستر/پودرشدن پخش می‌شود. */
+    private boolean pulverized = false;
+    public boolean isPulverized() { return pulverized; }
+    public void setPulverized(boolean pulverized) { this.pulverized = pulverized; }
+
+    /** اختاپوس‌پرت‌کن: آیا اختاپوسِ خود را پرتاب کرده است؟ (یک‌بار). */
+    private boolean octopusTossed = false;
+    public boolean isOctopusTossed() { return octopusTossed; }
+    public void setOctopusTossed(boolean v) { this.octopusTossed = v; }
+
+    /** مراحلِ بلاکِ یخِ زامبی: total + damage1..damage5 (assets/ice blocks/zombie). */
+    public static final int ICE_MELT_STAGES = 6;
+
     public boolean hasEffect(ZombieEffect effect) {
         return activeEffects.containsKey(effect);
     }
 
     public void addEffect(ZombieEffect effect, int durationTicks) {
+        boolean wasActive = activeEffects.containsKey(effect);
+        // با تشکیلِ یک بلاکِ یخِ تازه (FROZEN جدید)، شمارنده‌ی ذوب صفر می‌شود.
+        if (effect == ZombieEffect.FROZEN && !wasActive) iceMeltHits = 0;
         activeEffects.put(effect, durationTicks);
+        if (!wasActive) fireAnimEvent(AnimEvent.EFFECT_APPLIED);
+    }
+
+    /** تعدادِ ضرباتِ آتشِ خورده به بلاکِ یخِ زامبی (۰=کامل). */
+    public int getIceMeltHits() { return iceMeltHits; }
+
+    /**
+     * یک ضربه‌ی تیرِ آتشین بلاکِ یخِ زامبی را یک مرحله ذوب می‌کند؛ با رسیدن به
+     * آخرین مرحله، یخ کاملاً آب شده و اثرِ FROZEN برداشته می‌شود.
+     */
+    public void meltIceBlock() {
+        if (!hasEffect(ZombieEffect.FROZEN)) return;
+        iceMeltHits++;
+        if (iceMeltHits >= ICE_MELT_STAGES) {
+            removeEffect(ZombieEffect.FROZEN);
+            iceMeltHits = 0;
+        }
     }
 
     public void removeEffect(ZombieEffect effect) {
@@ -166,6 +248,11 @@ public abstract class Zombie {
         return armors.containsKey(armorType);
     }
 
+    /** مشعلِ Explorer روشن است؟ (تیرِ یخی خاموش، تیرِ آتشین روشن می‌کند). */
+    private boolean torchLit = true;
+    public boolean isTorchLit() { return torchLit; }
+    public void setTorchLit(boolean lit) { this.torchLit = lit; }
+
     public void addArmor(ArmorType type, int hp) {
         armors.put(type, hp);
     }
@@ -193,7 +280,11 @@ public abstract class Zombie {
     public boolean isMovingBackward() { return movingBackward; }
     public void setMovingBackward(boolean b) { this.movingBackward = b; }
     public boolean isHypnotized() { return hypnotized; }
-    public void setHypnotized(boolean h) { this.hypnotized = h; }
+    public void setHypnotized(boolean h) {
+        boolean changed = this.hypnotized != h;
+        this.hypnotized = h;
+        if (changed && h) fireAnimEvent(AnimEvent.HYPNOTIZED);
+    }
     public int getSpawnWave() { return spawnWave; }
     public void setSpawnWave(int w) { this.spawnWave = w; }
     public int getLane() { return lane; }

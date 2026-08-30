@@ -911,20 +911,11 @@ public class GameService {
      * زامبی‌ها را صدا نمی‌زند، اینجا فقط برای مرحله‌ی ZOMBOTANY آن را اجرا می‌کنیم
      * (peashooter شلیک، jalapeno سوزاندنِ ردیف در ۱۰ثانیه، squash برخوردِ کشنده).
      */
-    private void tickZombotany(GameSession session) {
+    private void tickAllZombies(GameSession session) {
         int tick = session.getCurrentTick();
+        // کپی، چون onTick می‌تواند زامبیِ جدید بسازد (Gargantuar→Imp، Tomb Raiser→...).
         for (Zombie z : new ArrayList<>(session.getActiveZombies())) {
             if (z.isAlive()) z.onTick(tick, session);
-        }
-    }
-
-    /** فقط غول‌پیکرها را tick می‌کند تا در نیمه‌جان imp پرتاب کنند (کپی برای throwImp). */
-    private void tickGargantuars(GameSession session) {
-        int tick = session.getCurrentTick();
-        for (Zombie z : new ArrayList<>(session.getActiveZombies())) {
-            if (z.isAlive() && z instanceof com.pvz2.model.zombies.Gargantuar) {
-                z.onTick(tick, session);
-            }
         }
     }
 
@@ -949,6 +940,8 @@ public class GameService {
             if (target == null || z.getX() - target.getX() > OCTOPUS_TOSS_RANGE) continue;
             z.setOctopusTossed(true);
             session.addOctopusToss(z.getX(), row, target.getX(), row);
+            // اختاپوس روی سرِ گیاه می‌نشیند و مثلِ یخ‌زدگی غیرفعالش می‌کند.
+            target.addEffect(com.pvz2.model.enums.PlantEffect.OCTOPUSED, 150);
         }
     }
 
@@ -1124,11 +1117,19 @@ public class GameService {
             manageWaves(session);
         }
         combatService.processTick(session);
+        // خورشیدِ گیاهانِ خورشیدزا: پس از tickِ گیاهان (که sunPending را ست می‌کند)
+        // یک خورشیدِ زمینیِ کنارِ گیاه رها کن تا با نشانگر برداشته شود (مینی‌گیم‌های
+        // بدونِ اقتصادِ خورشید مستثنا).
+        if (lt != LevelType.VASEBREAKER && lt != LevelType.WALLNUT_BOWLING
+                && lt != LevelType.I_ZOMBIE) {
+            sunService.spawnPlantProducedSuns(session);
+        }
         // چمن‌زنِ متحرک: هر تیک جلو می‌رود و زامبی‌های لاین را یکی‌یکی می‌کشد.
         combatService.tickMowers(session);
-        // غول‌پیکر: در نیمه‌جان imp پرتاب می‌کند (onTick زامبی‌ها به‌صورتِ عمومی
-        // توسطِ موتور صدا زده نمی‌شود؛ پس مثلِ Zombotany صریحاً گیت‌شده صدا می‌زنیم).
-        tickGargantuars(session);
+        // onTickِ عمومیِ همه‌ی زامبی‌ها — موتورِ مبارزه آن را صدا نمی‌زند؛ اینجا صدا
+        // می‌زنیم تا هم اثرها (یخ/گیجی) منقضی شوند و هم رفتارهای خاص (Ra/King/
+        // Turquoise/Prospector/Pianist/All-Star/Newspaper/Gargantuar/Explorer/...) اجرا شوند.
+        tickAllZombies(session);
         // اختاپوس‌پرت‌کن: نزدیکِ گیاه که رسید، اختاپوسِ خود را پرتاب می‌کند.
         tickOctopus(session);
         // حرکت/برخورد گردوهای بولینگ پس از حرکت زامبی‌ها
@@ -1139,10 +1140,7 @@ public class GameService {
         if (lt == LevelType.BOSS) {
             bossService.tick(session);
         }
-        // Zombotany: رفتارِ اختصاصیِ زامبی‌های گیاهی (شلیک/آتش/کدو) پس از مبارزه.
-        if (lt == LevelType.ZOMBOTANY) {
-            tickZombotany(session);
-        }
+        // Zombotany: onTickِ زامبی‌های گیاهی حالا در tickAllZombies انجام می‌شود.
         // EK3: تغییرِ سطحِ آبِ ساحل (فقط برای مراحلِ ساحلی؛ خودش early-return دارد)
         tickBeachTide(session);
         // خورشیدهای جمع‌آوری‌شده را از مدل پاک کن (لایه‌ی انیمیشن، انیمیشنِ

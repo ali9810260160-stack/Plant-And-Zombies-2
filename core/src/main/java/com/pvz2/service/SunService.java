@@ -81,6 +81,39 @@ public class SunService {
         return false;
     }
 
+    /**
+     * خورشیدهایی که گیاهانِ تولیدکننده (SUN_PRODUCER) در این تیک «آماده» کرده‌اند را
+     * به‌صورتِ یک خورشیدِ زمینیِ کنارِ خودِ گیاه رها می‌کند تا مثلِ خورشیدِ آسمانی با
+     * گذرِ نشانگرِ موس برداشته شوند (رفتارِ فازِ گرافیک؛ در فازِ کنسول با کلیک روی
+     * گیاه مستقیم جمع می‌شد). مقدارِ هر خورشید = مقدارِ تولیدِ همان گیاه.
+     * <p>باید هر تیک، پس از {@code CombatService.processTick} (که {@code onTick}
+     * گیاهان و در نتیجه {@code sunPending} را ست می‌کند) صدا زده شود.</p>
+     */
+    public void spawnPlantProducedSuns(GameSession session) {
+        int cols = session.getGameMap().getCols();
+        int rows = session.getGameMap().getRows();
+        int tick = session.getCurrentTick();
+        for (int y = 1; y <= rows; y++) {
+            for (int x = 1; x <= cols; x++) {
+                Tile tile = session.getGameMap().getTile(x, y);
+                if (tile == null || tile.getPlant() == null) continue;
+                if (!(tile.getPlant() instanceof com.pvz2.model.plants.GenericPlant)) continue;
+                com.pvz2.model.plants.GenericPlant gp =
+                        (com.pvz2.model.plants.GenericPlant) tile.getPlant();
+                if (!gp.isSunPending()) continue;
+                int amount = gp.getSunProductionAmount();
+                gp.collectSun();                       // پاک‌کردنِ pending و resumeِ چرخه
+                Sun sun = new Sun(SunType.NORMAL, x, y, tick);
+                sun.setValue(amount);
+                sun.setLanded(true);                   // مستقیم روی زمینِ کنارِ گیاه
+                sun.setFallProgress(1.0);
+                session.getActiveSuns().add(sun);
+                view.printRaw("[33m☀ " + gp.getType().name()
+                        + " produced a sun at (" + x + ", " + y + ")[0m");
+            }
+        }
+    }
+
     private void dropSunFromSky(GameSession session, int tick) {
         SunType type = pickSunType();
         int x = RandomUtil.between(1, session.getGameMap().getCols());
@@ -138,7 +171,7 @@ public class SunService {
             return 0;
         }
         target.setCollected(true);
-        int value = getSunValue(target);
+        int value = target.getValue();   // مقدارِ خودِ خورشید (نوعِ آسمانی یا مقدارِ تولیدِ گیاه)
         session.addSun(value);
         // الگوی امتیازی: جمع‌آوریِ آیتم (۵ خورشید در ۱۰ ثانیه)
         session.registerItemCollected();

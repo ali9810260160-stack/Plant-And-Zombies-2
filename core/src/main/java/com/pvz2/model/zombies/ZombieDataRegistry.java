@@ -171,7 +171,8 @@ public class ZombieDataRegistry {
                 .withArmor(ArmorType.BARREL,1100);
         reg(ZombieType.TURQUOISE_ZOMBIE,250,100,0.185,500,"Steals sun, fires laser.");
         reg(ZombieType.PROSPECTOR_ZOMBIE,190,100,0.16,200,"Dynamite reverses him.");
-        reg(ZombieType.PIANIST_ZOMBIE,840,100,0.12,450,"Music shifts zombie lanes.");
+        reg(ZombieType.PIANIST_ZOMBIE,840,100,0.12,450,"Music shifts zombie lanes.")
+                .withArmor(ArmorType.PIANO,1000);
         reg(ZombieType.RA_ZOMBIE,190,100,0.2,100,"Raises sun from ground.");
         reg(ZombieType.EXPLORER_ZOMBIE,250,150,0.25,250,"Torch burns nearby plants.");
         reg(ZombieType.TOMB_RAISER,380,100,0.185,300,"Creates tombstones.");

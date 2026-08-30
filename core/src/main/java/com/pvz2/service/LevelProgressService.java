@@ -226,4 +226,13 @@ public class LevelProgressService {
     public int getLevelsInChapter(ChapterType chapter) {
         return LEVELS_PER_CHAPTER.getOrDefault(chapter, 4);
     }
+
+    /**
+     * تعدادِ اسلاتِ بذرِ قفل‌شده در صفحه‌ی انتخاب گیاه. فقط مرحله‌ی ویژه‌ی
+     * «Locked Plants» (BIG_WAVE_BEACH مرحله‌ی ۲) دو اسلات را قفل می‌کند؛ بقیه ۰.
+     * باید با نگاشتِ نوعِ مرحله در {@link #getLevelTypeName} هم‌خوان بماند.
+     */
+    public int getLockedSlotCount(ChapterType chapter, int level) {
+        return chapter == ChapterType.BIG_WAVE_BEACH && level == 2 ? 2 : 0;
+    }
 }

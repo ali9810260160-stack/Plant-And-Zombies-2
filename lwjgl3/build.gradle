@@ -26,7 +26,7 @@ eclipse.project.name = appName + '-lwjgl3'
 java.sourceCompatibility = 25
 java.targetCompatibility = 25
 if (JavaVersion.current().isJava9Compatible()) {
-        compileJava.options.release.set(25)
+  compileJava.options.release.set(25)
 }
 
 dependencies {
@@ -37,7 +37,7 @@ dependencies {
 
   if(enableGraalNative == 'true') {
     implementation "io.github.berstanio:gdx-svmhelper-backend-lwjgl3:$graalHelperVersion"
-      implementation "io.github.berstanio:gdx-svmhelper-extension-freetype:$graalHelperVersion"
+    implementation "io.github.berstanio:gdx-svmhelper-extension-freetype:$graalHelperVersion"
 
   }
   // Forces LWJGL3 to use at least $lwjgl3Version, currently 3.4.1, to avoid warnings on Java 25 and up.
@@ -207,4 +207,10 @@ tasks.withType(JavaExec.class).configureEach {
 
 if(enableGraalNative == 'true') {
   apply from: file("nativeimage.gradle")
+}
+
+jar {
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+  manifest { attributes 'Main-Class': 'com.pvz2.lwjgl3.Lwjgl3Launcher' }
+  from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
 }

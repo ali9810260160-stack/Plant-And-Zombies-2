@@ -54,6 +54,8 @@ public class PlantSelectScreen extends BaseScreen {
     private Skin skin;
 
     private int maxSlots;
+    /** اسلات‌های قابلِ استفاده (کلِ اسلات‌ها منهایِ اسلات‌های قفل‌شده‌ی مرحله). */
+    private int usableSlots;
     private List<GameFacade.PlantEntry> allPlants;
     private final List<PlantType> chosenSlots = new ArrayList<>();
     private PlantType highlighted;
@@ -66,6 +68,12 @@ public class PlantSelectScreen extends BaseScreen {
     @Override
     public void show() {
         maxSlots = GameConstants.MAX_PLANT_SLOTS;
+        // مرحله‌ی ویژه‌ی Locked Plants دو اسلات را قفل می‌کند (فقط ۶ گیاه انتخاب‌پذیر).
+        int lockedSlots = 0;
+        try {
+            lockedSlots = facade().getLockedPlantSlots(game.getCurrentChapter(), game.getCurrentLevel());
+        } catch (Exception ignored) { }
+        usableSlots = Math.max(1, maxSlots - lockedSlots);
         stage = new Stage(new FitViewport(GameConstants.VIEWPORT_WIDTH, GameConstants.VIEWPORT_HEIGHT));
         Gdx.input.setInputProcessor(stage);
         skin = GameAssets.getInstance().getSkin();
@@ -182,6 +190,10 @@ public class PlantSelectScreen extends BaseScreen {
     }
 
     private Actor buildSlotCell(int index) {
+        // اسلات‌های قفل‌شده‌ی مرحله (آخرین اسلات‌ها) — غیرقابلِ استفاده.
+        if (index >= usableSlots) {
+            return buildLockedSlotCell();
+        }
         if (index >= chosenSlots.size()) {
             Table empty = new Table(skin);
             if (skin.has("image_ui_dialog_asset_inner_bkgd_10", com.badlogic.gdx.scenes.scene2d.utils.Drawable.class)) {
@@ -204,6 +216,31 @@ public class PlantSelectScreen extends BaseScreen {
             rebuildUi();
         });
         return card;
+    }
+
+    /** اسلاتِ قفل‌شده‌ی مرحله: پس‌زمینه‌ی تیره + آیکونِ قفل (غیرقابلِ کلیک). */
+    private Actor buildLockedSlotCell() {
+        Stack stack = new Stack();
+        Table bg = new Table(skin);
+        if (skin.has("image_ui_dialog_asset_inner_bkgd_10", com.badlogic.gdx.scenes.scene2d.utils.Drawable.class)) {
+            bg.setBackground("image_ui_dialog_asset_inner_bkgd_10");
+        } else {
+            bg.setBackground(new TextureRegionDrawable(GameAssets.getInstance().getWhiteRegion()));
+        }
+        stack.add(bg);
+
+        Image dim = new Image(GameAssets.getInstance().getWhiteRegion());
+        dim.setColor(0.06f, 0.06f, 0.08f, 0.60f);
+        stack.add(dim);
+
+        TextureRegion lockRegion = CollectionAssets.getInstance().region(PlantSelectAssetPaths.LOCK_GOLD);
+        if (lockRegion != null) {
+            Table lockWrap = new Table();
+            lockWrap.add(new Image(lockRegion)).size(42f);
+            stack.add(lockWrap);
+        }
+        stack.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.disabled);
+        return stack;
     }
 
     // =========================================================================
@@ -357,8 +394,8 @@ public class PlantSelectScreen extends BaseScreen {
         }
         if (highlighted == type) {
             // کلیک دوم روی همون کارت highlight شده → اضافه به اسلات
-            if (chosenSlots.size() >= maxSlots) {
-                showToast(ToastActor.error("Max " + maxSlots + " plants allowed"));
+            if (chosenSlots.size() >= usableSlots) {
+                showToast(ToastActor.error("Max " + usableSlots + " plants allowed"));
                 return;
             }
             chosenSlots.add(type);

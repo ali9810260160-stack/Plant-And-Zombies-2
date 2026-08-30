@@ -273,12 +273,15 @@ public class MainMenuScreen extends BaseScreen {
             Table alertCorner = new Table();
             alertCorner.top().right();
             alertCorner.add(alertIcon).size(20).padTop(-6).padRight(-6);
+            // نشانگرِ تزئینی نباید کلیکِ دکمه‌ی News (که زیرش در Stack است) را بگیرد.
+            alertCorner.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.disabled);
             newsStack.add(alertCorner);
         }
 
         unreadNewsBadge = new Label("", skin, "default");
         unreadNewsBadge.setColor(Color.RED);
         unreadNewsBadge.setAlignment(Align.topRight);
+        unreadNewsBadge.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.disabled);
         newsStack.add(unreadNewsBadge);
 
         int unreadCount = user != null ? facade().news().getUnreadCount(user) : 0;

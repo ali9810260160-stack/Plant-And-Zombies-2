@@ -300,7 +300,7 @@
     "moveSpeed": 0.185,
     "waveCost": 500,
     "chapter": "ALL",
-    "armors": [],
+    "armors": [{"alias": "BarrelDefault", "type": "BARREL", "hp": 500}],
     "canSpawnPlantFood": true,
     "description": "Pushes barrel; two Imps emerge when barrel breaks."
   },
@@ -348,7 +348,7 @@
     "moveSpeed": 0.19,
     "waveCost": 600,
     "chapter": "ALL",
-    "armors": [],
+    "armors": [{"alias": "ArcadeMachine", "type": "BARREL", "hp": 1100}],
     "canSpawnPlantFood": true,
     "description": "Pushes arcade machine; releases two Imps when broken."
   },

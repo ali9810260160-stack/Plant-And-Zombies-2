@@ -193,13 +193,13 @@ public class PlantDataRegistry {
         reg(PlantType.PUMPKIN, PlantFamily.WALL_NUT, 4000, 125, 30, 0,
                 "WallNut", "Protects plant inside.",
                 PlantTag.DAY, PlantTag.STACK);
-        reg(PlantType.CHERRY_BOMB, PlantFamily.EXPLOSIVE, 300, 150, 50, 180,
+        reg(PlantType.CHERRY_BOMB, PlantFamily.EXPLOSIVE, 300, 150, 50, 1800,
                 "Explosive", "3x3 instant explosion.",
                 PlantTag.DAY, PlantTag.EXPLOSIVE, PlantTag.AOE);
         reg(PlantType.POTATO_MINE, PlantFamily.EXPLOSIVE, 300, 25, 30, 180,
                 "Explosive", "Arms after 14s, kills on step.",
                 PlantTag.DAY, PlantTag.TRAP, PlantTag.EXPLOSIVE);
-        reg(PlantType.JALAPENO, PlantFamily.EXPLOSIVE, 300, 125, 50, 180,
+        reg(PlantType.JALAPENO, PlantFamily.EXPLOSIVE, 300, 125, 50, 1800,
                 "Explosive", "Burns entire row.",
                 PlantTag.DAY, PlantTag.FIRE, PlantTag.EXPLOSIVE, PlantTag.AOE);
         reg(PlantType.CABBAGE_PULT, PlantFamily.LOBBER, 300, 100, 7.5, 40,

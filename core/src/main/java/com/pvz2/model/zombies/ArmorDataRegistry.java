@@ -138,5 +138,10 @@ public class ArmorDataRegistry {
         dataMap.put(ArmorType.BARREL,
             new ArmorData(ArmorType.BARREL,"Barrel",1100,true,true,true,
                 "Barrel: 1100 HP, blocks shots."));
+        // پیانوِ پیانیست: جلوی زامبی؛ اول پیانو نابود می‌شود سپس خودِ زامبی. فلزی
+        // نیست (magnetshroom جذبش نمی‌کند) و overlayِ رویِ بدن ندارد (جدا رندر می‌شود).
+        dataMap.put(ArmorType.PIANO,
+            new ArmorData(ArmorType.PIANO,"Piano",1000,false,false,false,
+                "Piano: 1000 HP, destroyed before the zombie."));
     }
 }

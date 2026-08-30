@@ -147,6 +147,9 @@ public class ZombieAnimController {
             case SPECIAL_ABILITY_FIRED:
                 requestState(ZombieAnimState.SPECIAL);
                 break;
+            case SPECIAL_ABILITY_ENDED:
+                endActiveAbility();   // فازِ EXIT (مثلِ power_down) سپس بازگشت به WALK
+                break;
             case HYPNOTIZED:
                 break; // جهت مستقیماً در render() از zombie.isHypnotized() خوانده می‌شود
             default:
@@ -339,10 +342,30 @@ public class ZombieAnimController {
 
     private void onSingleArmorBroken(ArmorType type) {
         rebuildVisMap();
+        throwBrokenArmorPart(type);      // زره‌ی شکسته پرت شود و مدتی روی زمین بماند
         ArmorAnimConfig armCfg = config.armors.get(type.name());
         if (armCfg != null && armCfg.isClipSuffixStyle() && armCfg.breakEventClip != null) {
             breakingArmor = type;
             breakEventTime = 0f;
+        }
+    }
+
+    /**
+     * پارتِ زرهِ شکسته را برای «پرتاب‌شدن و ماندنِ کوتاه روی زمین» به AnimationSystem
+     * می‌سپارد — دقیقاً مثلِ دستِ افتاده‌ی زامبی (مسیرِ {@code pendingFallSpawns} →
+     * {@code spawnFallingPart}: پرش سهموی، فرود، سپس محو). برای زره‌های overlayِ عمومی
+     * (cone/bucket/brick) از نامِ پارتِ واقعی در آخرین مرحله‌ی آسیب ({@code _damage_02})
+     * استفاده می‌شود؛ برای زره‌های overlayِ ویژه (visMap) از خودِ spriteها.
+     */
+    private void throwBrokenArmorPart(ArmorType type) {
+        String base = armorPartBase(type);
+        if (base != null) {
+            pendingFallSpawns.add(base + "_damage_02");   // شکلِ همان لحظه‌ی شکستن
+            return;
+        }
+        ArmorAnimConfig armCfg = config.armors.get(type.name());
+        if (armCfg != null && armCfg.isOverlayStyle()) {
+            for (String sprite : armCfg.visMap.keySet()) pendingFallSpawns.add(sprite);
         }
     }
 

@@ -38,7 +38,7 @@ public class BossService {
     private static final int ENTER_TICKS   = 26;
     private static final int DYING_TICKS    = 16;
     private static final int MOVING_TICKS   = 7;
-    private static final int ATTACK_ANIM_TICKS = 10;
+    private static final int ATTACK_ANIM_TICKS = 22;  // ~۲٫۲ ثانیه: جا برای توالیِ start→loop→end کلیپِ حمله
     private static final int SUMMON_ANIM_TICKS = 10;
 
     private static final int ATTACK_INCOMING_TICKS = 16;
@@ -54,6 +54,10 @@ public class BossService {
     private static final int[] MOVE_INTERVAL   = { 95, 80, 65 };
 
     private static final int MINION_CAP = 6;
+
+    /** آتشِ اژدها: تعدادِ گلوله‌های آتشین در هر حمله + مدتِ غیرقابلِ کاشت بودنِ زمینِ سوخته (تیک). */
+    private static final int DARK_FIREBALL_COUNT = 3;
+    private static final int SCORCH_TICKS = 40;   // ۴ ثانیه
 
     public BossService(ConsoleView view) {
         this.view = view;
@@ -113,6 +117,7 @@ public class BossService {
         if (boss == null) return;
         boss.addStateTime(0.1);
 
+        tickScorchedTiles(session);
         updateAttacks(boss, session);
         updateChargeAnim(boss);
 
@@ -245,7 +250,8 @@ public class BossService {
             case BIG_WAVE_BEACH:
                 return RandomUtil.chance(0.45) ? AbilityType.BEACH_TURBINE : AbilityType.BEACH_SHARK;
             case DARK_AGES:
-                return AbilityType.DARK_FIREBALL;
+                // اژدها: گاهی توپِ آتشِ یک‌خانه (fire_bomb)، گاهی آتشِ ۲-سطری (fire_attack).
+                return RandomUtil.chance(0.4) ? AbilityType.DARK_FIRE_TWOROW : AbilityType.DARK_FIREBALL;
             case ANCIENT_EGYPT:
             default:
                 return RandomUtil.chance(0.3) ? AbilityType.EGYPT_CHARGE : AbilityType.EGYPT_MISSILE;
@@ -260,11 +266,30 @@ public class BossService {
         switch (ability) {
             case EGYPT_CHARGE:
             case BEACH_TURBINE: {
+                // ۲ سطرِ مقابلِ خودِ زامباس (سطرهایی که اشغال می‌کند).
                 int r1 = boss.getLane();
                 int r2 = boss.secondLane(rows);
                 atk = new Boss.BossAttack(ability, 1, r1, ATTACK_INCOMING_TICKS);
                 atk.targetRow2 = r2;
                 break;
+            }
+            case DARK_FIRE_TWOROW: {
+                // ۲ ردیفِ کنارِ همِ تصادفی — کلِ هر دو ردیف می‌سوزند (بدونِ Dragon Imp).
+                int r1 = RandomUtil.between(1, Math.max(1, rows - 1));
+                int r2 = r1 + 1;
+                atk = new Boss.BossAttack(ability, 1, r1, ATTACK_INCOMING_TICKS);
+                atk.targetRow2 = r2;
+                break;
+            }
+            case DARK_FIREBALL: {
+                // چند گلوله‌ی آتشین به چند خانه‌ی تصادفی (هرکدام یک پرتابه‌ی جدا).
+                for (int i = 0; i < DARK_FIREBALL_COUNT; i++) {
+                    int c = RandomUtil.between(1, cols);
+                    int r = RandomUtil.between(1, rows);
+                    boss.getAttacks().add(
+                            new Boss.BossAttack(ability, c, r, ATTACK_INCOMING_TICKS));
+                }
+                return; // چند پرتابه اضافه شد؛ از addِ انتهایی رد شو
             }
             case ICE_WIND: {
                 int r1 = RandomUtil.between(1, rows);
@@ -286,7 +311,6 @@ public class BossService {
             }
             case EGYPT_MISSILE:
             case ICE_MISSILE:
-            case DARK_FIREBALL:
             default: {
                 int r = pickTargetLane(session, boss.getLane());
                 int c = pickTargetColumn(session, r);
@@ -387,13 +411,31 @@ public class BossService {
                 spawnTombstones(session, 2);
                 break;
             case ICE_MISSILE:
-            case DARK_FIREBALL:
                 destroyPlantAt(session, (int) Math.round(atk.targetCol), atk.targetRow);
                 break;
-            case BEACH_SHARK:
-                destroyPlantAt(session, (int) Math.round(atk.targetCol), atk.targetRow);
+            case DARK_FIREBALL: {
+                // گلوله‌ی آتشین: سوختنِ کاشی (۴ ثانیه غیرقابلِ کاشت) + نابودیِ گیاه +
+                // ظاهرشدنِ یک Dragon Imp در همان خانه.
+                int col = (int) Math.round(atk.targetCol);
+                scorchTile(session, col, atk.targetRow);
+                destroyPlantAt(session, col, atk.targetRow);
+                spawnDragonImp(session, col, atk.targetRow);
+                break;
+            }
+            case DARK_FIRE_TWOROW:
+                // آتشِ ۲-سطری: نابودی + سوختنِ کلِ هر دو سطر.
+                scorchRow(session, atk.targetRow);
+                scorchRow(session, atk.targetRow2);
+                break;
+            case BEACH_SHARK: {
+                // بچه‌کوسه فقط گیاهِ روی آب را می‌خورد (نه گیاهِ خشکی).
+                int col = (int) Math.round(atk.targetCol);
+                Tile t = session.getGameMap().getTile(col, atk.targetRow);
+                if (t != null && t.isWater() && t.getPlant() != null)
+                    destroyPlantAt(session, col, atk.targetRow);
                 spawnSharkMinion(session, atk.targetRow);
                 break;
+            }
             case EGYPT_CHARGE:
             case BEACH_TURBINE:
                 destroyPlantsInRow(session, atk.targetRow);
@@ -403,10 +445,13 @@ public class BossService {
                 freezePlantsInRow(session, atk.targetRow);
                 freezePlantsInRow(session, atk.targetRow2);
                 break;
-            case ICE_FREEZE_COLUMN:
-                freezePlantsInColumn(session, (int) Math.round(atk.targetCol));
-                spawnFrozenZombie(session, (int) Math.round(atk.targetCol));
+            case ICE_FREEZE_COLUMN: {
+                // یخ‌زدنِ ستون + یک بلوکِ یخ (زامبیِ یخ‌زده) در هر کاشیِ ستون.
+                int col = (int) Math.round(atk.targetCol);
+                freezePlantsInColumn(session, col);
+                spawnFrozenColumn(session, col);
                 break;
+            }
             default:
                 break;
         }
@@ -430,6 +475,47 @@ public class BossService {
             if (t.getPlant() != null) t.getPlant().setCurrentHealth(0);
             if (t.getSecondLayerPlant() != null) t.getSecondLayerPlant().setCurrentHealth(0);
         }
+    }
+
+    /** سوزاندنِ کلِ یک سطر: نابودیِ همه‌ی گیاهان + سوختنِ هر کاشی. */
+    private void scorchRow(GameSession session, int row) {
+        if (row < 1) return;
+        int cols = session.getGameMap().getCols();
+        for (int c = 1; c <= cols; c++) {
+            Tile t = session.getGameMap().getTile(c, row);
+            if (t == null) continue;
+            if (t.getPlant() != null) t.getPlant().setCurrentHealth(0);
+            if (t.getSecondLayerPlant() != null) t.getSecondLayerPlant().setCurrentHealth(0);
+            scorchTile(session, c, row);
+        }
+    }
+
+    /** یک کاشی را می‌سوزاند: علامتِ گرافیکی (یک‌بارمصرف) + غیرقابلِ کاشت برای مدتی. */
+    private void scorchTile(GameSession session, int col, int row) {
+        Tile t = session.getGameMap().getTile(col, row);
+        if (t != null) t.setScorched(SCORCH_TICKS);
+        session.addScorchedTile(col, row);
+    }
+
+    /** کاهشِ تایمرِ زمینِ سوخته‌ی همه‌ی کاشی‌ها (تا دوباره قابلِ کاشت شوند). */
+    private void tickScorchedTiles(GameSession session) {
+        int rows = session.getGameMap().getRows();
+        int cols = session.getGameMap().getCols();
+        for (int r = 1; r <= rows; r++)
+            for (int c = 1; c <= cols; c++) {
+                Tile t = session.getGameMap().getTile(c, r);
+                if (t != null) t.tickScorch();
+            }
+    }
+
+    /** یک Dragon Imp (ایمپِ مقاوم به آتش) در خانه‌ی داده‌شده ظاهر می‌کند. */
+    private void spawnDragonImp(GameSession session, int col, int row) {
+        Zombie z = ZombieFactory.create(ZombieType.DRAGON_IMP);
+        if (z == null) return;
+        z.setX(Math.max(1, col));
+        z.setY(row);
+        z.setLane(row);
+        session.getActiveZombies().add(z);
     }
 
     private void freezePlantsInRow(GameSession session, int row) {
@@ -496,16 +582,18 @@ public class BossService {
         session.getActiveZombies().add(z);
     }
 
-    /** زامبیِ یخ‌زده در ستونِ هدف (یخ‌زدنِ ستون). */
-    private void spawnFrozenZombie(GameSession session, int col) {
-        Zombie z = ZombieFactory.create(ZombieType.NORMAL);
-        if (z == null) return;
+    /** یک بلوکِ یخ (زامبیِ یخ‌زده) در هر کاشیِ ستونِ هدف. */
+    private void spawnFrozenColumn(GameSession session, int col) {
         int rows = session.getGameMap().getRows();
-        int lane = RandomUtil.between(1, rows);
-        z.setX(Math.max(1, col));
-        z.setY(lane);
-        z.setLane(lane);
-        z.addEffect(ZombieEffect.FROZEN, 120);
-        session.getActiveZombies().add(z);
+        int c = Math.max(1, col);
+        for (int r = 1; r <= rows; r++) {
+            Zombie z = ZombieFactory.create(ZombieType.NORMAL);
+            if (z == null) continue;
+            z.setX(c);
+            z.setY(r);
+            z.setLane(r);
+            z.addEffect(ZombieEffect.FROZEN, 120);
+            session.getActiveZombies().add(z);
+        }
     }
 }

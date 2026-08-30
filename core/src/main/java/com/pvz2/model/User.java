@@ -43,6 +43,17 @@ public class User {
     private java.util.List<NewsItem> allNews = new java.util.ArrayList<>();
 
     /**
+     * تنظیماتِ صوت/گرافیکِ ذخیره‌شونده به‌ازای هر کاربر (فاز ۲).
+     * این‌ها جدا برای هر user در users.json سیو می‌شوند و هنگام لاگین/auto-login
+     * روی {@link GameSettings} اعمال می‌شوند.
+     */
+    private float masterVolume = 0.8f;
+    private boolean musicEnabled = true;
+    private boolean sfxEnabled = true;
+    private boolean showGrid = false;
+    private float gameSpeed = 1.0f;
+
+    /**
      * سطح ارتقای هر گیاه: key = PlantType.name()، value = 0..3
      * 0 = بدون ارتقا، 1 = ارتقای اول، 2 = دوم، 3 = سوم (حداکثر)
      */
@@ -52,6 +63,23 @@ public class User {
      * موجودی بسته‌بذر هر گیاه: key = PlantType.name()، value = تعداد بسته
      */
     private Map<String, Integer> plantSeedPackets = new HashMap<>();
+
+    /**
+     * مجموعه‌ی گیاهانی که با الماس boost شده‌اند (دائمی): key = PlantType.name()
+     * افزوده‌شده در فاز ۲ برای صفحه‌ی انتخاب گیاه — پرچمی جدا از سطح ارتقا.
+     */
+    private List<String> boostedPlants = new java.util.ArrayList<>();
+
+    /** پیشنهاد روزانه فروشگاه: نام گیاه پیشنهادی امروز و تاریخی که تولید شده */
+    private String dailyOfferPlant;
+    private String dailyOfferGeneratedDate;
+
+    /**
+     * شناسه‌ی کوئست‌هایی که این کاربر تکمیل کرده (persist می‌شود تا پرچمِ
+     * «Achieved» بین session‌ها بماند). کوئست‌های روزانه در ریستِ روزانه از این
+     * مجموعه حذف می‌شوند تا دوباره قابلِ انجام باشند (منطق در QuestService).
+     */
+    private List<String> completedQuests = new java.util.ArrayList<>();
 
     // ---- Constructor ----
 
@@ -138,6 +166,43 @@ public class User {
         this.plantSeedPackets = map != null ? map : new HashMap<>();
     }
 
+    // ---- Boosted Plants (فاز ۲) ----
+
+    public boolean isPlantBoosted(String plantTypeName) {
+        return boostedPlants != null && boostedPlants.contains(plantTypeName.toUpperCase());
+    }
+
+    public boolean isPlantBoosted(PlantType type) { return isPlantBoosted(type.name()); }
+
+    public void setPlantBoosted(String plantTypeName, boolean boosted) {
+        if (boostedPlants == null) boostedPlants = new java.util.ArrayList<>();
+        if (boosted) boostedPlants.add(plantTypeName.toUpperCase());
+        else boostedPlants.remove(plantTypeName.toUpperCase());
+    }
+
+    public void setPlantBoosted(PlantType type, boolean boosted) { setPlantBoosted(type.name(), boosted); }
+
+    public void consumeStoredBoost(String plantTypeName) {
+        if (boostedPlants != null) boostedPlants.remove(plantTypeName.toUpperCase());
+    }
+
+    public List<String> getBoostedPlants() {
+        if (boostedPlants == null) boostedPlants = new java.util.ArrayList<>();
+        return boostedPlants;
+    }
+
+    public void setBoostedPlants(List<String> v) {
+        this.boostedPlants = v != null ? v : new java.util.ArrayList<>();
+    }
+
+    // ---- Daily Shop Offer ----
+
+    public String getDailyOfferPlant() { return dailyOfferPlant; }
+    public void setDailyOfferPlant(String p) { this.dailyOfferPlant = p; }
+    public String getDailyOfferGeneratedDate() { return dailyOfferGeneratedDate; }
+    public void setDailyOfferGeneratedDate(String d) { this.dailyOfferGeneratedDate = d; }
+
+
     // ---- Level utilities ----
 
     public int getNightOpsSun() { return 150; }
@@ -200,6 +265,14 @@ public class User {
     public void setDailyQuestsCompleted(int v) { this.dailyQuestsCompleted = v; }
     public int getRegularQuestsCompleted() { return regularQuestsCompleted; }
     public void setRegularQuestsCompleted(int v) { this.regularQuestsCompleted = v; }
+
+    public List<String> getCompletedQuests() {
+        if (completedQuests == null) completedQuests = new java.util.ArrayList<>();
+        return completedQuests;
+    }
+    public void setCompletedQuests(List<String> v) {
+        this.completedQuests = v != null ? v : new java.util.ArrayList<>();
+    }
     public String getLastReachedLevel() { return lastReachedLevel; }
     public void setLastReachedLevel(String v) { this.lastReachedLevel = v; }
     public int getDifficultyLevel() { return difficultyLevel; }
@@ -218,6 +291,18 @@ public class User {
     public void setLastDailyOfferDate(String v) { this.lastDailyOfferDate = v; }
     public Greenhouse getGreenhouse() { return greenhouse; }
     public void setGreenhouse(Greenhouse g) { this.greenhouse = g; }
+
+    // ---- Per-user settings (فاز ۲) ----
+    public float getMasterVolume() { return masterVolume; }
+    public void setMasterVolume(float v) { this.masterVolume = Math.max(0f, Math.min(1f, v)); }
+    public boolean isMusicEnabled() { return musicEnabled; }
+    public void setMusicEnabled(boolean v) { this.musicEnabled = v; }
+    public boolean isSfxEnabled() { return sfxEnabled; }
+    public void setSfxEnabled(boolean v) { this.sfxEnabled = v; }
+    public boolean isShowGrid() { return showGrid; }
+    public void setShowGrid(boolean v) { this.showGrid = v; }
+    public float getGameSpeed() { return gameSpeed; }
+    public void setGameSpeed(float v) { this.gameSpeed = v; }
     public java.util.List<NewsItem> getAllNews() {
         if (allNews == null) allNews = new java.util.ArrayList<>();
         return allNews;

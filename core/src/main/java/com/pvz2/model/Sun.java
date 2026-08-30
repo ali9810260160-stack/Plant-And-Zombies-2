@@ -20,6 +20,13 @@ public class Sun {
     /** ارزش خورشید */
     private int value;  // mutable: radioactive→normal on landing
 
+    // ─── دزدیده‌شدن توسطِ Ra: خورشید بنفش می‌شود و طیِ ۴ ثانیه به‌سمتِ چوبِ Ra
+    //     کشیده و دزدیده می‌شود (لایه‌ی گرافیک این‌ها را برای رنگ/حرکت می‌خواند).
+    private boolean beingStolen;
+    private double  stealProgress;   // ۰..۱ پیشرفتِ کشیده‌شدن
+    private int     stealerCol;      // ستونِ Ra (مقصدِ کشش)
+    private int     stealerRow;      // ردیفِ Ra
+
     public Sun(SunType type, int x, int y, int spawnTick) {
         this.type = type;
         this.x = x;
@@ -52,4 +59,12 @@ public class Sun {
     public int getSpawnTick() { return spawnTick; }
     public int getValue() { return value; }
     public void setValue(int v) { this.value = v; }
+
+    public boolean isBeingStolen() { return beingStolen; }
+    public void setBeingStolen(boolean b) { this.beingStolen = b; }
+    public double getStealProgress() { return stealProgress; }
+    public void setStealProgress(double p) { this.stealProgress = p; }
+    public int getStealerCol() { return stealerCol; }
+    public int getStealerRow() { return stealerRow; }
+    public void setStealer(int col, int row) { this.stealerCol = col; this.stealerRow = row; }
 }

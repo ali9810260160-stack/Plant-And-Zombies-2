@@ -62,6 +62,9 @@ public enum AnimEvent {
     /** یک special ability زامبی فعال شد */
     SPECIAL_ABILITY_FIRED(12),
 
+    /** پایانِ فازِ LOOP یک ability چندمرحله‌ای → پخشِ کلیپِ EXIT (مثلِ power_down تورکوایز) */
+    SPECIAL_ABILITY_ENDED(11),
+
     /** زامبی هیپنوتیزم شد — flip direction */
     HYPNOTIZED(6),
 

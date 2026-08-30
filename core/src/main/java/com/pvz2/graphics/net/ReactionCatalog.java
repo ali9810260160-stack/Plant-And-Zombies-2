@@ -11,6 +11,8 @@ public final class ReactionCatalog {
     public static final String KIND_TEXT = "TEXT";
     public static final String KIND_EMOJI = "EMOJI";
     public static final String KIND_STICKER = "STICKER";
+    /** استیکرِ GIFِ متحرک — value = نامِ فایل در {@code <assets>/gifs} (بدونِ پسوند). */
+    public static final String KIND_GIF = "GIF";
 
     /** 3 ready-made text messages. */
     public static final String[] TEXTS = {

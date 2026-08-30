@@ -140,7 +140,11 @@ public class CombatService {
 
     private void checkProjectileHits(GameSession session) {
         List<Projectile> toRemove = new ArrayList<>();
-        for (Projectile proj : session.getActiveProjectiles()) {
+        // روی یک کپیِ لحظه‌ای پیمایش می‌کنیم چون برخی برخوردها حین همین حلقه پرتابه
+        // اضافه می‌کنند (مثلِ منعکس‌کردنِ پرتابه توسطِ زامبیِ Jester در Dark Ages) و
+        // بدونِ کپی یک ConcurrentModificationException می‌دهد. پرتابه‌ی تازه، تیکِ بعد
+        // پردازش می‌شود.
+        for (Projectile proj : new ArrayList<>(session.getActiveProjectiles())) {
             // پرتابه‌ای که به لِینِ رئیس رسیده، به او آسیب می‌زند (مکانیکِ بردِ boss).
             if (hitBoss(proj, session)) {
                 toRemove.add(proj);
@@ -247,14 +251,52 @@ public class CombatService {
             if (!zombie.isAlive()) continue;
             if (Math.abs(zombie.getX() - proj.getX()) < 0.6
                     && zombie.getY() == proj.getY()) {
+                // غواصِ زیرِ آب فقط با پرتابه‌ی قوسی (lobber) آسیب می‌بیند؛ بقیه رد می‌شوند.
+                if (isSubmergedSnorkel(zombie, session) && !isLobber(proj)) continue;
+                // چتردار: تمامِ پرتابه‌های قوسی/لابر را با چترش دفع می‌کند — بی‌اثر و مصرف می‌شوند.
+                if (zombie.getType() == ZombieType.PARASOL_ZOMBIE && isLobber(proj)) {
+                    return true;
+                }
                 if (handleJesterDeflect(zombie, proj, session)) return true;
-                applyProjectileToZombie(proj, zombie);
+                applyProjectileToZombie(proj, zombie, session);
                 updateWaveHealth(session, proj.getDamage());
                 hitSomething = true;
-                if (zombie.getType() == ZombieType.PARASOL_ZOMBIE && proj.isArc()) break;
             }
         }
         return hitSomething;
+    }
+
+    /** غواص وقتی روی خانه‌ی آب و در حالِ خوردنِ گیاه نباشد، زیرِ آب (مصون) است. */
+    private boolean isSubmergedSnorkel(Zombie z, GameSession session) {
+        if (z.getType() != ZombieType.SNORKEL_ZOMBIE || z.isAttacking()) return false;
+        int col = (int) Math.round(z.getX());
+        if (!session.getGameMap().isValidPosition(col, z.getY())) return false;
+        Tile t = session.getGameMap().getTile(col, z.getY());
+        return t != null && t.isWater();
+    }
+
+    private boolean isLobber(Projectile proj) {
+        return proj.isArc() || proj.getType() == ProjectileType.LOBBED;
+    }
+
+    private boolean anyOtherWizardAlive(GameSession session, Zombie dying) {
+        for (Zombie z : session.getActiveZombies()) {
+            if (z != dying && z.isAlive() && z.getType() == ZombieType.WIZARD_ZOMBIE) return true;
+        }
+        return false;
+    }
+
+    private void revertAllSheep(GameSession session) {
+        for (int r = 1; r <= session.getGameMap().getRows(); r++) {
+            for (int c = 1; c <= session.getGameMap().getCols(); c++) {
+                Tile t = session.getGameMap().getTile(c, r);
+                if (t == null) continue;
+                if (t.getPlant() != null)
+                    t.getPlant().removeEffect(com.pvz2.model.enums.PlantEffect.WIZARDED);
+                if (t.getSecondLayerPlant() != null)
+                    t.getSecondLayerPlant().removeEffect(com.pvz2.model.enums.PlantEffect.WIZARDED);
+            }
+        }
     }
 
     private boolean handleJesterDeflect(Zombie zombie, Projectile proj,
@@ -266,8 +308,14 @@ public class CombatService {
         return true;
     }
 
-    private void applyProjectileToZombie(Projectile proj, Zombie zombie) {
+    private void applyProjectileToZombie(Projectile proj, Zombie zombie, GameSession session) {
+        // اژدها-ایمپ به آتش مصون است — تیرِ آتشین هیچ اثری روی او ندارد.
+        if (zombie.getType() == ZombieType.DRAGON_IMP
+                && proj.getType() == ProjectileType.FIRE) return;
         int dmg = proj.getDamage();
+        // فصلِ غارهای یخی: زامبی‌ها با تیرِ یخی سرد/یخ‌زده نمی‌شوند (ایمنی به یخ).
+        boolean iceImmune = session.getGameMap().getChapter()
+                == com.pvz2.model.enums.ChapterType.FROSTBITE_CAVES;
         if (proj.getType() == ProjectileType.FIRE) {
             dmg *= 2;
             zombie.removeEffect(ZombieEffect.CHILLED);
@@ -279,8 +327,13 @@ public class CombatService {
             zombie.takePoisonDamage(dmg);
         else
             zombie.takeDamage(dmg);
-        if (proj.getType() == ProjectileType.ICE)
+        if (proj.getType() == ProjectileType.ICE && !iceImmune)
             zombie.addEffect(ZombieEffect.CHILLED, 50);
+        // مشعلِ Explorer: تیرِ یخی خاموش، تیرِ آتشین دوباره روشنش می‌کند.
+        if (zombie.getType() == ZombieType.EXPLORER_ZOMBIE) {
+            if (proj.getType() == ProjectileType.ICE)  zombie.setTorchLit(false);
+            if (proj.getType() == ProjectileType.FIRE) zombie.setTorchLit(true);
+        }
         if (proj.isStunOnHit())
             zombie.addEffect(ZombieEffect.STUNNED, 60);
         if (proj.isExplodes() && proj.getAoeRadius() > 0)
@@ -316,7 +369,27 @@ public class CombatService {
         int col = (int) Math.ceil(zombie.getX());
         if (!session.getGameMap().isValidPosition(col, zombie.getY())) return false;
         Tile tile = session.getGameMap().getTile(col, zombie.getY());
-        return tile != null && tile.getPlant() != null;
+        if (tile == null || tile.getPlant() == null) return false;
+        // گیاهِ گوسفندشده (Wizard) خورده نمی‌شود — زامبی از رویش رد می‌شود.
+        if (tile.getPlant().isSheep()) return false;
+        // Dodo Rider از موانع (گردو/گیاهانِ پرجان/مین) پرواز می‌کند؛ فقط Tall-nut و
+        // گیاهانِ عادی جلویش را می‌گیرند.
+        if (zombie.getType() == ZombieType.DODO_RIDER && dodoFliesOver(tile.getPlant())) {
+            return false;
+        }
+        return true;
+    }
+
+    /** آیا Dodo Rider از روی این گیاه پرواز می‌کند؟ (نه از روی Tall-nut). */
+    private boolean dodoFliesOver(Plant plant) {
+        PlantType t = plant.getType();
+        if (t == PlantType.TALL_NUT) return false;   // بلندتر از آن که رد شود
+        if (t == PlantType.WALL_NUT || t == PlantType.PUMPKIN || t == PlantType.ENDURIAN
+                || t == PlantType.EXPLODE_O_NUT || t == PlantType.POTATO_MINE
+                || t == PlantType.PRIMAL_POTATO_MINE) {
+            return true;
+        }
+        return plant.getMaxHealth() >= 1000;         // سایرِ گیاهانِ پرجان
     }
 
     private void applySlipperyTile(Zombie zombie, GameSession session) {
@@ -617,6 +690,16 @@ public class CombatService {
         view.printZombieDead(zombie.getType().name(), zombie.getX(), zombie.getY());
         session.setZombiesKilled(session.getZombiesKilled() + 1);
 
+        // Wizard: با مرگِ آخرین جادوگر، همه‌ی گیاهانِ گوسفندشده به حالتِ عادی برمی‌گردند.
+        if (zombie.getType() == ZombieType.WIZARD_ZOMBIE
+                && !anyOtherWizardAlive(session, zombie)) {
+            revertAllSheep(session);
+        }
+
+        // خورشیددزدها هنگامِ مرگ خورشیدِ نگه‌داشته را برمی‌گردانند:
+        //   Ra → همه‌ی خورشید به بازیکن؛ Turquoise → نیمی روی زمین (قابلِ برداشت).
+        handleSunStealerDeath(zombie, session);
+
         // ثبت کشتن زامبی برای TIMED_WAR
         if (session.getLevel() != null
                 && session.getLevel().getLevelType() == LevelType.TIMED_WAR
@@ -641,6 +724,44 @@ public class CombatService {
         }
         Wave wave = session.getCurrentWave();
         if (wave != null) wave.registerHealthLost(zombie.getMaxHealth());
+    }
+
+    /**
+     * مرگِ خورشیددزدها. Ra: همه‌ی خورشیدِ نگه‌داشته را مستقیم به بازیکن برمی‌گرداند.
+     * Turquoise: نیمی از خورشیدِ دزدیده‌شده را به‌صورتِ خورشیدِ افتاده روی زمین می‌ریزد
+     * (بازیکن می‌تواند بردارد).
+     */
+    private void handleSunStealerDeath(Zombie zombie, GameSession session) {
+        if (!(zombie instanceof com.pvz2.model.zombies.NormalZombie)) return;
+        // اگر Ra وسطِ کشیدنِ خورشیدها بمیرد، خورشیدهای بنفشِ آن ردیف را به حالتِ
+        // عادیِ قابلِ برداشت برگردان (نگذار برای همیشه بنفش/معلق بمانند).
+        if (zombie.getType() == ZombieType.RA_ZOMBIE) {
+            int row = zombie.getY();
+            for (com.pvz2.model.Sun s : session.getActiveSuns()) {
+                if (s.isBeingStolen() && s.getStealerRow() == row) {
+                    s.setBeingStolen(false);
+                    s.setStealProgress(0);
+                }
+            }
+        }
+        int stolen = ((com.pvz2.model.zombies.NormalZombie) zombie).getStolenSun();
+        if (stolen <= 0) return;
+        if (zombie.getType() == ZombieType.RA_ZOMBIE) {
+            session.addSun(stolen);
+            session.pushCollectEvent("☀ Ra returned " + stolen + " sun!");
+        } else if (zombie.getType() == ZombieType.TURQUOISE_ZOMBIE) {
+            int half = stolen / 2;
+            if (half <= 0) return;
+            com.pvz2.model.Sun sun = new com.pvz2.model.Sun(
+                    com.pvz2.model.enums.SunType.NORMAL,
+                    (int) Math.round(zombie.getX()), zombie.getY(),
+                    session.getCurrentTick());
+            sun.setLanded(true);
+            sun.setFallProgress(1.0);
+            sun.setValue(half);
+            session.getActiveSuns().add(sun);
+            session.pushCollectEvent("☀ Turquoise dropped " + half + " sun!");
+        }
     }
 
     private void updateMeoPoints(Zombie zombie, GameSession session) {

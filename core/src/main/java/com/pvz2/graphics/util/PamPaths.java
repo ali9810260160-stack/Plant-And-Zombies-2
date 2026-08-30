@@ -1,20 +1,24 @@
 package com.pvz2.graphics.util;
 
+import com.pvz2.model.enums.PlantType;
+import com.pvz2.view.game.anim.config.AnimConfigLoader;
+import com.pvz2.view.game.anim.config.PlantAnimConfig;
+
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * مسیرهای فایل PAM برای تمام گیاهان و زامبی‌ها.
+ * مسیرهای فایل PAM — <b>فقط برای کارت‌های بانکِ بذر</b> ({@code PlantCardActor}).
  *
- * <p>فرمت مسیر: {@code 768/INITIAL/{TYPE}/{NAME}/{NAME}.PAM}
+ * <p><b>منبعِ اصلیِ مسیرها {@code assets/data/character_animations.json} است</b>
+ * (که رندرِ زندهٔ زمین از طریق {@code AnimConfigLoader}/{@code AnimationSystem}
+ * از همان می‌خواند). این کلاس صرفاً یک پلِ راحت برای گرفتنِ همان {@code pamPath}
+ * از روی نامِ نوعِ گیاه است: ابتدا از JSON می‌خواند و فقط اگر آنجا نبود، به نگاشتِ
+ * دستیِ زیر (که قدیمی است و ممکن است ناقص باشد) برمی‌گردد. پس دیگر منبعِ جداگانه/
+ * متناقضِ مسیر نیست.
  *
- * <p>کلیپ‌های رایج گیاهان:  {@code idle}, {@code attack}, {@code death}, {@code intro}
- * <p>کلیپ‌های رایج زامبی‌ها: {@code walk}, {@code eating}, {@code die}, {@code attack}
- *
- * <p><b>برای یافتن مسیر دقیق از Asset Browser استفاده کنید:</b>
- * <pre>java -Dpvz.assets="/path/to/assets" -jar pvz-asset-browser.jar</pre>
- *
- * <p>مسیرهای خالی را بعد از جستجو در asset browser پُر کنید.
+ * <p>نکته: نگاشتِ زامبیِ زیر فقط توسطِ کدِ قدیمیِ بلااستفاده مانده؛ رندرِ زندهٔ
+ * زامبی‌ها هم از همان JSON (با آگاهی از فصل) می‌آید.
  */
 public final class PamPaths {
 
@@ -118,7 +122,7 @@ public final class PamPaths {
 
         // ─── انفجاری ────────────────────────────────────────────────────────
         reg(PLANTS, "cherry_bomb",
-                P + "CHERRYBOMB/CHERRYBOMB.PAM");
+                "768/FULL/PLANT/CHERRYBOMB/CHERRYBOMB.PAM");
         reg(PLANTS, "jalapeno",
                 P + "JALAPENO/JALAPENO.PAM");
         reg(PLANTS, "potato_mine",
@@ -316,10 +320,40 @@ public final class PamPaths {
         map.put(key, path);
     }
 
-    /** مسیر PAM گیاه — "" اگر باید از asset browser پیدا شود */
+    /**
+     * مسیرِ PAMِ گیاه. اول از {@code character_animations.json} (منبعِ اصلی،
+     * همان که رندرِ زمین استفاده می‌کند) خوانده می‌شود؛ فقط اگر آنجا نبود به نگاشتِ
+     * دستیِ قدیمی برمی‌گردد. "" اگر هیچ‌کدام نداشت.
+     */
     public static String forPlant(String type) {
         if (type == null) return "";
-        return PLANTS.getOrDefault(type.toLowerCase(), "");
+        String key = type.toLowerCase();
+        String json = jsonPlantPaths().get(key);
+        if (json != null && !json.isEmpty()) return json;
+        return PLANTS.getOrDefault(key, "");
+    }
+
+    /** کشِ تنبلِ مسیرهای گیاه از JSON (منبعِ اصلی). یک‌بار ساخته می‌شود. */
+    private static Map<String, String> jsonPlantPaths;
+
+    private static Map<String, String> jsonPlantPaths() {
+        if (jsonPlantPaths == null) {
+            Map<String, String> m = new HashMap<>();
+            try {
+                AnimConfigLoader loader = new AnimConfigLoader(
+                        "data/character_animations.json", "data/environment_animations.json");
+                for (PlantType t : PlantType.values()) {
+                    PlantAnimConfig c = loader.getPlantConfig(t);
+                    if (c != null && c.pamPath != null && !c.pamPath.isEmpty()) {
+                        m.put(t.name().toLowerCase(), c.pamPath);
+                    }
+                }
+            } catch (Exception ignored) {
+                // اگر libGDX/فایل در دسترس نبود (مثلاً تست)، فقط به نگاشتِ دستی تکیه می‌کنیم.
+            }
+            jsonPlantPaths = m;
+        }
+        return jsonPlantPaths;
     }
 
     /** مسیر PAM زامبی — "" اگر باید از asset browser پیدا شود */

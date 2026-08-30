@@ -24,6 +24,9 @@ public class Tile {
     /** حفره (Beghouled): وقتی زامبی گیاهی را می‌خورد، آن خانه crater می‌شود و دیگر گیاه نمی‌گیرد. */
     private boolean crater;
 
+    /** زمینِ سوخته (آتشِ اژدهای فصلِ تاریک): تا وقتی >۰ باشد، کاشت روی این خانه ممنوع است. */
+    private int scorchTicks;
+
     /** جایزه‌ی نهفته در سنگ‌قبر — با اتمامِ جانِ سنگ‌قبر آزاد می‌شود. */
     public enum Reward { NONE, SUN, PLANT_FOOD }
     private Reward reward = Reward.NONE;
@@ -48,6 +51,9 @@ public class Tile {
 
     public boolean isPlantable() {
         if (crater) {
+            return false;
+        }
+        if (scorchTicks > 0) {   // زمینِ آتش‌گرفته — موقتاً غیرقابلِ کاشت
             return false;
         }
         if (type == TileType.TOMBSTONE || type == TileType.DARK_TOMBSTONE) {
@@ -133,6 +139,9 @@ public class Tile {
     public void incrementFreezeLevel() { this.freezeLevel = Math.min(3, this.freezeLevel + 1); }
     public boolean isCrater() { return crater; }
     public void setCrater(boolean crater) { this.crater = crater; }
+    public boolean isScorched() { return scorchTicks > 0; }
+    public void setScorched(int ticks) { this.scorchTicks = Math.max(this.scorchTicks, ticks); }
+    public void tickScorch() { if (scorchTicks > 0) scorchTicks--; }
     public Reward getReward() { return reward; }
     public void setReward(Reward reward) { this.reward = reward; }
 }

@@ -16,7 +16,9 @@ import com.pvz2.model.Sun;
 import com.pvz2.model.enums.AnimEvent;
 import com.pvz2.model.enums.ChapterType;
 import com.pvz2.model.enums.PlantType;
+import com.pvz2.model.plants.GenericPlant;
 import com.pvz2.model.plants.Plant;
+import com.pvz2.view.game.anim.state.PlantAnimState;
 import com.pvz2.model.tiles.Tile;
 import com.pvz2.model.zombies.Zombie;
 import com.pvz2.view.game.anim.action.ZombieAction;
@@ -78,6 +80,11 @@ import java.util.Set;
 public class AnimationSystem {
 
     private static final String TAG = "AnimationSystem";
+
+    /** کسری از کلیپِ حمله که در آن پرتابه شلیک می‌شود (شلیکِ طبیعی‌تر، ~۵۳٪). */
+    private static final float FIRE_FRACTION = 0.53f;
+    /** طولِ پیش‌فرضِ کلیپِ حمله تا وقتی PAM هنوز حل نشده (ثانیه). */
+    private static final float DEFAULT_ATTACK_DUR = 0.6f;
 
     // ─── ابزارهای اصلی ───────────────────────────────────────────
     private final AnimConfigLoader    configLoader;
@@ -233,6 +240,21 @@ public class AnimationSystem {
             ctrl.consumeEvent(ev);
 
             ctrl.update(delta);
+
+            // شلیکِ پرتابه در ~۵۳٪ کلیپِ حمله — تا شلیک با انیمیشن هماهنگ و طبیعی‌تر شود.
+            if (plant instanceof GenericPlant) {
+                GenericPlant gp = (GenericPlant) plant;
+                if (gp.isShotPending()) {
+                    if (ctrl.getCurrentState() != PlantAnimState.ATTACK) {
+                        gp.releaseShot(session);   // انیمیشنِ حمله فعال نیست → فوری شلیک کن
+                    } else {
+                        float dur = PamDrawUtil.clipDuration(
+                                pamPlayer, ctrl.getPamPath(), ctrl.getAttackClip());
+                        if (dur <= 0f) dur = DEFAULT_ATTACK_DUR;
+                        if (ctrl.getStateTime() >= dur * FIRE_FRACTION) gp.releaseShot(session);
+                    }
+                }
+            }
         }
 
         // ── زامبی‌ها ─────────────────────────────────────────────

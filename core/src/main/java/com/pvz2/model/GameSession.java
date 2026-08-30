@@ -29,6 +29,12 @@ public class GameSession {
     private List<PlantType> boostedPlants;
     private GameResult result;
     private boolean cooldownCheated;
+
+    /** cooldownِ بسته‌ی بذرِ هر نوع گیاه پس از کاشت (بر حسبِ تیک). */
+    private final java.util.Map<com.pvz2.model.enums.PlantType, Integer> seedCdRemaining =
+            new java.util.EnumMap<>(com.pvz2.model.enums.PlantType.class);
+    private final java.util.Map<com.pvz2.model.enums.PlantType, Integer> seedCdTotal =
+            new java.util.EnumMap<>(com.pvz2.model.enums.PlantType.class);
     private int plantsLost;
     private int zombiesKilled;
     private long meoPoints;
@@ -40,8 +46,17 @@ public class GameSession {
     private List<Integer> frostbiteWindAffectedRows;
     private Map<String, com.pvz2.model.plants.Plant> catPlants;
     private Object minigameState;
+    /** رئیس (Zomboss) — فقط در مراحلِ BOSS غیر-null. نگاه کنید {@link Boss}. */
+    private Boss boss;
     private int consecutiveKills;
     private long lastKillTick;
+
+    // ─── الگوهای امتیازی (بازی امتیازی — Scored) ───────────────────────────────
+    /** اعلان‌های الگوی میوپوینت که هنوز به لایه‌ی گرافیک تحویل داده نشده‌اند. */
+    private final List<String> meoEvents = new ArrayList<>();
+    /** پنجره‌ی جمع‌آوریِ آیتم (خورشید) — برای الگوی Item Collector. */
+    private int itemWindowStartTick = -1;
+    private int itemsInWindow;
 
     // ════════════════════════════════════════════════════════
     //  CONVEYOR_BELT state
@@ -130,6 +145,27 @@ public class GameSession {
     public boolean isInProgress() { return result == GameResult.IN_PROGRESS; }
 
     public void addSun(int amount) { sunAmount += amount; }
+
+    // ─── VERSUS (فاز ۳): دو اقتصادِ مجزا + تایمر + برنده ───────────────────────
+    /** خورشیدِ بازیکنِ زامبی (جدا از خورشیدِ گیاه‌کار = sunAmount). */
+    private int zombieSun;
+    /** تیک‌های باقی‌مانده تا پایانِ مسابقه (بردِ گیاه با اتمامِ زمان). */
+    private int versusTicksLeft;
+    /** نقشِ برنده وقتی مسابقه تمام شد: "PLANT" یا "ZOMBIE"؛ null یعنی هنوز ادامه دارد. */
+    private String versusWinnerRole;
+
+    public int getZombieSun() { return zombieSun; }
+    public void setZombieSun(int v) { this.zombieSun = v; }
+    public void addZombieSun(int v) { this.zombieSun += v; }
+    public boolean spendZombieSun(int amount) {
+        if (zombieSun < amount) return false;
+        zombieSun -= amount;
+        return true;
+    }
+    public int getVersusTicksLeft() { return versusTicksLeft; }
+    public void setVersusTicksLeft(int v) { this.versusTicksLeft = v; }
+    public String getVersusWinnerRole() { return versusWinnerRole; }
+    public void setVersusWinnerRole(String r) { this.versusWinnerRole = r; }
 
     public boolean spendSun(int amount) {
         if (sunAmount < amount) return false;
@@ -265,6 +301,36 @@ public class GameSession {
     public void setBoostedPlants(List<PlantType> b) { this.boostedPlants = b; }
     public GameResult getResult() { return result; }
     public void setResult(GameResult result) { this.result = result; }
+    // ─── cooldownِ بسته‌ی بذر (seed packet recharge) ─────────────────────────
+    /** شروعِ cooldownِ بسته‌ی بذر پس از کاشتِ موفقِ این نوع گیاه. */
+    public void startSeedCooldown(com.pvz2.model.enums.PlantType type, int ticks) {
+        if (type == null || ticks <= 0) return;
+        seedCdRemaining.put(type, ticks);
+        seedCdTotal.put(type, ticks);
+    }
+    /** هر تیک: کاهشِ همه‌ی cooldownهای بسته‌ی بذر. */
+    public void tickSeedCooldowns() {
+        for (java.util.Map.Entry<com.pvz2.model.enums.PlantType, Integer> e
+                : seedCdRemaining.entrySet()) {
+            if (e.getValue() > 0) e.setValue(e.getValue() - 1);
+        }
+    }
+    /** آیا بسته‌ی این گیاه آماده است (cooldown تمام شده)؟ */
+    public boolean isSeedReady(com.pvz2.model.enums.PlantType type) {
+        Integer r = seedCdRemaining.get(type);
+        return r == null || r <= 0;
+    }
+    /** کسرِ باقی‌مانده‌ی cooldown (۰=آماده … ۱=تازه کاشته). */
+    public float seedCooldownFraction(com.pvz2.model.enums.PlantType type) {
+        Integer r = seedCdRemaining.get(type);
+        Integer t = seedCdTotal.get(type);
+        if (r == null || t == null || t <= 0 || r <= 0) return 0f;
+        return Math.min(1f, (float) r / t);
+    }
+    public java.util.Map<com.pvz2.model.enums.PlantType, Integer> getSeedCdRemaining() {
+        return seedCdRemaining;
+    }
+
     public boolean isCooldownCheated() { return cooldownCheated; }
     public void setCooldownCheated(boolean b) { this.cooldownCheated = b; }
     public int getPlantsLost() { return plantsLost; }
@@ -285,12 +351,149 @@ public class GameSession {
     public Map<String, com.pvz2.model.plants.Plant> getCatPlants() { return catPlants; }
     public Object getMinigameState() { return minigameState; }
     public void setMinigameState(Object s) { this.minigameState = s; }
+    public Boss getBoss() { return boss; }
+    public void setBoss(Boss boss) { this.boss = boss; }
     public int getConsecutiveKills() { return consecutiveKills; }
     public void setConsecutiveKills(int n) { this.consecutiveKills = n; }
     public long getLastKillTick() { return lastKillTick; }
     public void setLastKillTick(long t) { this.lastKillTick = t; }
     public int getLevelNumber() { return levelNumber; }
     public void setLevelNumber(int n) { this.levelNumber = n; }
+
+    // ─── الگوهای امتیازی (Scored) ──────────────────────────────────────────────
+    /**
+     * ثبتِ یک اعلانِ الگوی میوپوینت + افزودنِ امتیاز.
+     * <b>فقط در بازیِ امتیازی (SCORED)</b> فعال است — در مراحلِ عادی اعلانِ
+     * میوپوینت نباید دیده شود (طبق درخواستِ کاربر).
+     */
+    public void pushMeoEvent(String label, long bonus) {
+        if (level == null || level.getLevelType() != com.pvz2.model.enums.LevelType.SCORED) {
+            return;
+        }
+        meoEvents.add(label);
+        meoPoints += bonus;
+    }
+    /** برداشتِ اعلان‌های انباشته (پس از تحویل به گرافیک، پاک می‌شوند). */
+    public List<String> drainMeoEvents() {
+        if (meoEvents.isEmpty()) return java.util.Collections.emptyList();
+        List<String> copy = new ArrayList<>(meoEvents);
+        meoEvents.clear();
+        return copy;
+    }
+
+    /**
+     * صفِ توستِ «جمع‌آوری» — برای هر مرحله (برخلافِ meoEvents که فقط SCORED است).
+     * مثلِ جمع‌آوریِ سکه/الماس/گلدان/غذای گیاه از زامبی‌های کشته‌شده.
+     */
+    private final List<String> collectEvents = new ArrayList<>();
+    public void pushCollectEvent(String label) { collectEvents.add(label); }
+    public List<String> drainCollectEvents() {
+        if (collectEvents.isEmpty()) return java.util.Collections.emptyList();
+        List<String> copy = new ArrayList<>(collectEvents);
+        collectEvents.clear();
+        return copy;
+    }
+
+    /**
+     * صفِ «گردبادِ انداختنِ زامبی» (مصرِ باستان، موجِ نهایی). هر عنصر {col,row}
+     * محلِ فرودِ گردباد است؛ لایه‌ی گرافیک انیمیشنِ intro→loop→outro را آنجا می‌زند.
+     */
+    private final List<int[]> tornadoDrops = new ArrayList<>();
+    public void addTornadoDrop(int col, int row) { tornadoDrops.add(new int[]{col, row}); }
+    public List<int[]> drainTornadoDrops() {
+        if (tornadoDrops.isEmpty()) return java.util.Collections.emptyList();
+        List<int[]> copy = new ArrayList<>(tornadoDrops);
+        tornadoDrops.clear();
+        return copy;
+    }
+
+    /**
+     * خانه‌هایی که اژدهای فصلِ تاریک آتش زده — لایه‌ی گرافیک انیمیشنِ زمینِ سوخته
+     * (SCORCHED_EARTH_TILE: animation→animation2→animation3) را آنجا پخش می‌کند.
+     * هر عنصر {col1based, row1based}.
+     */
+    private final List<int[]> scorchedTiles = new ArrayList<>();
+    public void addScorchedTile(int col, int row) { scorchedTiles.add(new int[]{col, row}); }
+    public List<int[]> drainScorchedTiles() {
+        if (scorchedTiles.isEmpty()) return java.util.Collections.emptyList();
+        List<int[]> copy = new ArrayList<>(scorchedTiles);
+        scorchedTiles.clear();
+        return copy;
+    }
+
+    /**
+     * چمن‌زنِ متحرک: پس از فعال‌شدن، از سرِ لاین حرکت می‌کند و هر زامبی که به آن
+     * می‌رسد را می‌کشد (نه همه با هم). {@code x} ستونِ اعشاریِ ۱-based.
+     */
+    public static final class ActiveMower {
+        public final int row;   // ۱-based
+        public double x;         // ستونِ اعشاری؛ از لبه‌ی خانه (۰) شروع می‌شود
+        public ActiveMower(int row) { this.row = row; this.x = 0.0; }
+    }
+    private final List<ActiveMower> activeMowers = new ArrayList<>();
+    public List<ActiveMower> getActiveMowers() { return activeMowers; }
+    public void launchMower(int row1based) { activeMowers.add(new ActiveMower(row1based)); }
+
+    /** صفِ انفجارها (بمب گیلاسی/جالاپینو/دوم‌شروم): هر عنصر {col,row}. لرزش + جلوه. */
+    private final List<int[]> explosionEvents = new ArrayList<>();
+    public void addExplosion(int col, int row) { explosionEvents.add(new int[]{col, row}); }
+    public List<int[]> drainExplosions() {
+        if (explosionEvents.isEmpty()) return java.util.Collections.emptyList();
+        List<int[]> copy = new ArrayList<>(explosionEvents);
+        explosionEvents.clear();
+        return copy;
+    }
+
+    /** صفِ لیزرهای تورکوایز: هر عنصر {row, nearCol, farCol}. گرافیک پرتوی محوشونده می‌کشد. */
+    private final List<int[]> laserZaps = new ArrayList<>();
+    public void addLaserZap(int row, int nearCol, int farCol) {
+        laserZaps.add(new int[]{row, nearCol, farCol});
+    }
+    public List<int[]> drainLaserZaps() {
+        if (laserZaps.isEmpty()) return java.util.Collections.emptyList();
+        List<int[]> copy = new ArrayList<>(laserZaps);
+        laserZaps.clear();
+        return copy;
+    }
+
+    /**
+     * صفِ پرتابه‌های اختاپوس: هر عنصر {srcCol,srcRow,tgtCol,tgtRow}. لایه‌ی گرافیک
+     * انیمیشنِ ZOMBIE_OCTOPUS_PROJECTILE را روی این مسیر پخش می‌کند.
+     */
+    private final List<double[]> octopusTosses = new ArrayList<>();
+    public void addOctopusToss(double srcCol, double srcRow, double tgtCol, double tgtRow) {
+        octopusTosses.add(new double[]{srcCol, srcRow, tgtCol, tgtRow});
+    }
+    public List<double[]> drainOctopusTosses() {
+        if (octopusTosses.isEmpty()) return java.util.Collections.emptyList();
+        List<double[]> copy = new ArrayList<>(octopusTosses);
+        octopusTosses.clear();
+        return copy;
+    }
+
+    /** صفِ افکت‌های تمام‌صفحه (مثلِ "iceshroom" = بادِ یخیِ IceShroom). لایه‌ی گرافیک مصرف می‌کند. */
+    private final List<String> screenEffects = new ArrayList<>();
+    public void pushScreenEffect(String name) { screenEffects.add(name); }
+    public List<String> drainScreenEffects() {
+        if (screenEffects.isEmpty()) return java.util.Collections.emptyList();
+        List<String> copy = new ArrayList<>(screenEffects);
+        screenEffects.clear();
+        return copy;
+    }
+    /** ثبتِ جمع‌آوریِ یک آیتم (خورشید) برای الگوی Item Collector. */
+    public void registerItemCollected() {
+        if (itemWindowStartTick < 0 || currentTick - itemWindowStartTick > 100) {
+            itemWindowStartTick = currentTick;
+            itemsInWindow = 1;
+        } else {
+            itemsInWindow++;
+            if (itemsInWindow == 5) {
+                pushMeoEvent("✨ ITEM COLLECTOR x5!", 200L * 5);
+                itemWindowStartTick = -1;
+                itemsInWindow = 0;
+            }
+        }
+    }
 
     // Conveyor
     public List<PlantType> getConveyorQueue() { return conveyorQueue; }

@@ -245,12 +245,25 @@ public class GameScreen extends BaseScreen {
                     .height(34);
         }
         for (String e : com.pvz2.graphics.net.ReactionCatalog.EMOJIS) {
-            bar.add(reactionButton(skin, e, com.pvz2.graphics.net.ReactionCatalog.KIND_EMOJI, e))
+            bar.add(reactionIconButton(skin, e, com.pvz2.graphics.net.ReactionCatalog.KIND_EMOJI, e))
                     .width(46).height(34);
         }
         for (String s : com.pvz2.graphics.net.ReactionCatalog.STICKERS) {
-            bar.add(reactionButton(skin, s, com.pvz2.graphics.net.ReactionCatalog.KIND_STICKER, s))
+            bar.add(reactionIconButton(skin, s, com.pvz2.graphics.net.ReactionCatalog.KIND_STICKER, s))
                     .width(46).height(34);
+        }
+        // ردیفِ استیکرهای GIFِ متحرک (assets/gifs) — انتخاب با نام، پخش برای حریف.
+        java.util.List<String> gifs = com.pvz2.graphics.net.GifStickers.names();
+        if (!gifs.isEmpty()) {
+            bar.row();
+            com.badlogic.gdx.scenes.scene2d.ui.Table gifRow =
+                    new com.badlogic.gdx.scenes.scene2d.ui.Table();
+            gifRow.defaults().pad(3);
+            for (String name : gifs) {
+                gifRow.add(reactionButton(skin, name,
+                        com.pvz2.graphics.net.ReactionCatalog.KIND_GIF, name)).height(30);
+            }
+            bar.add(gifRow).colspan(9);
         }
         bar.pack();
         bar.setPosition((GameConstants.VIEWPORT_WIDTH - bar.getWidth()) / 2f, 6);
@@ -269,9 +282,63 @@ public class GameScreen extends BaseScreen {
         return b;
     }
 
+    /** دکمه‌ی واکنشِ ایموجی/استیکر — گلیف را با فونتِ ایموجیِ سیستم به تصویر تبدیل می‌کند
+     *  (چون فونتِ اسکین ایموجی ندارد)؛ اگر نشد، به گلیفِ متنی برمی‌گردد. */
+    private com.badlogic.gdx.scenes.scene2d.ui.TextButton reactionIconButton(
+            Skin skin, String glyph, String kind, String value) {
+        com.badlogic.gdx.scenes.scene2d.ui.TextButton b =
+                new com.badlogic.gdx.scenes.scene2d.ui.TextButton("", skin, "brown");
+        com.badlogic.gdx.graphics.g2d.TextureRegion region =
+                com.pvz2.graphics.util.EmojiTextures.get(glyph);
+        if (region != null) {
+            b.clearChildren();
+            b.add(new com.badlogic.gdx.scenes.scene2d.ui.Image(region)).size(26);
+        } else {
+            b.setText(glyph);
+        }
+        b.addListener(new ClickListener() {
+            @Override public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent e, float x, float y) {
+                if (versus != null) versus.sendReaction(kind, value);
+            }
+        });
+        return b;
+    }
+
     /** واکنشِ دریافتی از حریف را در گوشه‌ی صفحه نمایش می‌دهد (اکتورِ متحرک). */
     private void onIncomingReaction(com.pvz2.shared.protocol.payload.ReactionEvent re) {
         if (re == null || hudStage == null) return;
+        // استیکرِ GIFِ متحرک: در گوشه‌ی بالا-راست یک‌بار پخش و سپس خودحذف می‌شود.
+        if (com.pvz2.graphics.net.ReactionCatalog.KIND_GIF.equals(re.kind)) {
+            com.badlogic.gdx.files.FileHandle f =
+                    com.pvz2.graphics.net.GifStickers.fileFor(re.value);
+            com.pvz2.graphics.net.NetLog.info("[gif] incoming '" + re.value
+                    + "' file=" + (f != null ? f.path() : "NOT FOUND"));
+            if (f == null) return;
+            float box = 180f;
+            com.pvz2.graphics.actors.AnimatedGifActor gif =
+                    new com.pvz2.graphics.actors.AnimatedGifActor(f, box);
+            gif.setPosition(GameConstants.VIEWPORT_WIDTH - box - 24,
+                    GameConstants.VIEWPORT_HEIGHT - box - 90);
+            hudStage.addActor(gif);
+            return;
+        }
+        // ایموجی/استیکر: تصویرِ rasterizeشده (فونتِ اسکین گلیفِ ایموجی ندارد).
+        if (com.pvz2.graphics.net.ReactionCatalog.KIND_EMOJI.equals(re.kind)
+                || com.pvz2.graphics.net.ReactionCatalog.KIND_STICKER.equals(re.kind)) {
+            com.badlogic.gdx.graphics.g2d.TextureRegion region =
+                    com.pvz2.graphics.util.EmojiTextures.get(re.value);
+            if (region != null) {
+                float size = 96f;
+                boolean pulse = com.pvz2.graphics.net.ReactionCatalog.KIND_STICKER.equals(re.kind);
+                com.pvz2.graphics.actors.EmojiReactionActor img =
+                        new com.pvz2.graphics.actors.EmojiReactionActor(region, size, pulse);
+                img.setPosition(GameConstants.VIEWPORT_WIDTH - size - 40,
+                        GameConstants.VIEWPORT_HEIGHT - size - 90);
+                hudStage.addActor(img);
+                return;
+            }
+            // اگر rasterize نشد، به toastِ متنیِ زیر برمی‌گردیم.
+        }
         Skin skin = GameAssets.getInstance().getSkin();
         String from = versus != null && GameFacade.get() != null
                 ? opponentName() : null;
@@ -660,8 +727,10 @@ public class GameScreen extends BaseScreen {
         showCollectEvents();
         spawnTornadoDrops();
         spawnScreenEffects();
+        spawnScorchedTiles();
         spawnExplosions();
         spawnOctopusTosses();
+        spawnLaserZaps();
         detectBossShake();
 
         ScreenUtils.clear(0f, 0f, 0f, 1f);
@@ -670,7 +739,11 @@ public class GameScreen extends BaseScreen {
         camera.position.set(GameConstants.VIEWPORT_WIDTH * 0.5f + renderer.getShakeOffsetX(),
                             GameConstants.VIEWPORT_HEIGHT * 0.5f + renderer.getShakeOffsetY(), 0);
         camera.update();
-        renderer.render(snap, GameFacade.get().getCurrentSession(), delta, camera, speedIndex);
+        // هنگام مکث، deltaی رندرِ بازی صفر می‌شود تا انیمیشن‌های PAM (راه‌رفتن،
+        // شلیک، idle) و جلوه‌ها هم مثلِ مدل «سر جای خود» فریز شوند — نه فقط توقفِ
+        // شبیه‌سازی. hudStage همچنان deltaی واقعی می‌گیرد تا خودِ منوی توقف کار کند.
+        float renderDelta = paused ? 0f : delta;
+        renderer.render(snap, GameFacade.get().getCurrentSession(), renderDelta, camera, speedIndex);
 
         hudStage.act(delta);
         hudStage.draw();
@@ -912,6 +985,13 @@ public class GameScreen extends BaseScreen {
         for (String name : snap.screenEffects) renderer.spawnScreenEffect(name);
     }
 
+    /** خانه‌های تازه‌سوخته (آتشِ اژدهای فصلِ تاریک) را برای انیمیشنِ زمینِ سوخته می‌سپارد. */
+    private void spawnScorchedTiles() {
+        if (snap == null || snap.scorchedTiles == null || snap.scorchedTiles.isEmpty()) return;
+        if (renderer == null) return;
+        for (int[] s : snap.scorchedTiles) renderer.spawnScorchedTile(s[0], s[1]);
+    }
+
     /** انفجارهایِ تازه (بمب گیلاسی/جالاپینو/دوم‌شروم): جلوه + لرزشِ صفحه. */
     private void spawnExplosions() {
         if (snap == null || snap.explosionEvents == null || snap.explosionEvents.isEmpty()) return;
@@ -920,6 +1000,13 @@ public class GameScreen extends BaseScreen {
             renderer.triggerExplosion(GameCoords.toScreenX(e[0]),
                                       GameCoords.toScreenY(e[1]), 80f);
         }
+    }
+
+    /** لیزرهای تورکوایزِ تازه را به رندرر می‌سپارد تا پرتوی محوشونده را بکشد. */
+    private void spawnLaserZaps() {
+        if (snap == null || snap.laserZaps == null || snap.laserZaps.isEmpty()) return;
+        if (renderer == null) return;
+        for (int[] l : snap.laserZaps) renderer.spawnLaser(l[0], l[1], l[2]);
     }
 
     /** پرتابه‌های اختاپوسِ تازه را به رندرر می‌سپارد تا انیمیشنشان را بزند. */
@@ -1225,11 +1312,9 @@ public class GameScreen extends BaseScreen {
         String err = facade().feedPlant(col, row);
         if (err != null) {
             showToast(ToastActor.error(err));
-        } else {
-            float cx = GameCoords.toScreenX(col);
-            float cy = GameCoords.toScreenY(row);
-            renderer.triggerPlantFoodAura(cx, cy);
         }
+        // حاله‌ی نور توسط PlantAnimController (PAM: PLANTFOOD_FX) پشتِ گیاه رندر
+        // می‌شود — با رویدادِ PLANT_FOOD_ACTIVATED که feedPlant صادر می‌کند.
         cursorMode = CursorMode.NONE;
         hideCursorVisuals();
     }

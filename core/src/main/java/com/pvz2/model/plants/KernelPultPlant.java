@@ -29,7 +29,7 @@ public class KernelPultPlant extends GenericPlant {
 
     @Override
     public void onTick(int tickCount, GameSession session) {
-        if (isFrozen()) { tickEffects(); return; }
+        if (isDisabled()) { tickEffects(); return; }
         tickCooldown();
         tickEffects();
 

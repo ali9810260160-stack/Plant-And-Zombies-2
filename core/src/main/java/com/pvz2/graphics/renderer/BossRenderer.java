@@ -86,11 +86,110 @@ public class BossRenderer {
         float half = BOSS_FALLBACK_W * 0.5f;
         cx = Math.min(cx, GameConstants.VIEWPORT_WIDTH - half);
         String pam  = bossPam(chapter);
-        String clip = bossClip(chapter, snap.bossState, snap.bossAbility);
-        boolean loopClip = "idle".equals(snap.bossState) || "moving".equals(snap.bossState)
-                || "stunned".equals(snap.bossState);   // گیج: کلیپِ idle به‌صورتِ loop
-        PamDrawUtil.draw(pamPlayer, batch, pam, clip, snap.bossStateTime,
-                cx, cy, loopClip, BOSS_FALLBACK_W, targetH, BOSS_FALLBACK, BOSS_MAX_SCALE);
+        ClipSel sel = selectBossClip(pam, chapter, snap.bossState, snap.bossAbility,
+                snap.bossStateTime, snap);
+        PamDrawUtil.draw(pamPlayer, batch, pam, sel.clip, sel.time,
+                cx, cy, sel.loop, BOSS_FALLBACK_W, targetH, BOSS_FALLBACK, BOSS_MAX_SCALE);
+    }
+
+    // ─── انتخابِ کلیپِ Zomboss (با توالیِ start→loop→end برای حالاتِ چندفازی) ────────
+
+    /** نتیجه‌ی انتخابِ کلیپ: نامِ کلیپ + زمانِ داخلِ کلیپ + آیا حلقه بزند. */
+    private static final class ClipSel {
+        String clip; float time; boolean loop;
+        ClipSel(String c, float t, boolean l) { clip = c; time = t; loop = l; }
+    }
+
+    // مدتِ حالت‌ها (ثانیه) — هماهنگ با BossService (تیک/۱۰).
+    private static final float ATTACK_ANIM = 2.2f;   // ATTACK_ANIM_TICKS = 22
+    private static final float STUN_TOTAL  = 3.5f;   // STUN_TICKS = 35
+    private static final float MOVING_TOTAL = 0.7f;  // MOVING_TICKS = 7
+
+    private ClipSel selectBossClip(String pam, String chapter, String state, String ability,
+                                    float t, GameStateSnapshot snap) {
+        boolean egypt = "ancient_egypt".equals(chapter);
+        boolean dark  = "dark_ages".equals(chapter);
+        boolean ice   = "frostbite_caves".equals(chapter);
+        boolean beach = "big_wave_beach".equals(chapter);
+        switch (state) {
+            case "entering":
+                return new ClipSel("intro", t, false);
+            case "summoning":
+                if (dark)  return new ClipSel("summoning", t, false);
+                if (egypt) return new ClipSel("zombie_portal_start", t, false);
+                return new ClipSel("idle", t, true);
+            case "attacking":
+                return attackSel(pam, chapter, ability, t, snap);
+            case "stunned":
+                if (ice)          return seq(pam, "reveal", "stun", "cover_up", t, STUN_TOTAL);
+                if (dark || beach) return seq(pam, "stun_start", "stun_loop", "stun_end", t, STUN_TOTAL);
+                return new ClipSel("idle", t, true); // مصر: بدونِ کلیپِ گیج
+            case "moving":
+                if (beach) {
+                    // تغییرِ لِین: submerge (خروج) → emerge (ورود).
+                    float dSub = clampDur(pam, "submerge", 0.35f, MOVING_TOTAL * 0.6f);
+                    return t < dSub ? new ClipSel("submerge", t, false)
+                                    : new ClipSel("emerge", t - dSub, false);
+                }
+                return new ClipSel("idle", t, true);
+            case "dying":
+            case "dead":
+                return new ClipSel(egypt ? "die_idle" : "die", t, false);
+            case "idle":
+            default:
+                return new ClipSel("idle", t, true);
+        }
+    }
+
+    private ClipSel attackSel(String pam, String chapter, String ability, float t,
+                              GameStateSnapshot snap) {
+        if (ability == null) ability = "";
+        switch (ability) {
+            case "dark_fireball":      // آتشِ یک‌خانه
+                return seq(pam, "fire_bomb", "fire_bomb_loop", "fire_bomb_end", t, ATTACK_ANIM);
+            case "dark_fire_tworow":   // آتشِ ۲-سطری
+                return seq(pam, "fire_attack", "fire_attack_idle", "fire_attack_end", t, ATTACK_ANIM);
+            case "beach_turbine":      // توربین/مکش
+                return seq(pam, "suction_on", "suction_loop", "suction_off", t, ATTACK_ANIM);
+            case "beach_shark":        return new ClipSel("spawn", t, false);
+            case "ice_missile":        return new ClipSel("slingshot", t, false);
+            case "ice_wind":           return new ClipSel("wind_1", t, true);
+            case "ice_freeze_column":  return new ClipSel("glacier_column_" + glacierN(snap), t, false);
+            case "egypt_charge":       return new ClipSel("walk_forward", t, true);
+            case "egypt_missile":      return new ClipSel("rocket_launch", t, false);
+            default:                   return new ClipSel("ancient_egypt".equals(chapter)
+                    ? "rocket_launch" : "idle", t, false);
+        }
+    }
+
+    /** ستونِ یخچال بر اساسِ فاصله‌ی ستونِ هدف تا زامباس (glacier_column_1..6). */
+    private int glacierN(GameStateSnapshot snap) {
+        for (GameStateSnapshot.BossAttackInfo atk : snap.bossAttacks) {
+            if ("ice_freeze_column".equals(atk.type)) {
+                int d = Math.round((float) (snap.bossPhase1X - atk.targetCol));
+                return Math.max(1, Math.min(6, d));
+            }
+        }
+        return 1;
+    }
+
+    /**
+     * توالیِ سه‌کلیپیِ start→loop→end در بازه‌ی زمانیِ {@code total}: کلیپِ start
+     * تا مدتِ خودش، سپس loop (حلقه) در میانه، و end در انتها — طوری که هر سه دیده شوند.
+     */
+    private ClipSel seq(String pam, String start, String loop, String end, float t, float total) {
+        float dStart = clampDur(pam, start, 0.30f, total * 0.45f);
+        float dEnd   = clampDur(pam, end,   0.30f, total * 0.35f);
+        if (t < dStart)              return new ClipSel(start, t, false);
+        if (t >= total - dEnd)       return new ClipSel(end, t - (total - dEnd), false);
+        return new ClipSel(loop, t - dStart, true);
+    }
+
+    /** طولِ کلیپ (ثانیه) با fallback و سقف. */
+    private float clampDur(String pam, String clip, float fallback, float cap) {
+        float d = PamDrawUtil.clipDuration(pamPlayer, pam, clip);
+        if (d <= 0f) d = fallback;
+        return Math.min(d, cap);
     }
 
     private String bossPam(String chapter) {
@@ -104,42 +203,6 @@ public class BossRenderer {
             case "ancient_egypt":
             default:
                 return "768/INITIAL/ZOMBIE/ZOMBIE_EGYPT_ZOMBOSS/ZOMBIE_EGYPT_ZOMBOSS.PAM";
-        }
-    }
-
-    /** کلیپِ Zombossِ فصل بر اساسِ حالت + توانایی. */
-    private String bossClip(String chapter, String state, String ability) {
-        boolean egypt = "ancient_egypt".equals(chapter);
-        switch (state) {
-            case "entering":  return "intro";
-            case "summoning":
-                if ("dark_ages".equals(chapter))  return "summoning";
-                if (egypt)                        return "zombie_portal_start";
-                return "idle";
-            case "attacking":
-                return attackClip(ability, egypt);
-            case "dying":
-            case "dead":
-                return egypt ? "die_idle" : "die";
-            case "moving":
-            case "idle":
-            default:
-                return "idle";
-        }
-    }
-
-    private String attackClip(String ability, boolean egypt) {
-        if (ability == null) ability = "";
-        switch (ability) {
-            case "egypt_charge":       return "walk_forward";
-            case "egypt_missile":      return "rocket_launch";
-            case "ice_missile":        return "slingshot";
-            case "ice_wind":           return "wind_1";
-            case "ice_freeze_column":  return "glacier_column_1";
-            case "beach_shark":        return "spawn";
-            case "beach_turbine":      return "suction_on";
-            case "dark_fireball":      return "fire_attack";
-            default:                   return egypt ? "rocket_launch" : "idle";
         }
     }
 
@@ -213,6 +276,10 @@ public class BossRenderer {
                     drawColumnBand(batch, (int) Math.round(atk.targetCol),
                             new Color(0.55f, 0.85f, 1f, 0.32f * intensity));
                     drawGlacierAccent(batch, (int) Math.round(atk.targetCol), atk.progress);
+                    break;
+                case "dark_fire_tworow":
+                    drawRowBand(batch, atk.targetRow, new Color(1f, 0.45f, 0.12f, 0.30f * intensity));
+                    drawRowBand(batch, atk.targetRow2, new Color(1f, 0.45f, 0.12f, 0.30f * intensity));
                     break;
                 case "egypt_charge":
                     if ("impact".equals(atk.phase)) {

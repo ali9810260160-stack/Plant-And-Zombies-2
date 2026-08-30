@@ -1,20 +1,81 @@
-0|2026-08-23|a2c33134|New Level Unlocked: Frostbite Caves — Level 1|A new challenge awaits you in Frostbite Caves! Level 1 is now available.
-0|2026-08-23|02c16c91|Level Completed: Frostbite Caves — Level 0|You successfully defended your garden in Frostbite Caves, Level 0! New levels may have been unlocked.
-0|2026-08-23|b92993ad|Quest Completed|You completed a quest and earned +1 Gems.
-0|2026-08-23|91f30ca9|New Zombie Encountered: Arcade Zombie|A Arcade Zombie appeared in battle for the first time! Check the Almanac to learn more.
-0|2026-08-23|fbf50e56|New Zombie Encountered: Turquoise Zombie|A Turquoise Zombie appeared in battle for the first time! Check the Almanac to learn more.
-0|2026-08-23|d2dbcb94|New Zombie Encountered: Troglobite|A Troglobite appeared in battle for the first time! Check the Almanac to learn more.
-0|2026-08-23|01c49b17|New Zombie Encountered: Conehead|A Conehead appeared in battle for the first time! Check the Almanac to learn more.
-0|2026-08-23|585c426c|Quest Completed|You completed a quest and earned +20 Gems.
-0|2026-08-23|77b47e67|Quest Completed|You completed a quest and earned +10 Gems.
-0|2026-08-23|da9f6af8|Quest Completed|You completed a quest and earned +5000 Coins.
-0|2026-08-23|eebc4dda|New Level Unlocked: Ancient Egypt — Level 1|A new challenge awaits you in Ancient Egypt! Level 1 is now available.
-0|2026-08-23|6f2aaede|Level Completed: Ancient Egypt — Level 0|You successfully defended your garden in Ancient Egypt, Level 0! New levels may have been unlocked.
-0|2026-08-23|ccd92eb8|New Zombie Encountered: All Star|A All Star appeared in battle for the first time! Check the Almanac to learn more.
-0|2026-08-23|67c31cf9|New Zombie Encountered: Tomb Raiser|A Tomb Raiser appeared in battle for the first time! Check the Almanac to learn more.
-0|2026-08-23|f5c94f8e|New Zombie Encountered: Parasol Zombie|A Parasol Zombie appeared in battle for the first time! Check the Almanac to learn more.
-0|2026-08-23|df188243|New Zombie Encountered: Ra Zombie|A Ra Zombie appeared in battle for the first time! Check the Almanac to learn more.
-0|2026-08-23|e580dd57|Quest Completed|You completed a quest and earned +10 Seed Packets.
-0|2026-08-23|b75b7e92|New Zombie Encountered: Normal|A Normal appeared in battle for the first time! Check the Almanac to learn more.
-0|2026-08-23|a588b470|New Zombie Encountered: Prospector Zombie|A Prospector Zombie appeared in battle for the first time! Check the Almanac to learn more.
-0|2026-08-23|3047f2a7|New Zombie Encountered: Imp|A Imp appeared in battle for the first time! Check the Almanac to learn more.
+0|2026-08-30|72471995|Quest Completed|You completed a quest and earned +10 Gems.
+0|2026-08-30|618ded97|Quest Completed|You completed a quest and earned +5000 Coins.
+0|2026-08-30|27ef18f6|New Level Unlocked: Ancient Egypt — Level 1|A new challenge awaits you in Ancient Egypt! Level 1 is now available.
+0|2026-08-30|4e327bed|Level Completed: Ancient Egypt — Level 0|You successfully defended your garden in Ancient Egypt, Level 0! New levels may have been unlocked.
+1|2026-08-30|75e750c8|New Level Unlocked: Ancient Egypt — Level 1|A new challenge awaits you in Ancient Egypt! Level 1 is now available.
+1|2026-08-30|cd767387|Level Completed: Ancient Egypt — Level 0|You successfully defended your garden in Ancient Egypt, Level 0! New levels may have been unlocked.
+1|2026-08-30|d0390132|Quest Completed|You completed a quest and earned +200 Gems.
+1|2026-08-30|65d19b9c|New Level Unlocked: Ancient Egypt — Level 1|A new challenge awaits you in Ancient Egypt! Level 1 is now available.
+1|2026-08-30|5fea8df9|Level Completed: Ancient Egypt — Level 0|You successfully defended your garden in Ancient Egypt, Level 0! New levels may have been unlocked.
+1|2026-08-30|5723336b|New Level Unlocked: Frostbite Caves — Level 1|A new challenge awaits you in Frostbite Caves! Level 1 is now available.
+1|2026-08-30|e255b18c|Level Completed: Frostbite Caves — Level 0|You successfully defended your garden in Frostbite Caves, Level 0! New levels may have been unlocked.
+1|2026-08-30|af56e977|New Level Unlocked: Big Wave Beach — Level 1|A new challenge awaits you in Big Wave Beach! Level 1 is now available.
+1|2026-08-30|8137acb2|Level Completed: Big Wave Beach — Level 0|You successfully defended your garden in Big Wave Beach, Level 0! New levels may have been unlocked.
+1|2026-08-30|df801ed4|New Level Unlocked: Ancient Egypt — Level 1|A new challenge awaits you in Ancient Egypt! Level 1 is now available.
+1|2026-08-30|348d8fb4|Level Completed: Ancient Egypt — Level 0|You successfully defended your garden in Ancient Egypt, Level 0! New levels may have been unlocked.
+1|2026-08-30|9dbdbf26|New Level Unlocked: Ancient Egypt — Level 1|A new challenge awaits you in Ancient Egypt! Level 1 is now available.
+1|2026-08-30|8d09d672|Level Completed: Ancient Egypt — Level 0|You successfully defended your garden in Ancient Egypt, Level 0! New levels may have been unlocked.
+1|2026-08-30|1d3a09a8|Quest Completed|You completed a quest and earned +20 Gems.
+1|2026-08-30|f57afd5a|New Level Unlocked: Ancient Egypt — Level 1|A new challenge awaits you in Ancient Egypt! Level 1 is now available.
+1|2026-08-30|5ab295ff|Level Completed: Ancient Egypt — Level 0|You successfully defended your garden in Ancient Egypt, Level 0! New levels may have been unlocked.
+1|2026-08-30|f28f2679|Quest Completed|You completed a quest and earned +20 Gems.
+1|2026-08-30|e72968a7|Quest Completed|You completed a quest and earned +10 Gems.
+1|2026-08-30|5b9f9042|Quest Completed|You completed a quest and earned +5000 Coins.
+1|2026-08-30|57c9c3c7|New Level Unlocked: Ancient Egypt — Level 1|A new challenge awaits you in Ancient Egypt! Level 1 is now available.
+1|2026-08-30|40d45334|Level Completed: Ancient Egypt — Level 0|You successfully defended your garden in Ancient Egypt, Level 0! New levels may have been unlocked.
+1|2026-08-30|bfcb8978|New Zombie Encountered: Blockhead|A Blockhead appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-30|165655f3|New Zombie Encountered: Gargantuar|A Gargantuar appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-30|3f0bcf0e|New Zombie Encountered: Jester Zombie|A Jester Zombie appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-30|66d01025|New Zombie Encountered: Dragon Imp|A Dragon Imp appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-30|b3fe5707|Quest Completed|You completed a quest and earned +10 Gems.
+1|2026-08-30|bf5f2418|Quest Completed|You completed a quest and earned +5000 Coins.
+1|2026-08-30|c302a52d|New Level Unlocked: Big Wave Beach — Level 1|A new challenge awaits you in Big Wave Beach! Level 1 is now available.
+1|2026-08-30|ee22fde7|Level Completed: Big Wave Beach — Level 0|You successfully defended your garden in Big Wave Beach, Level 0! New levels may have been unlocked.
+1|2026-08-30|719967a5|New Zombie Encountered: Snorkel Zombie|A Snorkel Zombie appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-30|c86ecd19|New Zombie Encountered: Knight|A Knight appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-30|ed0f9bf7|New Zombie Encountered: Hunter Zombie|A Hunter Zombie appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-30|29b2646d|New Zombie Encountered: Newspaper Zombie|A Newspaper Zombie appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-30|3eff6b3f|New Zombie Encountered: Troglobite|A Troglobite appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-30|c911ba14|New Zombie Encountered: Dodo Rider|A Dodo Rider appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-28|fa88f32e|Quest Completed|You completed a quest and earned +1 Gems.
+1|2026-08-28|c0ad36ab|New Zombie Encountered: Buckethead|A Buckethead appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-28|536c39ea|New Zombie Encountered: All Star|A All Star appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-28|91cbe505|New Zombie Encountered: Explorer Zombie|A Explorer Zombie appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-28|233163db|New Zombie Encountered: Tomb Raiser|A Tomb Raiser appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-28|af4decdf|Quest Completed|You completed a quest and earned +20 Gems.
+1|2026-08-28|c181200f|Quest Completed|You completed a quest and earned +10 Gems.
+1|2026-08-28|694ec547|Quest Completed|You completed a quest and earned +5000 Coins.
+1|2026-08-28|470399ea|Quest Completed|You completed a quest and earned +20 Seed Packets.
+1|2026-08-28|cf678d9b|New Level Unlocked: Ancient Egypt — Level 1|A new challenge awaits you in Ancient Egypt! Level 1 is now available.
+1|2026-08-28|0a71cb8a|Level Completed: Ancient Egypt — Level 0|You successfully defended your garden in Ancient Egypt, Level 0! New levels may have been unlocked.
+1|2026-08-28|e8a8285e|New Zombie Encountered: Barrel Roller|A Barrel Roller appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-28|09a49539|New Zombie Encountered: Prospector Zombie|A Prospector Zombie appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-28|73eacae8|New Zombie Encountered: Ra Zombie|A Ra Zombie appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-28|4057dbd0|New Zombie Encountered: Conehead|A Conehead appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-28|6fa57a37|New Zombie Encountered: Normal|A Normal appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-27|1ef51813|New Zombie Encountered: Imp|A Imp appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-27|76810775|New Zombie Encountered: Pianist Zombie|A Pianist Zombie appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-27|6602b8f3|Quest Completed|You completed a quest and earned +10 Seed Packets.
+1|2026-08-27|79444c29|New Zombie Encountered: Parasol Zombie|A Parasol Zombie appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-27|0016ff5b|New Zombie Encountered: Turquoise Zombie|A Turquoise Zombie appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-27|4a3f6abf|New Zombie Encountered: Arcade Zombie|A Arcade Zombie appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-23|a2c33134|New Level Unlocked: Frostbite Caves — Level 1|A new challenge awaits you in Frostbite Caves! Level 1 is now available.
+1|2026-08-23|02c16c91|Level Completed: Frostbite Caves — Level 0|You successfully defended your garden in Frostbite Caves, Level 0! New levels may have been unlocked.
+1|2026-08-23|b92993ad|Quest Completed|You completed a quest and earned +1 Gems.
+1|2026-08-23|91f30ca9|New Zombie Encountered: Arcade Zombie|A Arcade Zombie appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-23|fbf50e56|New Zombie Encountered: Turquoise Zombie|A Turquoise Zombie appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-23|d2dbcb94|New Zombie Encountered: Troglobite|A Troglobite appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-23|01c49b17|New Zombie Encountered: Conehead|A Conehead appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-23|585c426c|Quest Completed|You completed a quest and earned +20 Gems.
+1|2026-08-23|77b47e67|Quest Completed|You completed a quest and earned +10 Gems.
+1|2026-08-23|da9f6af8|Quest Completed|You completed a quest and earned +5000 Coins.
+1|2026-08-23|eebc4dda|New Level Unlocked: Ancient Egypt — Level 1|A new challenge awaits you in Ancient Egypt! Level 1 is now available.
+1|2026-08-23|6f2aaede|Level Completed: Ancient Egypt — Level 0|You successfully defended your garden in Ancient Egypt, Level 0! New levels may have been unlocked.
+1|2026-08-23|ccd92eb8|New Zombie Encountered: All Star|A All Star appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-23|67c31cf9|New Zombie Encountered: Tomb Raiser|A Tomb Raiser appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-23|f5c94f8e|New Zombie Encountered: Parasol Zombie|A Parasol Zombie appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-23|df188243|New Zombie Encountered: Ra Zombie|A Ra Zombie appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-23|e580dd57|Quest Completed|You completed a quest and earned +10 Seed Packets.
+1|2026-08-23|b75b7e92|New Zombie Encountered: Normal|A Normal appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-23|a588b470|New Zombie Encountered: Prospector Zombie|A Prospector Zombie appeared in battle for the first time! Check the Almanac to learn more.
+1|2026-08-23|3047f2a7|New Zombie Encountered: Imp|A Imp appeared in battle for the first time! Check the Almanac to learn more.

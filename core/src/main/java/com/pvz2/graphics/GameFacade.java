@@ -580,8 +580,10 @@ public final class GameFacade {
         s.collectEvents  = sess.drainCollectEvents();
         s.tornadoDrops   = sess.drainTornadoDrops();
         s.screenEffects  = sess.drainScreenEffects();
+        s.scorchedTiles  = sess.drainScorchedTiles();
         s.explosionEvents = sess.drainExplosions();
         s.octopusTosses  = sess.drainOctopusTosses();
+        s.laserZaps      = sess.drainLaserZaps();
         s.conveyorQueue  = new ArrayList<>(sess.getConveyorQueue());
         s.levelType      = sess.getLevel().getLevelType();
         s.waitingForPlayerStart = !sess.isWaveStarted()
@@ -765,6 +767,7 @@ public final class GameFacade {
             case HELMET:        return 1600;
             case SHOULDER_ARMOR:return 1600;
             case BLOCK:         return 2200;
+            case PIANO:         return 1000;
             default:            return 500;
         }
     }
@@ -804,6 +807,10 @@ public final class GameFacade {
             info.sunType      = sun.getType().name().toLowerCase();
             info.isLanded     = sun.isLanded();
             info.fallProgress = (float) sun.getFallProgress();
+            info.beingStolen  = sun.isBeingStolen();
+            info.stealProgress = (float) sun.getStealProgress();
+            info.stealerCol   = sun.getStealerCol();
+            info.stealerRow   = sun.getStealerRow();
             s.sunItems.add(info);
         }
     }
@@ -887,6 +894,16 @@ public final class GameFacade {
     public String getLevelTypeName(String chapter, int level) {
         return svc().getLevelProgressService()
                 .getLevelTypeName(ChapterType.valueOf(chapter.toUpperCase()), level);
+    }
+
+    /** تعدادِ اسلاتِ بذرِ قفل‌شده در مرحله‌ی انتخاب گیاه (Locked Plants = ۲، بقیه ۰). */
+    public int getLockedPlantSlots(String chapter, int level) {
+        try {
+            return svc().getLevelProgressService()
+                    .getLockedSlotCount(ChapterType.valueOf(chapter.toUpperCase()), level);
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     public Map<String, String> getProfileStats() {

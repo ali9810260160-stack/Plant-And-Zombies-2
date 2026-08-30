@@ -193,6 +193,16 @@ public abstract class Plant {
         return frozen || freezeLevel >= 3;
     }
 
+    /** گیاه غیرفعال است؟ (یخ‌زده، اختاپوس‌زده، یا گوسفندشده — نمی‌تواند کاری کند). */
+    public boolean isDisabled() {
+        return isFrozen() || hasEffect(PlantEffect.OCTOPUSED) || hasEffect(PlantEffect.WIZARDED);
+    }
+
+    /** آیا گیاه به گوسفند تبدیل شده (Wizard)؟ گوسفند خورده نمی‌شود. */
+    public boolean isSheep() {
+        return hasEffect(PlantEffect.WIZARDED);
+    }
+
     public void incrementFreezeLevel() {
         boolean wasFrozen = isFrozen();
         freezeLevel = Math.min(3, freezeLevel + 1);

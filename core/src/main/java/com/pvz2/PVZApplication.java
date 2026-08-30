@@ -46,7 +46,7 @@ public class PVZApplication extends Game {
     private Stage overlayStage;
     private InputProcessor prevInput;
 
-    // ─── مالتی‌پلیر (فاز ۳): جلسه‌ی VERSUS در انتظارِ باز شدنِ GameScreen ──────────
+    // ─── مالتی‌پلیر (فاز ۳): جلسه‌ی VERSUS در انتظارِ باز شدنِ GameScreen ───
     private com.pvz2.graphics.net.VersusSession pendingVersus;
     /** Couch Play (بونوس): دونفره‌ی محلی روی یک دستگاه، بدونِ شبکه. */
     private boolean pendingCouch;

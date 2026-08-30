@@ -1527,20 +1527,7 @@
      "loop": false,
      "returnTo": "WALK"
     }
-   },
-   "specialAbilities": [
-    {
-     "id": "STEAL_SUN",
-     "trigger": "PERIODIC",
-     "triggerParam": 4.0,
-     "once": false,
-     "animState": "SPECIAL",
-     "action": "COLLECT_SUN",
-     "actionParams": {
-      "range": "3.0"
-     }
-    }
-   ]
+   }
   },
   "EXPLORER_ZOMBIE": {
    "pamPath": "768/INITIAL/ZOMBIE/ZOMBIE_EXPLORER/ZOMBIE_EXPLORER.PAM",
@@ -1959,10 +1946,39 @@
     }
    }
   },
+  "PARASOL_ZOMBIE": {
+   "pamPath": "768/FULL/ZOMBIE/ZOMBIE_BEACH_BASIC/ZOMBIE_BEACH_BASIC.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    }
+   }
+  },
   "PIANIST_ZOMBIE": {
    "pamPath": "768/FULL/ZOMBIE/ZOMBIE_PIANO/ZOMBIE_PIANO.PAM",
    "states": {
     "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "idle",
+     "loop": true
+    },
+    "EAT": {
      "clip": "idle",
      "loop": true
     },
@@ -1971,6 +1987,43 @@
      "loop": false
     }
    }
+  },
+  "TURQUOISE_ZOMBIE": {
+   "pamPath": "768/FULL/ZOMBIE/ZOMBIE_LOSTCITY_CRYSTALSKULL/ZOMBIE_LOSTCITY_CRYSTALSKULL.PAM",
+   "states": {
+    "IDLE": {
+     "clip": "idle",
+     "loop": true
+    },
+    "WALK": {
+     "clip": "walk",
+     "loop": true
+    },
+    "EAT": {
+     "clip": "eat",
+     "loop": true
+    },
+    "SPECIAL": {
+     "clip": "attack",
+     "loop": false,
+     "returnTo": "WALK"
+    },
+    "DYING": {
+     "clip": "die",
+     "loop": false
+    }
+   },
+   "specialAbilities": [
+    {
+     "id": "STEAL_SUN",
+     "trigger": "ON_ENTER",
+     "once": true,
+     "animState": "SPECIAL",
+     "enterClip": "power_up",
+     "clip": "power",
+     "exitClip": "power_down"
+    }
+   ]
   },
   "NEWSPAPER_ZOMBIE": {
    "pamPath": "768/FULL/ZOMBIE/ZOMBIE_MODERN_NEWSPAPER/ZOMBIE_MODERN_NEWSPAPER.PAM",

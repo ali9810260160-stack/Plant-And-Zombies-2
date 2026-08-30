@@ -42,6 +42,25 @@ public class PlantAnimController {
     private float plantFoodGlowTimer = 0f;
     private static final float PF_GLOW_DURATION = 1.6f;
 
+    // ─── حاله‌ی نورِ غذای گیاه (PAM: PLANTFOOD_FX، پشتِ گیاه) ─────────────────
+    //   ترتیبِ پخش: plantfood_on → plantfood (loop تا پایانِ عملکرد) → plantfood_off
+    private static final String PF_HALO_PAM   = "768/INITIAL/EFFECTS/PLANTFOOD_FX/PLANTFOOD_FX.PAM";
+    private static final String PF_CLIP_ON     = "plantfood_on";
+    private static final String PF_CLIP_LOOP   = "plantfood";
+    private static final String PF_CLIP_OFF    = "plantfood_off";
+    private static final float  PF_ON_FALLBACK  = 0.40f;  // اگر طولِ واقعیِ clip هنوز حل نشده
+    private static final float  PF_OFF_FALLBACK  = 0.40f;
+    private static final float  PF_MIN_LOOP      = 0.50f;  // حداقلِ زمانِ نمایشِ فازِ میانی
+    private static final float  PF_MAX_LOOP      = 3.50f;  // سقفِ ایمنی (اگر گیاه از PLANT_FOOD خارج نشد)
+
+    /** طولِ واقعیِ کلیپ‌های on/off — یک‌بار از PamPlayer حل و بینِ همه‌ی گیاهان share می‌شود. */
+    private static float pfOnDur = -1f, pfOffDur = -1f;
+
+    private enum HaloPhase { NONE, ON, LOOP, OFF }
+    private HaloPhase haloPhase   = HaloPhase.NONE;
+    private float     haloTime    = 0f;   // زمان در فازِ فعلی (ON/OFF)
+    private float     haloLoopTime = 0f;  // زمانِ تجمعیِ فازِ LOOP (کلیپِ loop + حداقل/سقف)
+
     /** اگر غیر null باشد، این clip به‌جای clip حالت IDLE استفاده می‌شود (آسیب فیزیکی). */
     private String damageClipOverride = null;
 
@@ -68,6 +87,7 @@ public class PlantAnimController {
                 break;
             case PLANT_FOOD_ACTIVATED:
                 plantFoodGlowTimer = PF_GLOW_DURATION;
+                startHalo();
                 forceTransition(PlantAnimState.PLANT_FOOD);
                 break;
             case TOOK_DAMAGE:
@@ -118,7 +138,50 @@ public class PlantAnimController {
 
         if (flashTimer         > 0) flashTimer         = Math.max(0, flashTimer - delta);
         if (plantFoodGlowTimer > 0) plantFoodGlowTimer = Math.max(0, plantFoodGlowTimer - delta);
+
+        updateHalo(delta);
     }
+
+    // ════════════════════════════════════════════════════════════
+    //  حاله‌ی نورِ غذای گیاه — ماشینِ حالتِ on → loop → off
+    // ════════════════════════════════════════════════════════════
+
+    private void startHalo() {
+        haloPhase    = HaloPhase.ON;
+        haloTime     = 0f;
+        haloLoopTime = 0f;
+    }
+
+    private void updateHalo(float delta) {
+        if (haloPhase == HaloPhase.NONE) return;
+        haloTime += delta;
+        switch (haloPhase) {
+            case ON:
+                if (haloTime >= onDur()) {           // پایانِ «باز شدنِ حاله» → فازِ میانی
+                    haloPhase = HaloPhase.LOOP;
+                    haloTime = 0f;
+                    haloLoopTime = 0f;
+                }
+                break;
+            case LOOP:
+                haloLoopTime += delta;
+                // عملکردِ گیاه (کلیپِ plantfood) وقتی تمام است که از حالتِ PLANT_FOOD خارج شده باشد.
+                boolean performing = (current == PlantAnimState.PLANT_FOOD);
+                if ((!performing && haloLoopTime >= PF_MIN_LOOP) || haloLoopTime >= PF_MAX_LOOP) {
+                    haloPhase = HaloPhase.OFF;       // → «بسته شدنِ حاله»
+                    haloTime = 0f;
+                }
+                break;
+            case OFF:
+                if (haloTime >= offDur()) haloPhase = HaloPhase.NONE;
+                break;
+            default:
+                break;
+        }
+    }
+
+    private static float onDur()  { return pfOnDur  > 0f ? pfOnDur  : PF_ON_FALLBACK;  }
+    private static float offDur() { return pfOffDur > 0f ? pfOffDur : PF_OFF_FALLBACK; }
 
     // ════════════════════════════════════════════════════════════
     //  Render
@@ -135,9 +198,9 @@ public class PlantAnimController {
         String clip = resolveClip();
         boolean loop = resolveLoop();
 
-        // ── حاله‌ی نورانیِ غذای گیاه: پشتِ گیاه (قبل از خودِ گیاه) کشیده می‌شود
-        //    و تا پایانِ اثر (plantFoodGlowTimer) نبض می‌زند. ──
-        if (plantFoodGlowTimer > 0) drawPlantFoodAura(batch, worldX, worldY);
+        // ── حاله‌ی نورِ غذای گیاه (PAM): پشتِ گیاه (قبل از خودِ گیاه) رندر می‌شود
+        //    و ترتیبِ on → loop → off را می‌پیماید (updateHalo). ──
+        if (haloPhase != HaloPhase.NONE) drawPlantFoodHalo(batch, pamPlayer, worldX, worldY);
 
         Color saved = batch.getColor().cpy();
         applyTint(batch);
@@ -165,19 +228,32 @@ public class PlantAnimController {
     //  منطق داخلی
     // ════════════════════════════════════════════════════════════
 
-    /** حاله‌ی نورانیِ طلاییِ نبض‌دار پشتِ گیاه، حین فعال بودنِ اثرِ غذای گیاه. */
-    private void drawPlantFoodAura(SpriteBatch batch, float worldX, float worldY) {
-        com.badlogic.gdx.graphics.g2d.TextureRegion disc =
-                com.pvz2.graphics.assets.GameAssets.getInstance().getDiscRegion();
-        if (disc == null) return;
-        float phase = (PF_GLOW_DURATION - plantFoodGlowTimer) / PF_GLOW_DURATION; // ۰..۱
-        float pulse = 0.55f + 0.30f * (float) Math.sin(phase * Math.PI * 6);
-        float fade  = Math.min(1f, plantFoodGlowTimer / 0.4f); // محوشدنِ نرمِ انتها
-        float size  = GameConstants.TW * 1.9f;
-        float cy    = worldY + GameConstants.TH * 0.35f;
+    /**
+     * حاله‌ی نورِ PAMِ غذای گیاه، پشتِ گیاه. کلیپِ فازِ فعلی را رندر می‌کند:
+     *   ON → plantfood_on (یک‌بار) | LOOP → plantfood (حلقه) | OFF → plantfood_off (یک‌بار).
+     * fallback نامرئی است تا اگر PAM هنوز bake نشده، مستطیلِ رنگی دیده نشود.
+     */
+    private void drawPlantFoodHalo(SpriteBatch batch, Object pamPlayer,
+                                   float worldX, float worldY) {
+        // حلِ یک‌باره‌ی طولِ کلیپ‌های on/off (share بینِ همه‌ی گیاهان).
+        if (pfOnDur  <= 0f) { float d = PamDrawUtil.clipDuration(pamPlayer, PF_HALO_PAM, PF_CLIP_ON);  if (d > 0f) pfOnDur  = d; }
+        if (pfOffDur <= 0f) { float d = PamDrawUtil.clipDuration(pamPlayer, PF_HALO_PAM, PF_CLIP_OFF); if (d > 0f) pfOffDur = d; }
+
+        String clip; float clipTime; boolean loop;
+        switch (haloPhase) {
+            case ON:   clip = PF_CLIP_ON;   clipTime = haloTime;     loop = false; break;
+            case LOOP: clip = PF_CLIP_LOOP; clipTime = haloLoopTime; loop = true;  break;
+            case OFF:  clip = PF_CLIP_OFF;  clipTime = haloTime;     loop = false; break;
+            default:   return;
+        }
+        float w  = GameConstants.TW * 1.9f;
+        float h  = GameConstants.TH * 1.9f;
+        // مرکزِ حاله حدودِ نیم‌کاشی بالاتر از پایه‌ی گیاه تا پشتِ بدنه‌اش بنشیند.
+        float hy = worldY + GameConstants.TH * 0.55f;
         Color saved = batch.getColor().cpy();
-        batch.setColor(1f, 0.95f, 0.35f, pulse * fade * 0.7f);
-        batch.draw(disc, worldX - size / 2f, cy - size / 2f, size, size);
+        batch.setColor(1f, 1f, 1f, 1f);
+        PamDrawUtil.draw(pamPlayer, batch, PF_HALO_PAM, clip, clipTime,
+                worldX, hy, loop, w, h, new Color(0f, 0f, 0f, 0f));
         batch.setColor(saved);
     }
 
@@ -292,6 +368,15 @@ public class PlantAnimController {
 
     public PlantAnimState getCurrentState() { return current; }
     public float getStateTime()             { return stateTime; }
+
+    /** مسیرِ PAMِ این گیاه (برای محاسبه‌ی طولِ کلیپِ حمله). */
+    public String getPamPath() { return config.pamPath; }
+
+    /** نامِ کلیپِ حالتِ حمله (برای هماهنگیِ نقطه‌ی شلیک). null اگر تعریف نشده باشد. */
+    public String getAttackClip() {
+        StateConfig sc = config.states.get(PlantAnimState.ATTACK.name());
+        return sc != null ? sc.clip : null;
+    }
 
     public boolean isDeadAndDone() {
         return current == PlantAnimState.DYING

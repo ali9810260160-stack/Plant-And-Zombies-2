@@ -112,11 +112,16 @@ public class GameRenderer implements Disposable {
         batch.begin();
 
         grid.renderOverlays(batch, snap, GameConfig.showGrid, 0);
+        grid.drawScorchedTilesBackground(batch); // زمینِ سوخته (زیرِ موجودیت‌ها)
         if (session != null) animSystem.render(batch, session, delta);
         iceBlocks.render(batch, snap);   // بلاکِ یخِ شفاف روی موجودیت‌هایِ یخ‌زده
         grid.drawTornadoesForeground(batch); // گردباد جلویِ زامبی که آن را می‌اندازد
         grid.drawScreenEffectsForeground(batch); // بادِ یخیِ IceShroom و ...
         grid.drawOctopusProjectiles(batch);      // پرتابه‌ی اختاپوس در حالِ پرواز
+        grid.drawBarrelsForeground(batch, snap); // دبه‌ی Barrel Roller (rol/die) جلوی زامبی
+        grid.drawPianosForeground(batch, snap);  // پیانوِ Pianist (play/damage/play2/die) جلوی زامبی
+        grid.drawLasersForeground(batch);        // پرتوی لیزرِ تورکوایز
+        grid.drawExplosionsForeground(batch);    // انفجارِ گیاهانِ انفجاری (روی موجودیت‌ها)
         boss.render(batch, snap);
         effects.render(batch);
         hud.render(batch, snap, speedIndex);
@@ -136,7 +141,7 @@ public class GameRenderer implements Disposable {
     // ─── جلوه‌های خارجی (توسط GameScreen فراخوانی می‌شوند) ──────────────────
 
     public void triggerExplosion(float cx, float cy, float radius) {
-        effects.addExplosion(cx, cy, radius);
+        grid.spawnExplosionPam(cx, cy);   // افکتِ انفجارِ PAM (Cherry Bomb و ...)
         triggerShake(5f, 0.3f);
         com.pvz2.graphics.audio.SoundManager.get()
                 .playSfx(com.pvz2.graphics.audio.SoundManager.SFX_EXPLOSION);
@@ -163,9 +168,15 @@ public class GameRenderer implements Disposable {
     public void spawnTornado(int col, int row) { grid.spawnTornado(col, row); }
     /** یک افکتِ تمام‌صفحه (مثلِ "iceshroom") را پخش می‌کند. */
     public void spawnScreenEffect(String name) { grid.spawnScreenEffect(name); }
+    /** انیمیشنِ زمینِ سوخته را در خانه‌ی (col,row) شروع می‌کند (۱-based). */
+    public void spawnScorchedTile(int col, int row) { grid.spawnScorchedTile(col, row); }
     /** یک پرتابه‌ی اختاپوس از src به tgt (۱-based col/row) پرتاب می‌کند. */
     public void spawnOctopusProjectile(double sc, double sr, double tc, double tr) {
         grid.spawnOctopusProjectile(sc, sr, tc, tr);
+    }
+    /** پرتوی لیزرِ تورکوایز در ردیفِ row از nearCol تا farCol (۱-based). */
+    public void spawnLaser(int row, int nearCol, int farCol) {
+        grid.spawnLaser(row, nearCol, farCol);
     }
     public void setBeghouledSelection(int col1based, int row1based) {
         grid.setBeghouledSelection(col1based, row1based);

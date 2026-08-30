@@ -108,6 +108,9 @@ public class AdventureScreen extends BaseScreen {
 
         carouselGroup = new Group();
         carouselGroup.setSize(GameConstants.VIEWPORT_WIDTH, GameConstants.VIEWPORT_HEIGHT);
+        // فقط کارت‌ها (فرزندان) کلیک بگیرند؛ فضای خالیِ گروهِ تمام‌صفحه نباید کلیکِ
+        // هدر (دکمه‌های Back/Collection/…) را که زیرش است ببلعد.
+        carouselGroup.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.childrenOnly);
         stage.addActor(carouselGroup);
 
         for (int i = 0; i < CHAPTERS.length; i++) {

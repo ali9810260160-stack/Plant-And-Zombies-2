@@ -827,28 +827,25 @@ public class GridRenderer implements Disposable {
         batch.setColor(Color.WHITE);
     }
 
+    /** PAMِ خانه‌ی محافظت‌شده (SAVE_OUR_SEEDS) — جایگزینِ کادرِ زردِ رویه‌ای. */
+    private static final String PROTECT_TILE_PAM =
+            "768/INITIAL/BACKGROUNDS/PROTECT_TILE/PROTECT_TILE.PAM";
+
     private void drawProtectedTileMarkers(Batch batch, GameStateSnapshot snap) {
-        // فقط خانه‌های محافظت‌شده‌ی واقعی (نه همه گیاهان) به‌عنوان «خانه خطر» با
-        // یک هاله‌ی طلایی نبض‌دار + کادر مشخص می‌شوند. اگر گیاهشان کشته شود، باخت آنی.
+        // خانه‌های محافظت‌شده‌ی واقعی («خانه خطر»): با PAMِ PROTECT_TILE مشخص می‌شوند.
+        // اگر گیاهشان کشته شود، باخت آنی.
         if (snap.protectedTiles == null || snap.protectedTiles.isEmpty()) return;
-        TextureRegion white = GameAssets.getInstance().getWhiteRegion();
-        float pulse = 0.30f + 0.22f * (float) Math.abs(
-                Math.sin(com.badlogic.gdx.utils.TimeUtils.millis() / 380.0));
         float tw = GameConstants.TW, th = GameConstants.TH;
-        for (int[] pos : snap.protectedTiles) {
-            float tx = GameCoords.tileLeft(pos[0]);
-            float ty = GameCoords.tileBottom(pos[1]);
-            // هاله‌ی داخلی
-            batch.setColor(1f, 0.82f, 0.15f, pulse * 0.5f);
-            batch.draw(white, tx, ty, tw, th);
-            // کادر طلایی توپر
-            batch.setColor(1f, 0.78f, 0.05f, 0.9f);
-            batch.draw(white, tx, ty, tw, 4);               // bottom
-            batch.draw(white, tx, ty + th - 4, tw, 4);      // top
-            batch.draw(white, tx, ty, 4, th);               // left
-            batch.draw(white, tx + tw - 4, ty, 4, th);      // right
-        }
+        Color fallback = new Color(1f, 0.80f, 0.10f, 0.45f); // اگر PAM نبود: هاله‌ی طلایی
+        Color saved = batch.getColor().cpy();
         batch.setColor(Color.WHITE);
+        for (int[] pos : snap.protectedTiles) {
+            float cx = GameCoords.tileLeft(pos[0]) + tw / 2f;
+            float by = GameCoords.tileBottom(pos[1]);
+            PamDrawUtil.draw(pamPlayer, batch, PROTECT_TILE_PAM, "animation", envStateTime,
+                    cx, by, true, tw, th, fallback);
+        }
+        batch.setColor(saved);
     }
 
     private void drawLovePlantsBorder(Batch batch) {
@@ -917,6 +914,267 @@ public class GridRenderer implements Disposable {
                     cx, by, loop, null,
                     GameConstants.TW * 1.5f, GameConstants.TH * 2.3f, fallback);
         }
+    }
+
+    // ─── زمینِ سوخته (آتشِ اژدهای فصلِ تاریک) ───────────────────────────────────────
+    //   توالی: animation (ورود) → animation2 (ماندگاری، loop) → animation3 (خروج).
+    private static final String SCORCHED_PAM =
+            "768/FULL/EFFECTS/SCORCHED_EARTH_TILE/SCORCHED_EARTH_TILE.PAM";
+    private static final float SCORCH_ENTER = 0.6f, SCORCH_IDLE = 4.0f, SCORCH_EXIT = 0.7f;
+    private static final class Scorch { int col, row; float t; }
+    private final java.util.List<Scorch> scorches = new java.util.ArrayList<>();
+
+    /** انیمیشنِ زمینِ سوخته را در خانه‌ی (col,row) آغاز می‌کند (۱-based). */
+    public void spawnScorchedTile(int col, int row) {
+        Scorch s = new Scorch();
+        s.col = col; s.row = row; s.t = 0f;
+        scorches.add(s);
+    }
+
+    /** خانه‌های سوخته‌ی فعال را زیرِ موجودیت‌ها رندر می‌کند و پس از خروج حذف می‌کند. */
+    public void drawScorchedTilesBackground(Batch batch) {
+        if (scorches.isEmpty()) return;
+        float dt = com.badlogic.gdx.Gdx.graphics.getRawDeltaTime();
+        Color fallback = new Color(0.15f, 0.10f, 0.08f, 0.55f);
+        Color saved = batch.getColor().cpy();
+        batch.setColor(Color.WHITE);
+        java.util.Iterator<Scorch> it = scorches.iterator();
+        while (it.hasNext()) {
+            Scorch s = it.next();
+            s.t += dt;
+            String clip; float clipTime; boolean loop;
+            if (s.t < SCORCH_ENTER) {
+                clip = "animation"; clipTime = s.t; loop = false;
+            } else if (s.t < SCORCH_ENTER + SCORCH_IDLE) {
+                clip = "animation2"; clipTime = s.t - SCORCH_ENTER; loop = true;
+            } else if (s.t < SCORCH_ENTER + SCORCH_IDLE + SCORCH_EXIT) {
+                clip = "animation3"; clipTime = s.t - SCORCH_ENTER - SCORCH_IDLE; loop = false;
+            } else { it.remove(); continue; }
+            // مرکزِ کاشی (نیم‌کاشی بالاتر از کف تا سرِ جای درست بنشیند).
+            float cx = GameCoords.tileLeft(s.col) + GameConstants.TW / 2f;
+            float cy = GameCoords.tileBottom(s.row) + GameConstants.TH * 0.5f;
+            // هم‌اندازه‌ی کاشی؛ چون scale بر اساسِ کلِ canvasِ افکت است (بزرگ‌تر از
+            // خودِ لکه)، هدفِ ارتفاع سخاوتمندانه گرفته می‌شود + maxScale برای بزرگ‌نمایی.
+            PamDrawUtil.draw(pamPlayer, batch, SCORCHED_PAM, clip, clipTime,
+                    cx, cy, loop,
+                    GameConstants.TW * 1.6f, GameConstants.TH * 1.6f, fallback, 3f);
+        }
+        batch.setColor(saved);
+    }
+
+    // ─── افکتِ انفجارِ گیاهانِ انفجاری (Cherry Bomb و ...) ──────────────────────────
+    private static final String EXPLOSION_PAM =
+            "768/FULL/EFFECTS/CHERRYBOMB_EXPLOSION_REAR/CHERRYBOMB_EXPLOSION_REAR.PAM";
+    private static final float EXPLOSION_DUR = 0.9f;
+    private static final class ExplosionFx { float x, y, t; }
+    private final java.util.List<ExplosionFx> explosionFxs = new java.util.ArrayList<>();
+
+    /** یک افکتِ انفجارِ PAM در نقطه‌ی صفحه‌ای (x,y) آغاز می‌کند. */
+    public void spawnExplosionPam(float x, float y) {
+        ExplosionFx fx = new ExplosionFx();
+        fx.x = x; fx.y = y; fx.t = 0f;
+        explosionFxs.add(fx);
+    }
+
+    /** انفجارهایِ فعال را (روی موجودیت‌ها) پخش و پس از پایان حذف می‌کند. */
+    public void drawExplosionsForeground(Batch batch) {
+        if (explosionFxs.isEmpty()) return;
+        float dt = com.badlogic.gdx.Gdx.graphics.getRawDeltaTime();
+        Color fallback = new Color(1f, 0.6f, 0.1f, 0.85f);
+        Color saved = batch.getColor().cpy();
+        batch.setColor(Color.WHITE);
+        java.util.Iterator<ExplosionFx> it = explosionFxs.iterator();
+        while (it.hasNext()) {
+            ExplosionFx fx = it.next();
+            fx.t += dt;
+            if (fx.t >= EXPLOSION_DUR) { it.remove(); continue; }
+            PamDrawUtil.draw(pamPlayer, batch, EXPLOSION_PAM, "explosion", fx.t,
+                    fx.x, fx.y, false, null,
+                    GameConstants.TW * 3f, GameConstants.TH * 3f, fallback);
+        }
+        batch.setColor(saved);
+    }
+
+    // ─── دبه‌ی Barrel Roller (rol=غلتیدن، die=شکستن) ────────────────────────────────
+    private static final String BARREL_PAM =
+            "768/FULL/ZOMBIE/ZOMBIE_PIRATE_BARREL_PUSHER_BARREL/ZOMBIE_PIRATE_BARREL_PUSHER_BARREL.PAM";
+    private static final float BARREL_DIE_DUR = 0.7f;
+    /** آخرین موقعیتِ صفحه‌ایِ دبه‌ی هر زامبی (کلید: netId) تا وقتی دبه سالم است. */
+    private final java.util.Map<Integer, float[]> barrelPos = new java.util.HashMap<>();
+    private float barrelRollTime = 0f;
+    private static final class BarrelBreak { float x, y, t; }
+    private final java.util.List<BarrelBreak> barrelBreaks = new java.util.ArrayList<>();
+
+    /** دبه‌ی Barrel Roller ها را جلوی زامبی می‌کشد؛ لحظه‌ی شکستن، کلیپِ die را پخش می‌کند. */
+    public void drawBarrelsForeground(Batch batch, GameStateSnapshot snap) {
+        float dt = com.badlogic.gdx.Gdx.graphics.getRawDeltaTime();
+        barrelRollTime += dt;
+        Color fallback = new Color(0.55f, 0.36f, 0.18f, 0.9f);
+        Color saved = batch.getColor().cpy();
+        batch.setColor(Color.WHITE);
+
+        java.util.Set<Integer> stillRolling = new java.util.HashSet<>();
+        if (snap != null && snap.zombies != null) {
+            for (GameStateSnapshot.ZombieInfo z : snap.zombies) {
+                if (!"barrel_roller".equals(z.type)) continue;
+                boolean hasBarrel = false;
+                for (GameStateSnapshot.ZombieInfo.ArmorInfo a : z.armors)
+                    if ("barrel".equals(a.type)) { hasBarrel = true; break; }
+                if (!hasBarrel) continue;
+                float cx = GameCoords.toScreenX(z.phase1X - 0.55); // جلوی زامبی (به سمتِ خانه)
+                float by = GameCoords.tileBottom(z.phase1Y);
+                stillRolling.add(z.netId);
+                barrelPos.put(z.netId, new float[]{cx, by});
+                PamDrawUtil.draw(pamPlayer, batch, BARREL_PAM, "rol", barrelRollTime,
+                        cx, by, true, GameConstants.TW * 1.1f, GameConstants.TH, fallback);
+            }
+        }
+        // دبه‌هایی که این فریم دیگر سالم نیستند = شکستند → کلیپِ die را یک‌بار پخش کن.
+        java.util.Iterator<java.util.Map.Entry<Integer, float[]>> it = barrelPos.entrySet().iterator();
+        while (it.hasNext()) {
+            java.util.Map.Entry<Integer, float[]> e = it.next();
+            if (!stillRolling.contains(e.getKey())) {
+                BarrelBreak b = new BarrelBreak();
+                b.x = e.getValue()[0]; b.y = e.getValue()[1]; b.t = 0f;
+                barrelBreaks.add(b);
+                it.remove();
+            }
+        }
+        // پخشِ انیمیشنِ شکستنِ دبه.
+        java.util.Iterator<BarrelBreak> bit = barrelBreaks.iterator();
+        while (bit.hasNext()) {
+            BarrelBreak b = bit.next();
+            b.t += dt;
+            if (b.t >= BARREL_DIE_DUR) { bit.remove(); continue; }
+            PamDrawUtil.draw(pamPlayer, batch, BARREL_PAM, "die", b.t,
+                    b.x, b.y, false, GameConstants.TW * 1.1f, GameConstants.TH, fallback);
+        }
+        batch.setColor(saved);
+    }
+
+    // ─── پیانوِ Pianist (play/damage/play2/die) جلوی زامبی ───────────────────────
+    private static final String PIANO_PAM = "768/FULL/ZOMBIE/PIANO/PIANO.PAM";
+    private static final float PIANO_DIE_DUR    = 0.8f;
+    private static final float PIANO_DAMAGE_DUR = 0.5f;
+    private final java.util.Map<Integer, float[]> pianoPos = new java.util.HashMap<>();
+    private final java.util.Map<Integer, Boolean> pianoHalf = new java.util.HashMap<>();
+    private final java.util.Map<Integer, Float> pianoDamageT = new java.util.HashMap<>();
+    private float pianoTime = 0f;
+    private static final class PianoBreak { float x, y, t; }
+    private final java.util.List<PianoBreak> pianoBreaks = new java.util.ArrayList<>();
+
+    /**
+     * پیانوِ زامبیِ پیانیست را دقیقاً روبه‌رویش می‌کشد. کلیپ بر اساسِ جانِ پیانو:
+     * {@code play} (جانِ بالای نیمه)، {@code damage} (لحظه‌ی افتِ زیرِ نیمه)،
+     * {@code play2} (نیمه‌ی دوم)، و {@code die} (لحظه‌ی نابودیِ کاملِ پیانو). پیانو
+     * پیش از خودِ زامبی نابود می‌شود چون به‌صورتِ زره (ArmorType.PIANO) مدل شده.
+     */
+    public void drawPianosForeground(Batch batch, GameStateSnapshot snap) {
+        float dt = com.badlogic.gdx.Gdx.graphics.getRawDeltaTime();
+        pianoTime += dt;
+        Color fallback = new Color(0.16f, 0.13f, 0.13f, 0.95f);
+        Color saved = batch.getColor().cpy();
+        batch.setColor(Color.WHITE);
+
+        java.util.Set<Integer> alive = new java.util.HashSet<>();
+        if (snap != null && snap.zombies != null) {
+            for (GameStateSnapshot.ZombieInfo z : snap.zombies) {
+                if (!"pianist_zombie".equals(z.type)) continue;
+                float hp = -1f, maxHp = -1f;
+                for (GameStateSnapshot.ZombieInfo.ArmorInfo a : z.armors)
+                    if ("piano".equals(a.type)) { hp = a.hp; maxHp = a.maxHp; break; }
+                if (hp <= 0f) continue;   // پیانو نابود شده → کلیپِ die جدا پخش می‌شود
+                float cx = GameCoords.toScreenX(z.phase1X - 0.6); // دقیقاً روبه‌روی زامبی
+                float by = GameCoords.tileBottom(z.phase1Y);
+                alive.add(z.netId);
+                pianoPos.put(z.netId, new float[]{cx, by});
+
+                float frac = maxHp > 0 ? hp / maxHp : 1f;
+                String clip;
+                if (frac <= 0.5f) {
+                    if (!Boolean.TRUE.equals(pianoHalf.get(z.netId))) {
+                        pianoHalf.put(z.netId, true);
+                        pianoDamageT.put(z.netId, 0f);   // شروعِ کلیپِ damage
+                    }
+                    Float dtmr = pianoDamageT.get(z.netId);
+                    if (dtmr != null && dtmr < PIANO_DAMAGE_DUR) {
+                        pianoDamageT.put(z.netId, dtmr + dt);
+                        clip = "damage";
+                    } else {
+                        clip = "play2";
+                    }
+                } else {
+                    clip = "play";
+                }
+                PamDrawUtil.draw(pamPlayer, batch, PIANO_PAM, clip, pianoTime,
+                        cx, by, false, GameConstants.TW * 1.3f, GameConstants.TH * 1.1f, fallback);
+            }
+        }
+        // پیانوهایی که این فریم دیگر سالم نیستند = نابود شدند → کلیپِ die یک‌بار.
+        java.util.Iterator<java.util.Map.Entry<Integer, float[]>> it = pianoPos.entrySet().iterator();
+        while (it.hasNext()) {
+            java.util.Map.Entry<Integer, float[]> e = it.next();
+            if (!alive.contains(e.getKey())) {
+                PianoBreak b = new PianoBreak();
+                b.x = e.getValue()[0]; b.y = e.getValue()[1]; b.t = 0f;
+                pianoBreaks.add(b);
+                pianoHalf.remove(e.getKey());
+                pianoDamageT.remove(e.getKey());
+                it.remove();
+            }
+        }
+        java.util.Iterator<PianoBreak> bit = pianoBreaks.iterator();
+        while (bit.hasNext()) {
+            PianoBreak b = bit.next();
+            b.t += dt;
+            if (b.t >= PIANO_DIE_DUR) { bit.remove(); continue; }
+            PamDrawUtil.draw(pamPlayer, batch, PIANO_PAM, "die", b.t,
+                    b.x, b.y, false, GameConstants.TW * 1.3f, GameConstants.TH * 1.1f, fallback);
+        }
+        batch.setColor(saved);
+    }
+
+    // ─── لیزرِ تورکوایز (پرتوی رویه‌ایِ محوشونده) ────────────────────────────────
+    private static final float LASER_DUR = 0.45f;
+    private static final class LaserFx { float x1, x2, y, t; }
+    private final java.util.List<LaserFx> lasers = new java.util.ArrayList<>();
+
+    /** یک پرتوی لیزر در ردیفِ row (۱-based) از nearCol تا farCol آغاز می‌کند. */
+    public void spawnLaser(int row, int nearCol, int farCol) {
+        int lo = Math.max(1, Math.min(nearCol, farCol));
+        int hi = Math.max(nearCol, farCol);
+        LaserFx fx = new LaserFx();
+        fx.x1 = GameCoords.tileLeft(lo);
+        fx.x2 = GameCoords.tileLeft(hi) + GameConstants.TW;
+        fx.y  = GameCoords.toScreenY(row);
+        fx.t  = 0f;
+        lasers.add(fx);
+    }
+
+    /** پرتوهای لیزرِ فعال را (روی موجودیت‌ها) می‌کشد و پس از محو حذف می‌کند. */
+    public void drawLasersForeground(Batch batch) {
+        if (lasers.isEmpty()) return;
+        float dt = com.badlogic.gdx.Gdx.graphics.getRawDeltaTime();
+        TextureRegion white = GameAssets.getInstance().getWhiteRegion();
+        Color saved = batch.getColor().cpy();
+        java.util.Iterator<LaserFx> it = lasers.iterator();
+        while (it.hasNext()) {
+            LaserFx fx = it.next();
+            fx.t += dt;
+            float p = fx.t / LASER_DUR;
+            if (p >= 1f) { it.remove(); continue; }
+            float alpha = 1f - p;                       // محوشدن
+            float w = fx.x2 - fx.x1;
+            float coreH = GameConstants.TH * 0.18f;
+            float glowH = GameConstants.TH * 0.5f;
+            // هاله‌ی بیرونیِ فیروزه‌ای
+            batch.setColor(0.2f, 0.95f, 0.9f, 0.35f * alpha);
+            batch.draw(white, fx.x1, fx.y - glowH / 2f, w, glowH);
+            // هسته‌ی روشن
+            batch.setColor(0.8f, 1f, 1f, 0.95f * alpha);
+            batch.draw(white, fx.x1, fx.y - coreH / 2f, w, coreH);
+        }
+        batch.setColor(saved);
     }
 
     // ─── پرتابه‌ی اختاپوس (اختاپوس‌پرت‌کن، ساحل) ────────────────────────────────────

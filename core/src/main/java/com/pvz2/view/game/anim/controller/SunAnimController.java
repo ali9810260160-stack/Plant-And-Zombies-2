@@ -109,6 +109,14 @@ public class SunAnimController {
             t = t * t; // ease-in quadratic
             worldX = lerp(worldX, SUN_COUNTER_X, t);
             worldY = lerp(worldY, SUN_COUNTER_Y, t);
+        } else if (sun.isBeingStolen()) {
+            // دزدیده‌شدن توسطِ Ra: خورشید به‌سمتِ چوبِ Ra (کمی بالای ردیفش) کشیده می‌شود.
+            float p = Math.max(0f, Math.min(1f, (float) sun.getStealProgress()));
+            p = p * p; // ease-in
+            float tgtX = GameCoords.toScreenX(sun.getStealerCol());
+            float tgtY = GameCoords.toScreenY(sun.getStealerRow()) + 35f;
+            worldX = lerp(worldX, tgtX, p);
+            worldY = lerp(worldY, tgtY, p);
         }
 
         float scale = 1.0f;
@@ -172,6 +180,9 @@ public class SunAnimController {
         }
         if (sun.getType() == SunType.RADIOACTIVE) {
             r = 0.75f; g = 1.0f; b = 0.55f;
+        }
+        if (sun.isBeingStolen()) {   // دزدیده‌شدن توسطِ Ra → بنفش
+            r = 0.78f; g = 0.32f; b = 1.0f;
         }
         if (isHovered) {
             float p = s.glowPulse;

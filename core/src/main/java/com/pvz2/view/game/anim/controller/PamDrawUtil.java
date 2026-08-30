@@ -269,6 +269,26 @@ public final class PamDrawUtil {
         drawPart(pamPlayer, batch, pamPath, clip, stateTime, x, y, part, targetH, 0f, 0f);
     }
 
+    /**
+     * طولِ (ثانیه‌ایِ) یک clip از یک PAM — از {@code PamPlayer.clipDurationSeconds}.
+     * تا وقتی PAM هنوز bake نشده یا asset در دسترس نیست، {@code -1} برمی‌گرداند
+     * (کالر باید در آن حالت به مقدارِ fallback تکیه کند).
+     */
+    public static float clipDuration(Object pamPlayer, String pamPath, String clip) {
+        if (pamPlayer == null || !GameAssets.getInstance().hasPvzAssets()
+                || pamPath == null || pamPath.isEmpty() || clip == null || clip.isEmpty()) {
+            return -1f;
+        }
+        try {
+            pvz.libpvz.pam.PamPlayer p = (pvz.libpvz.pam.PamPlayer) pamPlayer;
+            if (p.getClip(pamPath, clip) == null) return -1f; // هنوز bake نشده
+            float d = p.clipDurationSeconds(pamPath, clip);
+            return d > 0f ? d : -1f;
+        } catch (Exception ignored) {
+            return -1f;
+        }
+    }
+
     /** ساخت سریع یک visibility map تک‌کلیدی (برای موارد ساده). */
     public static Map<String, Boolean> mapOf(String key, boolean value) {
         Map<String, Boolean> m = new HashMap<>();
