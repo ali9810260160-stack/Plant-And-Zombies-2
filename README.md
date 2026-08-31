@@ -1,499 +1,401 @@
+<div align="center">
 
-# پروژه Plants vs. Zombies (Java) — راهنمای تیم، Git، کیفیت کد و مستندسازی
+# 🌻 Plants vs. Zombies — Java Edition 🧟
 
-نام اعضا :
-- علی امیر آبادی زاده ، شماره دانشجویی : 404105518
-- حمیدرضا فرقدانی ، شماره دانشجویی : 404106163
-- امیر حسین علیپور شهر بابکی ، شماره دانشجویی : 404106117
+### A full-featured desktop remake of *Plants vs. Zombies 2* built from scratch in **Java** with **libGDX**
 
----
+*Adventure chapters · animated plants & zombies · bosses · mini-games · greenhouse & shop economy · quests · and online 2-player I, Zombie*
 
-این پروژه یک بازسازی (Clone) از بازی **Plants vs. Zombies** با زبان **Java** است که به‌صورت تیمی توسعه داده می‌شود. این README نقش «راهنمای کار تیمی» را دارد تا همه اعضا:
-- یک روش یکسان برای **Git و Branching** داشته باشند،
-- استانداردهای **کدنویسی/کامنت‌گذاری/Javadoc** را رعایت کنند،
-- و قبل از تحویل، کیفیت کد با **Checkstyle + PMD** کنترل شود.
+<br/>
 
----
+![Java](https://img.shields.io/badge/Java-25-orange?logo=openjdk&logoColor=white)
+![libGDX](https://img.shields.io/badge/libGDX-Game%20Framework-red?logo=libgdx&logoColor=white)
+![Gradle](https://img.shields.io/badge/Build-Gradle-02303A?logo=gradle&logoColor=white)
+![Architecture](https://img.shields.io/badge/Architecture-MVC-blue)
+![Networking](https://img.shields.io/badge/Multiplayer-TCP%20Client--Server-brightgreen)
+![Platform](https://img.shields.io/badge/Platform-Desktop%20(Windows%2FLinux%2FmacOS)-lightgrey)
 
-## فهرست مطالب
-1. [معرفی و فازهای پروژه](#معرفی-و-فازهای-پروژه)
-2. [قواعد کلی کار تیمی](#قواعد-کلی-کار-تیمی)
-3. [ساختار Git و Branching](#ساختار-git-و-branching)
-4. [راهنمای کامل Git: pull/push/merge/MR](#راهنمای-کامل-git-pullpushmergemr)
-5. [قوانین Commit و پیام‌های Commit](#قوانین-commit-و-پیامهای-commit)
-6. [کیفیت کد: Checkstyle و PMD](#کیفیت-کد-checkstyle-و-pmd)
-7. [استاندارد مستندسازی: کامنت و Javadoc](#استاندارد-مستندسازی-کامنت-و-javadoc)
-8. [میانبرها و Auto-complete برای Javadoc در IntelliJ](#میانبرها-و-auto-complete-برای-javadoc-در-intellij)
-9. [قوانین Merge Conflict و حل تعارض‌ها](#قوانین-merge-conflict-و-حل-تعارضها)
-10. [چک‌لیست قبل از Merge به main](#چکلیست-قبل-از-merge-به-main)
+<br/>
+
+<img src="documant-and-files/image%20of%20ui/What%20is%20now/in%20game.png" alt="In-game screenshot" width="85%"/>
+
+</div>
 
 ---
 
-## معرفی و فازهای پروژه
-پروژه در ۵ فاز اصلی جلو می‌رود:
+## 📖 About the project
 
-1. **فاز ۱:** طراحی UML و معماری اولیه
-2. **فاز ۲:** منوها + منطق بازی (Game Logic)
-3. **فاز ۳:** گرافیک/GUI
-4. **فاز ۴:** شبکه (Networking / Multiplayer)
-5. **فاز ۵:** باگ‌فیکس + بهینه‌سازی + آماده‌سازی نهایی
+This project is a ground-up recreation of **Plants vs. Zombies 2** as a native desktop game.
+It began as a text/console simulation of the game logic and grew into a fully graphical,
+animated, and networked game. Real in-game art and skeletal **PAM** animations are used for
+every plant, zombie, projectile, boss, and environment effect.
 
----
+The codebase is intentionally organized around a **clean Model–View–Controller** split so the
+game *logic* is completely independent of the *graphics* — the same deterministic simulation
+drives both the single-player campaign and the synchronized two-player online mode.
 
-## قواعد کلی کار تیمی
-- هیچ‌کس مستقیم روی شاخه `main` کار نمی‌کند.
-- همه تغییرات باید در **feature branch** انجام شود.
-- ادغام به `main` فقط از طریق **Merge Request** و بعد از review انجام می‌شود.
-- قبل از push کردن، پروژه باید **build** شود و **quality checks** پاس شوند.
+### 👥 Team
 
----
-
-## ساختار Git و Branching
-### شاخه‌ها
-- `main`: شاخه پایدار/نهایی. فقط از طریق MR آپدیت می‌شود.
-- `feature/<name>`: برای هر قابلیت جدید
-  - مثال: `feature/zombie-ai`, `feature/sun-system`, `feature/main-menu`
-- (اختیاری) `fix/<name>`: برای باگ‌فیکس‌های مشخص
-  - مثال: `fix/crash-on-exit`
-
-### قانون نام‌گذاری Branch
-- کوتاه، مشخص، بدون فاصله
-- از `-` استفاده کنید
-- مثال خوب: `feature/plant-peashooter`
-- مثال بد: `new branch`, `myFeature1`
+| Name | Student ID |
+|------|-----------|
+| Ali Amirabadizadeh | 404105518 |
+| Hamidreza Farghadani | 404106163 |
+| Amir Hossein Alipour Shahr Babaki | 404106117 |
 
 ---
 
-## راهنمای کامل Git: pull/push/merge/MR
+## 📑 Table of contents
 
-### 1) مفاهیم مهم (خیلی کوتاه و کاربردی)
-- **clone**: گرفتن پروژه برای اولین بار از ریموت
-- **pull**: گرفتن آخرین تغییرات از ریموت و اعمال روی شاخه فعلی
-- **fetch**: گرفتن تغییرات بدون merge کردن
-- **push**: فرستادن تغییرات لوکال به ریموت
-- **merge**: ادغام یک شاخه در شاخه دیگر
-- **rebase**: بازچینش تاریخچه (در تیم‌های تازه‌کار توصیه نمی‌شود مگر با هماهنگی)
-- **MR (Merge Request)**: درخواست رسمی برای ادغام کد شما در `main`
+- [Feature highlights](#-feature-highlights)
+- [Screenshot tour](#-screenshot-tour)
+- [Development phases](#-development-phases)
+- [Architecture](#-architecture)
+- [How the key systems work](#-how-the-key-systems-work)
+- [Game content](#-game-content)
+- [Project structure](#-project-structure)
+- [Tech stack](#-tech-stack)
+- [Getting started](#-getting-started)
+- [Multiplayer & server](#-multiplayer--server)
+- [Code quality & documentation](#-code-quality--documentation)
 
 ---
 
-### 2) اولین بار: clone کردن پروژه
-**راه ۱ — HTTPS (با Token به جای پسورد):**
+## ✨ Feature highlights
+
+- 🌍 **Four adventure chapters** — Ancient Egypt, Frostbite Caves, Big Wave Beach, and Dark Ages, each with unique environments, hazards, and zombies.
+- 🌱 **69 plants & 27+ zombies** with real idle / attack / walk / eat / death animations rendered from PAM skeletal files.
+- 🧟 **Zombie special abilities** — sun-stealers, dynamite prospectors, tomb raisers, snorkels, gargantuars, jesters, pianists, and more, each with dedicated behavior and animation.
+- 👑 **Zomboss battles** — a two-lane boss at the end of each chapter with a segmented health bar, stun phases, minion summons, and chapter-specific attacks (missiles, ice winds, fireballs, turbines).
+- 🎮 **Mini-games** — Vasebreaker, Wall-nut Bowling, I, Zombie, plus bonus modes (Beghouled match-3 and Zombotany).
+- 🗺️ **Special level types** — Conveyor Belt, Save Our Seeds, Deadline, Timed War, Love Your Plants, and Last Stand.
+- 🪴 **Greenhouse, Shop & economy** — grow plants over time, buy seed packets/pots/currency, daily offers, and coins/gems/plant-food.
+- 📜 **Quests & leaderboard** — daily / main / challenge quests with progress bars, plus a sortable global leaderboard.
+- ✨ **Juice** — explosions, screen shake, hit flashes, falling heads/hands/armor, ashes, ice blocks, plant-food auras, and animated conveyor rails.
+- 🌐 **Online 2-player I, Zombie** — host-authoritative snapshot sync, matchmaking, invite pop-ups, and in-game reactions (text, emoji, and animated GIF stickers).
+- 🔐 **Accounts** — server-side registration/login, security-question password recovery, device-independent profiles, and seamless remember-me.
+
+---
+
+## 📸 Screenshot tour
+
+### 🔐 Accounts & authentication
+
+<table>
+  <tr>
+    <td width="50%"><img src="documant-and-files/image%20of%20ui/What%20is%20now/welcom%20menu.png" alt="Welcome"/><p align="center"><b>Welcome</b></p></td>
+    <td width="50%"><img src="documant-and-files/image%20of%20ui/What%20is%20now/login%20menu%20now.png" alt="Login"/><p align="center"><b>Login (online status shown)</b></p></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="documant-and-files/image%20of%20ui/What%20is%20now/register%20meni%20now.png" alt="Register"/><p align="center"><b>Register</b></p></td>
+    <td width="50%"><img src="documant-and-files/image%20of%20ui/What%20is%20now/forget%20password%20now.png" alt="Forgot password"/><p align="center"><b>Password recovery</b></p></td>
+  </tr>
+</table>
+
+### 🏠 Main hub
+
+<table>
+  <tr>
+    <td width="50%"><img src="documant-and-files/image%20of%20ui/What%20is%20now/main%20menu.png" alt="Main menu"/><p align="center"><b>Main menu</b></p></td>
+    <td width="50%"><img src="documant-and-files/image%20of%20ui/What%20is%20now/profile%20now.png" alt="Profile"/><p align="center"><b>Profile</b></p></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="documant-and-files/image%20of%20ui/What%20is%20now/setting%20now.png" alt="Settings"/><p align="center"><b>Settings</b></p></td>
+    <td width="50%"><img src="documant-and-files/image%20of%20ui/What%20is%20now/leaderboard%20now.png" alt="Leaderboard"/><p align="center"><b>Leaderboard</b></p></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="documant-and-files/image%20of%20ui/What%20is%20now/news%20menu.png" alt="News"/><p align="center"><b>News</b></p></td>
+    <td width="50%"><img src="documant-and-files/image%20of%20ui/What%20is%20now/quest%20now.png" alt="Quests"/><p align="center"><b>Quests</b></p></td>
+  </tr>
+</table>
+
+### 📚 Collection & economy
+
+<table>
+  <tr>
+    <td width="50%"><img src="documant-and-files/image%20of%20ui/What%20is%20now/collection%20plant%20now.png" alt="Plant collection"/><p align="center"><b>Plant almanac</b></p></td>
+    <td width="50%"><img src="documant-and-files/image%20of%20ui/What%20is%20now/collection%20plant%20detail.png" alt="Plant detail"/><p align="center"><b>Plant detail (animated idle)</b></p></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="documant-and-files/image%20of%20ui/What%20is%20now/collection%20zombie%20tab%20now.png" alt="Zombie collection"/><p align="center"><b>Zombie almanac</b></p></td>
+    <td width="50%"><img src="documant-and-files/image%20of%20ui/What%20is%20now/collection%20zombie%20detail.png" alt="Zombie detail"/><p align="center"><b>Zombie detail</b></p></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="documant-and-files/image%20of%20ui/What%20is%20now/greenhouse%20now.png" alt="Greenhouse"/><p align="center"><b>Greenhouse</b></p></td>
+    <td width="50%"><img src="documant-and-files/image%20of%20ui/What%20is%20now/shop%20now.png" alt="Shop"/><p align="center"><b>Shop</b></p></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="documant-and-files/image%20of%20ui/What%20is%20now/shop%20confirm%20now.png" alt="Purchase confirmation"/><p align="center"><b>Purchase confirmation</b></p></td>
+    <td width="50%"><img src="documant-and-files/image%20of%20ui/What%20is%20now/plant%20select%20now.png" alt="Plant selection"/><p align="center"><b>Plant selection</b></p></td>
+  </tr>
+</table>
+
+### 🎮 Playing a level
+
+<table>
+  <tr>
+    <td width="50%"><img src="documant-and-files/image%20of%20ui/What%20is%20now/adventure%20now.png" alt="Adventure map"/><p align="center"><b>Adventure / chapter select</b></p></td>
+    <td width="50%"><img src="documant-and-files/image%20of%20ui/What%20is%20now/mission%20popup.png" alt="Mission popup"/><p align="center"><b>Level objectives</b></p></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="documant-and-files/image%20of%20ui/What%20is%20now/NPC%20dialog.png" alt="NPC dialog"/><p align="center"><b>Intro NPC dialogue</b></p></td>
+    <td width="50%"><img src="documant-and-files/image%20of%20ui/What%20is%20now/loading%20page.png" alt="Loading"/><p align="center"><b>Loading</b></p></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="documant-and-files/image%20of%20ui/What%20is%20now/in%20game.png" alt="In game"/><p align="center"><b>In-game battle</b></p></td>
+    <td width="50%"><img src="documant-and-files/image%20of%20ui/What%20is%20now/pause%20menu.png" alt="Pause"/><p align="center"><b>Pause menu</b></p></td>
+  </tr>
+</table>
+
+---
+
+## 🧭 Development phases
+
+The project was delivered in progressive phases, each building on the last:
+
+| Phase | Focus | What was built |
+|:-----:|-------|----------------|
+| **1** | Logic & architecture | UML design, the pure game **model** (plants, zombies, tiles, waves), core **services** (combat, sun, waves, quests), and a console simulation. |
+| **2** | Graphics & GUI | libGDX rendering, all menus/screens, the **PAM animation system**, the map/grid, HUD, effects, bosses, and the four chapters with their special level types and mini-games. |
+| **3** | Networking | A standalone TCP **server** (accounts, sessions, matchmaking, admin dashboard), the client **net layer**, online-first auth, profile/leaderboard sync, and **online 2-player I, Zombie** with in-game reactions. |
+| **4** | Bonus & polish | Zombie special abilities across all chapters, Zomboss battles, plant-food effects, scored (MeoPoint) mode, couch co-op, and extensive visual juice. |
+| **5** | Hardening | Bug-fixing, performance, and final delivery. |
+
+---
+
+## 🏛 Architecture
+
+The single most important design decision is a strict separation between **simulation** and
+**rendering**, connected by a one-way **snapshot pipeline**:
+
+```mermaid
+flowchart TD
+    subgraph Input
+        IN["Player input / Guest input / Cheats"]
+    end
+    subgraph Simulation["Deterministic simulation (tick-driven, ~10 ticks/s)"]
+        GS["GameService.processOneTick"]
+        CS["CombatService"]
+        SS["SunService"]
+        WS["WaveService"]
+        BS["BossService"]
+        MODEL["Model: GameSession, Plants, Zombies, Tiles, Sun, Boss"]
+        GS --> CS & SS & WS & BS
+        CS & SS & WS & BS --> MODEL
+    end
+    subgraph Bridge
+        FACADE["GameFacade  (the only Model to View bridge)"]
+        SNAP["GameStateSnapshot  (read-only per-frame copy)"]
+    end
+    subgraph Rendering["Rendering (reads snapshot only)"]
+        GR["GameRenderer"]
+        ANIM["AnimationSystem + PAM controllers"]
+        GRID["GridRenderer"]
+        HUD["HudRenderer / BossRenderer / EffectsRenderer"]
+    end
+    IN --> GS
+    MODEL --> FACADE
+    FACADE -->|buildSnapshot| SNAP
+    SNAP --> GR
+    GR --> ANIM & GRID & HUD
+```
+
+**Why it matters**
+
+- 🧠 **The model never imports graphics.** All game rules live in `com.pvz2.model` / `com.pvz2.service`; the graphics layer only ever reads an immutable `GameStateSnapshot`.
+- ⏸ **Pause is trivial and correct** — when paused, ticks stop *and* the render delta is zeroed, so animations freeze in place too.
+- 🌐 **Multiplayer reuses the exact same engine** — one client runs the real simulation and streams snapshots; the other renders them. Both players see an identical board.
+- 🔌 The `GameFacade` singleton is the *only* touch-point between the two worlds, reached through a `ServiceLocator` and `AppState`.
+
+### Layers
+
+```
+Model  ──►  Service  ──►  Controller  ──►  GameFacade  ──►  Graphics (libGDX)
+(rules)     (logic)       (commands)       (bridge)         (screens + renderers + PAM)
+```
+
+---
+
+## ⚙️ How the key systems work
+
+<details open>
+<summary><b>🎞 PAM animation system</b></summary>
+
+Every plant and zombie is a small **state machine** (`PlantAnimController` / `ZombieAnimController`).
+Clip names and states (`IDLE`, `WALK`, `ATTACK`, `EAT`, `SPECIAL`, `DYING`, …) are **data-driven**
+from [`assets/data/character_animations.json`](assets/data/character_animations.json) via
+`AnimConfigLoader`, and rendered with the `libPVZ` PAM player. Multi-phase abilities use
+`enter → loop → exit` clips (e.g. a sun-stealer’s *power_up → power → power_down*), and armor,
+freeze, hit-flash, and health variants are layered on top.
+</details>
+
+<details>
+<summary><b>🖼 The render stack</b></summary>
+
+`GameRenderer` orchestrates, per frame and in depth order:
+
+| Renderer | Draws |
+|----------|-------|
+| `GridRenderer` | Tiled background, tile overlays (graves/water/fire/ice), vases, bowling nuts, brains, lawn-mowers, and foreground props (barrel, piano, laser, tornado) |
+| `AnimationSystem` | Plants, zombies, projectiles and suns via PAM, with correct Y-depth sorting and falling body parts |
+| `IceBlockRenderer` | Translucent ice over frozen entities with melt stages |
+| `BossRenderer` | The Zomboss, its missiles/turbines/winds and area effects |
+| `EffectsRenderer` | Explosions, hit flashes, projectile sparks, plant-food auras, text pop-ups |
+| `HudRenderer` | Sun counter, plant-food bank, wave progress, boss health, currencies |
+</details>
+
+<details>
+<summary><b>🧟 Zombie behaviors</b></summary>
+
+Behavior lives in the **model** — `NormalZombie.onTick` switches on zombie type and is ticked
+every frame by `GameService.tickAllZombies`. Examples: **Ra** raises its staff, turns row suns
+purple and drags them in over 4s; **Prospector** blasts to the front tile then reverse-walks;
+**Turquoise** steals sun then fires a 4-tile laser; **Pianist** rolls a piano (destroyed before
+the zombie); **Jester** deflects projectiles; **Gargantuar** throws an Imp.
+</details>
+
+<details>
+<summary><b>☀️ Sun & plant-food economy</b></summary>
+
+Sun falls from the sky and is produced by sun-plants (a collectible sun drops beside the plant
+each cycle). Plant-food is stored in a HUD bank; feeding a plant plays a glowing PAM aura and
+triggers a per-plant super-effect handled by `PlantFoodEffectHandler`.
+</details>
+
+<details>
+<summary><b>🌐 Networking</b></summary>
+
+A standalone TCP server (in `server/`, **built with plain `javac` — no Gradle**) handles
+length-prefixed JSON packets over a shared protocol (`shared/`). It stores accounts, issues
+session tokens, runs matchmaking, and relays the host’s snapshots to the guest for I, Zombie.
+The client’s `NetClient` runs a dedicated reader thread and drains events onto the render thread.
+</details>
+
+---
+
+## 🕹 Game content
+
+- **Chapters:** Ancient Egypt · Frostbite Caves · Big Wave Beach · Dark Ages — each with its own background, tiles, hazards, zombie roster, and Zomboss.
+- **Level types:** Normal · Conveyor Belt · Save Our Seeds · Deadline · Timed War · Love Your Plants · Last Stand (*Plant What You Get*).
+- **Mini-games:** Vasebreaker · Wall-nut Bowling · I, Zombie · Beghouled (match-3) · Zombotany.
+- **Bosses:** a chapter-specific two-lane Zomboss with a 3-segment health bar, stun windows, and minion summons.
+- **Reference data:** plant/zombie/quest stats live in [`assets/data/`](assets/data) and are documented in [`documant-and-files/AP project phase2.md`](documant-and-files/AP%20project%20phase2.md).
+
+---
+
+## 📂 Project structure
+
+```
+Plant-And-Zombies-2/
+├── core/                     # Game logic + libGDX graphics (the main module)
+│   └── src/main/java/com/pvz2/
+│       ├── model/            # Pure model — no graphics (plants, zombies, tiles, waves, sun, boss)
+│       ├── service/          # Game logic (combat, sun, waves, quests, boss, greenhouse, scored)
+│       ├── controller/       # Command controllers
+│       ├── repository/       # User persistence
+│       ├── graphics/         # Screens, renderers, actors, assets, net client  (libGDX)
+│       ├── view/game/anim/   # PAM animation system (controllers, config, actions)
+│       └── map/              # Tiled map loading, coordinates, zones
+├── lwjgl3/                   # Desktop launcher (LWJGL3 backend)
+├── server/                   # Standalone TCP server (no Gradle — javac + scripts)
+├── shared/                   # Network protocol shared by client & server
+├── assets/                   # Art, audio, maps, PAM animations, JSON data, GIFs
+├── documant-and-files/       # Design docs, phase specs, UI screenshots
+├── run-client.bat            # Launch a single client
+├── run-2p.bat                # Launch two clients for local 2-player testing
+└── server/run.bat            # Launch the server
+```
+
+---
+
+## 🧰 Tech stack
+
+- **Language:** Java 25
+- **Game framework:** libGDX (LWJGL3 desktop backend)
+- **UI:** scene2d + a custom `pvz-skin`
+- **Animation:** `libPVZ` PAM skeletal renderer, driven by JSON config
+- **Maps:** Tiled (`.tmx`)
+- **Build:** Gradle (client) · plain `javac` (server)
+- **Networking:** TCP sockets, length-prefixed JSON frames, Gson
+- **Quality:** Checkstyle + PMD, Javadoc across the codebase
+
+---
+
+## 🚀 Getting started
+
+### Prerequisites
+
+- **JDK 25** (or newer) on your `PATH`.
+- No manual Gradle install needed — the included `gradlew` wrapper handles it.
+
+### Run the game (single player)
+
 ```bash
-git clone https://<server>/<group>/<repo>.git
+# Windows
+run-client.bat
 ```
 
-**راه ۲ — SSH (با کلید SSH):**
-```bash
-git clone git@<server>:<group>/<repo>.git
-```
-
----
-
-### 3) شروع یک کار جدید (ساخت feature branch)
-همیشه قبل از ساخت شاخه جدید، `main` را آپدیت کنید:
+or with Gradle directly:
 
 ```bash
-git checkout main
-git pull origin main
+./gradlew :lwjgl3:run
 ```
 
-سپس شاخه جدید بسازید:
+### Build a runnable jar
 
 ```bash
-git checkout -b feature/<your-feature-name>
+./gradlew :lwjgl3:jar
+# output: lwjgl3/build/libs/*.jar
 ```
 
-و اولین بار push کنید:
+### Compile-check only
 
 ```bash
-git push -u origin feature/<your-feature-name>
+./gradlew compileJava
 ```
 
-> `-u` باعث می‌شود شاخه لوکال به شاخه ریموت «متصل» شود و دفعات بعد فقط `git push` کافی باشد.
+> The desktop launcher’s main class is `com.pvz2.lwjgl3.Lwjgl3Launcher`.
 
 ---
 
-### 4) چه زمانی pull کنیم؟
-قاعده طلایی:
-- **قبل از شروع کار روزانه**
-- **قبل از merge کردن**
-- **قبل از اینکه MR را نهایی کنید**
-- **اگر می‌دانید هم‌تیمی‌ها روی بخش‌های مشترک کار کرده‌اند**
+## 🌐 Multiplayer & server
 
-پیشنهاد عملی:
-- اگر روی feature branch هستید، معمولاً این کار کافی است:
-```bash
-git pull
-```
-
----
-
-### 5) چه زمانی push کنیم؟
-- بعد از اینکه یک بخش کوچک و منطقی از کار کامل شد (نه خیلی بزرگ)
-- قبل از اینکه سیستم‌تان خاموش شود
-- قبل از درخواست review
-- وقتی می‌خواهید بکاپ امن روی ریموت داشته باشید
+The **online I, Zombie** mode needs the server running. The server is fully independent of the
+client’s Gradle build.
 
 ```bash
-git add .
-git commit -m "feat: add basic zombie movement"
-git push
+# 1) Build & start the server
+cd server
+build.bat        # or ./build.sh
+run.bat          # or ./run.sh   (listens on port 5599 by default)
+
+# 2) Launch two clients (for local testing)
+run-2p.bat
 ```
 
-> بهتر است commitها کوچک، قابل فهم، و قابل بازگشت باشند.
+Then, from two accounts: open the multiplayer lobby, invite by username (or use random
+matchmaking), and one player controls the plants while the other places zombies. During the
+match you can send **text, emoji, and animated GIF reactions** that appear in the opponent’s
+corner. A Swing **admin dashboard** shows connected users, live logs, and lets you broadcast news.
 
 ---
 
-### 6) ساخت Merge Request (MR) — روش پیشنهادی
-#### گام‌ها (روال استاندارد)
-1. روی شاخه feature کار کنید و push کنید.
-2. در HamGit/GitLab به بخش **Merge Requests** بروید.
-3. **New Merge Request** را بزنید:
-   - Source branch: `feature/...`
-   - Target branch: `main`
-4. توضیحات MR را کامل کنید:
-   - چه چیزی اضافه شد؟
-   - چه چیزی تغییر کرد؟
-   - چگونه تست شد؟
-   - اگر باگ/issue مرتبط دارد لینک بدهید.
-5. یک نفر دیگر از تیم review کند.
-6. بعد از تایید، merge انجام شود.
+## 🧹 Code quality & documentation
 
-#### نکته مهم
-- اگر `main` محافظت شده باشد، merge فقط از طریق MR انجام می‌شود (و این خوب است).
+The team follows a shared set of conventions to keep the codebase consistent:
+
+- **Git flow:** feature work on branches, small scoped commits, and a linear history merged into `main`.
+- **Commit format:** `[scope] type: subject` (e.g. `[render] add: boss and ice-block renderers`).
+- **Docs:** Javadoc on public types/methods and explanatory comments for non-obvious logic.
+- **Static analysis:** Checkstyle + PMD are run before merging to `main`.
+
+Detailed design notes, the full phase-2 evaluation breakdown (with per-feature code references),
+and the plant/zombie/quest reference tables are kept in
+[`documant-and-files/`](documant-and-files).
 
 ---
 
-### 7) Merge کردن از طریق خط فرمان (اگر لازم شد)
-در تیم‌های تازه‌کار، merge از طریق UI (MR) امن‌تر است.  
-اما اگر مجبور بودید:
+<div align="center">
 
-```bash
-git checkout main
-git pull origin main
-git merge feature/<name>
-git push origin main
-```
+*Built with ☀️ and 🧠 — a semester-long journey from a console simulation to a fully animated, networked game.*
 
-> اگر `main` protected باشد، معمولاً push مستقیم به main اجازه داده نمی‌شود.
-
----
-
-## قوانین Commit و پیام‌های Commit
-### قانون کلی
-- هر commit باید یک واحد «معنادار» باشد.
-- commitهای خیلی بزرگ باعث conflict و سختی review می‌شوند.
-
-### قالب پیشنهادی پیام Commit
-- `feat:` قابلیت جدید
-- `fix:` رفع باگ
-- `refactor:` بازآرایی بدون تغییر رفتار
-- `docs:` مستندات
-- `test:` تست‌ها
-- `chore:` کارهای جانبی (تنظیمات، dependencyها)
-
-مثال‌ها:
-- `feat: implement sunflower sun generation`
-- `fix: prevent null pointer in game loop`
-- `docs: add gameplay rules to README`
-- `refactor: extract collision logic into helper`
-
----
-
-## کیفیت کد: Checkstyle و PMD
-در پروژه از دو ابزار استفاده می‌کنیم:
-
-### Checkstyle (سبک و استانداردهای کدنویسی)
-مواردی که کنترل می‌شوند (نمونه):
-- نام‌گذاری کلاس/متد/فیلد/متغیرها
-- طول خط (مثلاً ۱۲۰)
-- طول متد (مثلاً ۵۰ خط)
-- طول فایل/کلاس (مثلاً ۵۰۰ خط)
-
-**مسیر فایل تنظیمات (طبق توافق تیم):**
-- `config/checkstyle/checkstyle.xml`
-
-### PMD (پیدا کردن کدهای بی‌استفاده و مشکلات رایج)
-تمرکز فعلی:
-- unused local variables
-- unused private fields/methods
-
-**مسیر فایل تنظیمات:**
-- `config/pmd/ruleset.xml`
-
-### اجرای تست کیفیت با Maven
-قبل از MR این دستور را اجرا کنید:
-
-```bash
-mvn clean verify
-```
-
----
-
-## استاندارد مستندسازی: کامنت و Javadoc
-
-### 1) فرق کامنت معمولی و Javadoc
-- `//` و `/* ... */` برای توضیح داخلی کد (توسعه‌دهندگان)
-- `/** ... */` مخصوص **Javadoc** است و می‌تواند به مستندات رسمی تبدیل شود
-
----
-
-### 2) اصول طلایی کامنت‌گذاری حرفه‌ای
-کامنت خوب یعنی:
-- **چرایی (Why)** و **قصد (Intent)** را توضیح می‌دهد  
-نه اینکه همان کد را دوباره تکرار کند.
-
-#### مثال بد (واضح است، ارزش ندارد)
-```java
-// increment i
-i++;
-```
-
-#### مثال خوب (چرایی را می‌گوید)
-```java
-// We skip index 0 because it is reserved for the base tile.
-for (int i = 1; i < tiles.size(); i++) { ... }
-```
-
----
-
-### 3) استاندارد کامنت‌گذاری برای کلاس‌ها
-برای هر کلاس (خصوصاً کلاس‌های public و مهم) Javadoc بگذارید:
-
-```java
-/**
- * توضیح کوتاه: این کلاس چه کاری انجام می‌دهد و چه مسئولیتی دارد.
- * اگر محدودیت/قانون مهمی دارد ذکر شود.
- *
- * @author ...
- * @since ...
- */
-public class Plant { ... }
-```
-
-> پیشنهاد تیمی: `@author` را در سطح کلاس‌ها نگه دارید، نه در تمام متدها.
-
----
-
-### 4) استاندارد کامنت‌گذاری متدها (Method Javadoc)
-برای متدهای `public` (و متدهای مهم داخلی) Javadoc بنویسید.
-
-#### قالب پیشنهادی
-```java
-/**
- * یک جمله خلاصه درباره کاری که متد انجام می‌دهد.
- * (در صورت نیاز) جزئیات رفتار، شرایط خاص، اثرات جانبی، و قوانین بازی.
- *
- * @param zombie توضیح اینکه این پارامتر چه چیزی است و چه محدودیتی دارد
- * @param damage میزان آسیب (باید >= 0 باشد)
- * @return مقدار خروجی و معنی آن
- * @throws IllegalArgumentException اگر damage منفی باشد
- */
-public int dealDamage(Zombie zombie, int damage) { ... }
-```
-
-#### چه چیزهایی را در Javadoc متد بنویسیم؟
-- **هدف متد**
-- **شرایط ورودی** (مثلاً null نبودن، بازه مجاز)
-- **اثر جانبی** (Side effects): تغییر وضعیت بازی، کم شدن HP، افزودن به لیست‌ها، IO
-- **پیچیدگی/کارایی** (اگر مهم است)
-- **استثناها** (چه زمانی throw می‌شود)
-
----
-
-### 5) کامنت‌گذاری برای فیلدها (Fields)
-فیلدها معمولاً Javadoc لازم ندارند مگر:
-- `public` باشند (ترجیحاً public field نداشته باشیم)
-- مفهوم خاص/غیر بدیهی داشته باشند
-- واحد/محدودیت مهم داشته باشند
-
-#### مثال
-```java
-/** Current health points of the plant. Must be between 0 and maxHp. */
-private int hp;
-```
-
-یا اگر ثابت است:
-```java
-/** Maximum allowed tiles in a row (game design constraint). */
-private static final int MAX_TILES_PER_ROW = 9;
-```
-
----
-
-### 6) کامنت‌گذاری برای کدهای پیچیده (Inline Comments)
-Inline comment فقط وقتی استفاده شود که:
-- الگوریتم پیچیده است
-- دلیل یک تصمیم غیر بدیهی است
-- workaround یا محدودیت خارجی دارید
-
-#### مثال
-```java
-// Workaround: network packets may arrive out of order; we ignore outdated ticks.
-if (packetTick < lastAppliedTick) return;
-```
-
----
-
-### 7) علائم اختصاری و انواع کامنت در Java
-#### 1) کامنت تک‌خطی
-```java
-// توضیح کوتاه
-```
-
-#### 2) کامنت چندخطی
-```java
-/*
-  توضیح چند خطی
-*/
-```
-
-#### 3) Javadoc (برای تولید مستندات)
-```java
-/**
- * توضیح
- * @param ...
- */
-```
-
-#### 4) TODO / FIXME / NOTE
-این‌ها برای مدیریت کارهای باقی‌مانده مفیدند و IntelliJ آنها را پیدا می‌کند.
-
-- `TODO`: کاری که باید انجام شود
-- `FIXME`: مشکل/باگ شناخته‌شده که باید اصلاح شود
-- `NOTE`: نکته مهم برای خواننده
-- `HACK`: راه‌حل موقت (بهتر است کم استفاده شود)
-
-مثال:
-```java
-// TODO: add cooldown mechanic for plants
-// FIXME: this method fails when waveIndex == 0
-// NOTE: this value comes from game design doc
-```
-
-در IntelliJ:
-- از منو: `View > Tool Windows > TODO`
-می‌توانید همه TODOها را ببینید.
-
----
-
-## میانبرها و Auto-complete برای Javadoc در IntelliJ
-
-### 1) تولید سریع Javadoc برای متد با Auto-complete
-روی خط بالای متد این را بنویسید و Enter بزنید:
-
-```java
-/**
-```
-
-IntelliJ معمولاً خودش این‌ها را اضافه می‌کند:
-- `@param` برای همه پارامترها
-- `@return` اگر خروجی غیر void باشد
-- `@throws` اگر در signature استثنا اعلام شده باشد
-
-### 2) تکمیل خودکار تگ‌ها
-داخل Javadoc وقتی `@pa` تایپ کنید، IntelliJ پیشنهاد `@param` می‌دهد.  
-همچنین هنگام نوشتن نام پارامترها، به شما پیشنهاد می‌دهد.
-
-### 3) تنظیم قالب خودکار برای کلاس‌های جدید (File Template)
-برای اینکه هنگام ساخت کلاس جدید، بالای کلاس این قالب بیاید:
-
-```java
-/**
- * $DESCRIPTION$
- *
- * @author YourName
- */
-```
-
-مسیر تنظیم:
-- `Settings/Preferences`
-- `Editor`
-- `File and Code Templates`
-- تب `Files`
-- قالب `Class` را ویرایش کنید و Javadoc را بالای `public class ${NAME}` بگذارید.
-
-> نکته: `DESCRIPTION` متغیر پیش‌فرض IntelliJ نیست؛ معمولاً از `TODO` یا متن ثابت استفاده می‌کنیم، یا با Live Template جایگزین می‌کنیم.
-
-### 4) Live Template برای درج سریع Javadoc (برای کلاس‌های موجود)
-اگر می‌خواهید با یک میانبر Javadoc را سریع درج کنید:
-- `Settings > Editor > Live Templates`
-- یک template مثل `jcls` بسازید و متن را قرار دهید:
-
-```java
-/**
- * $END$
- *
- * @author YourName
- */
-```
-
-سپس در کد:
-- `jcls` تایپ کنید و `Tab` بزنید.
-
----
-
-## قوانین Merge Conflict و حل تعارض‌ها
-### تعارض (Conflict) کی رخ می‌دهد؟
-وقتی دو نفر یک قسمت مشابه از کد را تغییر داده باشند.
-
-### راه کاهش Conflict
-- کارها را خرد کنید و زودتر push کنید
-- قبل از تغییر فایل‌های مشترک، با هم هماهنگ کنید
-- ویژگی‌ها را در شاخه جدا پیاده کنید
-
-### حل Conflict در IntelliJ
-IntelliJ ابزار merge دارد:
-- هنگام conflict، فایل‌ها مشخص می‌شوند
-- با **Merge Tool** سه پنل می‌بینید (Yours / Theirs / Result)
-- نتیجه را ذخیره کنید و commit کنید
-
----
-
-## چک‌لیست قبل از Merge به main
-قبل از اینکه MR را merge کنید:
-
-- [ ] `mvn clean verify` بدون خطا اجرا شود
-- [ ] Checkstyle و PMD پاس شوند
-- [ ] کد بی‌استفاده (unused) حذف شده باشد
-- [ ] نام‌گذاری‌ها استاندارد باشد
-- [ ] متدهای public دارای Javadoc باشند
-- [ ] توضیحات MR کامل باشد (چه شد؟ چطور تست شد؟)
-- [ ] حداقل یک نفر review کرده باشد
-
----
-
-## نکات نهایی مفید برای تیم
-- فایل‌های IDE مثل `.idea/` و `*.iml` را **commit نکنید** (در `.gitignore` باشد).
-- تغییرات تنظیمات کیفیت کد (`checkstyle.xml`, `ruleset.xml`, `pom.xml`) حساس هستند؛ قبل از تغییر با تیم هماهنگ کنید.
-- اگر `main` محافظت شده است، **Force Push ممنوع** (حتی اگر بلد باشید، در تیم خطرناک است).
-- برای کارهای بزرگ، Issue بسازید و شاخه را به Issue لینک کنید.
-
----
-
-### پیشنهاد مسیرهای پروژه (پیشنهادی)
-```
-config/
-  checkstyle/
-    checkstyle.xml
-  pmd/
-    ruleset.xml
-src/
-  main/
-    java/
-  test/
-    java/
-```
-
----
-
-## اجرای سریع (Quick Start)
-1. پروژه را clone کنید
-2. در IntelliJ وارد کنید
-3. (در صورت نیاز) افزونه‌های Checkstyle/PMD را فعال کنید و به فایل‌های config اشاره دهید
-4. قبل از MR، `mvn clean verify` را اجرا کنید
-5. MR بسازید و review بگیرید
-
----
-
+</div>
