@@ -44,8 +44,34 @@ drives both the single-player campaign and the synchronized two-player online mo
 
 ---
 
+## 📦 Download & play (release `v1.0.0`)
+
+Everything you need to try the game — without cloning or building anything — is attached to the
+[**v1.0.0** release](https://github.com/advanced-progamming-sut-2026/phase-0-the-inheritors/releases/tag/v1.0.0). You only need **Java 25+** installed.
+
+| File | What it is | Link |
+|------|-----------|------|
+| `Plant-And-Zombies-2-1.0.0.jar` | 🎮 The full game (desktop client, all assets bundled, ~475 MB) | [⬇ Download game](https://github.com/advanced-progamming-sut-2026/phase-0-the-inheritors/releases/download/v1.0.0/Plant-And-Zombies-2-1.0.0.jar) |
+| `Plant-And-Zombies-2-server-1.0.0.jar` | 🌐 Multiplayer / account server (standalone, ~0.4 MB) | [⬇ Download server](https://github.com/advanced-progamming-sut-2026/phase-0-the-inheritors/releases/download/v1.0.0/Plant-And-Zombies-2-server-1.0.0.jar) |
+| `Plant-And-Zombies-2-full-gameplay.mp4` | 🎬 Full walkthrough video of the game | [▶ Watch / download video](https://github.com/advanced-progamming-sut-2026/phase-0-the-inheritors/releases/download/v1.0.0/Plant-And-Zombies-2-full-gameplay.mp4) |
+
+```bash
+# 1) (optional, for online features) start the server — opens the admin dashboard, listens on 5599
+java -jar Plant-And-Zombies-2-server-1.0.0.jar
+
+# 2) start the game
+java -jar Plant-And-Zombies-2-1.0.0.jar
+```
+
+> The game works fully offline (campaign, mini-games, shop, …). The server is only required for
+> online accounts, the leaderboard and the 2-player *I, Zombie* mode. The server keeps its
+> accounts/logs in a `data/` folder created next to the jar.
+
+---
+
 ## 📑 Table of contents
 
+- [Download & play (release v1.0.0)](#-download--play-release-v100)
 - [Feature highlights](#-feature-highlights)
 - [Screenshot tour](#-screenshot-tour)
 - [Development phases](#-development-phases)
@@ -340,11 +366,22 @@ or with Gradle directly:
 ./gradlew :lwjgl3:run
 ```
 
-### Build a runnable jar
+### Build the runnable jars yourself
+
+Prebuilt jars are attached to the [`v1.0.0` release](https://github.com/advanced-progamming-sut-2026/phase-0-the-inheritors/releases/tag/v1.0.0) — see
+[Download & play](#-download--play-release-v100). To rebuild them from source:
 
 ```bash
+# Game client (fat jar with all assets) → lwjgl3/build/libs/Plant-And-Zombies-2-1.0.0.jar
 ./gradlew :lwjgl3:jar
-# output: lwjgl3/build/libs/*.jar
+```
+
+```bash
+# Server (plain javac, no Gradle) → Plant-And-Zombies-2-server-1.0.0.jar
+cd server
+build.bat                                  # or ./build.sh  → classes in server/out
+cd out && jar xf ../lib/gson-2.13.1.jar && cd ..   # bundle gson into the jar
+jar cfe Plant-And-Zombies-2-server-1.0.0.jar com.pvz2.server.Main -C out .
 ```
 
 ### Compile-check only
@@ -363,10 +400,13 @@ The **online I, Zombie** mode needs the server running. The server is fully inde
 client’s Gradle build.
 
 ```bash
-# 1) Build & start the server
+# 1) Start the server — either the prebuilt jar from the release …
+java -jar Plant-And-Zombies-2-server-1.0.0.jar      # listens on port 5599 by default
+
+# … or build & run it from source
 cd server
 build.bat        # or ./build.sh
-run.bat          # or ./run.sh   (listens on port 5599 by default)
+run.bat          # or ./run.sh
 
 # 2) Launch two clients (for local testing)
 run-2p.bat
